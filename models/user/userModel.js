@@ -10,12 +10,24 @@ const userSchema = new mongoose.Schema({
     email:{
         type:String,
         required:true,
-        unique:true
+        unique:true,
+        lowercase:true
+
     },
 
     password :{
         type:String,
-        required:true
+        default:null
+    },
+
+    googleId:{
+        type:String,
+        default:null,
+    },
+
+    authProviders:{
+         type:[String], //['manual','google']
+         default:[]
     },
 
     isVerified :{

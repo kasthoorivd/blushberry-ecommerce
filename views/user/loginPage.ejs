@@ -230,14 +230,11 @@
 
 <div class="or-divider"><span>Or continue with</span></div>
 
-<a href="#" class="social-btn">
-        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google"/>
-        Login with Google
-      </a>
-      <a href="#" class="social-btn">
-        <img src="https://www.svgrepo.com/show/448224/facebook.svg" alt="Facebook"/>
-        Login with Facebook
-      </a>
+<a href="http://localhost:3000/auth/google" class="social-btn">
+  <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google"/>
+  Login with Google
+</a>
+     
 
       <p class="register-link">Don't have an account? <a href="/signup">Sign Up</a></p>
     </div>
@@ -256,6 +253,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
             headers: {
                 "Content-Type": "application/json"
             },
+             credentials: "same-origin", 
             body: JSON.stringify({ email, password })
         });
 

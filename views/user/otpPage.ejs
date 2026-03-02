@@ -156,9 +156,11 @@ button:hover {
 
   <button onclick="confirmOTP()">Verify</button>
   <!-- <button onclick="confirmOTP">Resend OTP</button> -->
+<span id="timer"></span>
 
-  <p id="timer"></p>
-<button id="resendBtn"   onclick="resendOTP()" disabled>Resend OTP</button>
+<button id="resendBtn" class="resend-btn">Resend OTP</button>
+
+
 
   <div id="message"></div>
 </div>
@@ -180,7 +182,7 @@ async function confirmOTP() {
 
   const messageDiv = document.getElementById("message");
   messageDiv.innerHTML = "";
-
+  
   if (otp.length < 6) {
     messageDiv.innerHTML = "<p class='error'>Please enter complete OTP</p>";
     return;
@@ -193,7 +195,7 @@ async function confirmOTP() {
       headers: {
         "Content-Type": "application/json"
       },
-      credentials: "include",   // 🔥 VERY IMPORTANT for session
+      credentials: "include",   //  VERY IMPORTANT for session
       body: JSON.stringify({ otp })
     });
 
@@ -208,7 +210,7 @@ async function confirmOTP() {
         confirmButtonColor: "#3085d6"
       });
 
-      // 🔥 Redirect to login page
+      // Redirect to login page
       window.location.href = "/login";
 
     } else {
@@ -286,10 +288,10 @@ async function confirmOTP() {
   }
 }
 
-// Start timer when page loads
-document.addEventListener("DOMContentLoaded", function () {
-  startOtpTimer("timer", "resendBtn", 60);
-});
+if(result.success){
+   localStorage.setItem("otpEndTime", result.expiresAt);
+   location.reload();
+}
 
 </script>
 
