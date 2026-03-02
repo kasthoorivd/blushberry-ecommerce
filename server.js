@@ -3,6 +3,7 @@ const app = express()
 require('dotenv').config();
 const morgan = require('morgan')
 const session = require('express-session')
+const passport = require('./config/passport')
 const MongoStore = require('connect-mongo');
 
 
@@ -37,6 +38,8 @@ app.use(nocache())
   }
 }));
 
+app.use(passport.initialize())
+app.use(passport.session())
 app.set('view engine','ejs')
 
 app.set('views',path.join(__dirname,'views')) 

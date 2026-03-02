@@ -3,6 +3,7 @@ const Otp = require('../../models/user/otpModel')
 const bcrypt = require('bcrypt')
 const generateOtp = require('../../utils/generateOtp');
 const sendEmail = require("../../utils/sendEmail");
+const passport = require('../../config/passport');
 
 const loadHomePage = (req, res) => {
 
@@ -18,64 +19,66 @@ const loadSignUp = (req, res) => {
 };
 
 
-
 const signup = async (req, res) => {
    try {
-      const { fullName, email, password, confirmPassword } = req.body
-      console.log(req.body)
 
+      const { fullName, email, password, confirmPassword } = req.body;
+      console.log(req.body);
 
       if (password !== confirmPassword) {
          return res.json({
             success: false,
-            message: 'password do not match'
-         })
+            message: 'Passwords do not match'
+         });
       }
 
-      const existingUser = await User.findOne({ email })
+      const existingUser = await User.findOne({ email });
 
       if (existingUser) {
          return res.json({
             success: false,
-            message: 'user already exists'
-         })
+            message: 'User already exists'
+         });
       }
 
+      // ✅ Generate OTP
+      const otp = generateOtp();
 
-      const otp = generateOtp()
+      // ✅ Create expiry time
+      const expiresAt = Date.now() + 60 * 1000;
 
       await Otp.deleteMany({ email });
 
-      //save otp in db
       await Otp.create({
          email,
-         otp
-      })
+         otp,
+         expiresAt
+      });
 
       req.session.tempUser = {
          fullName,
          email,
          password
-      }
+      };
 
+      req.session.otpExpiresAt = expiresAt;
 
-      await sendEmail(email, otp)
+      await sendEmail(email, otp);
 
       return res.json({
          success: true,
-         redirectUrl: "/otp"
+         redirectUrl: "/otp",
+         expiresAt
       });
 
-   }
-   catch (error) {
+   } catch (error) {
       console.log(error);
       return res.status(500).json({
-         succecc: false,
+         success: false,
          message: 'Server error'
-      })
+      });
    }
 };
-
 
 const verifyOtp = async (req, res) => {
    try {
@@ -117,11 +120,19 @@ const verifyOtp = async (req, res) => {
       });
 
       console.log("User Saved Successfully:", newUser);
+await Otp.deleteOne({ email: tempUser.email });
 
-      await Otp.deleteOne({ email: tempUser.email });
-      req.session.tempUser = null;
+req.session.user = {
+   id: newUser._id,
+   name: newUser.fullName,
+   email: newUser.email
+};
 
-      return res.json({ success: true });
+req.session.tempUser = null;
+
+return res.json({ success: true });
+
+   
 
    } catch (error) {
       console.log(" VERIFY OTP ERROR FULL:");
@@ -149,21 +160,23 @@ const resendOtp = async (req, res) => {
 
       await Otp.deleteMany({ email });
 
-      // Generate new OTP
       const newOtp = generateOtp();
 
-      // Save new OTP
+      const expiresAt = Date.now() + 60 * 1000;
+
       await Otp.create({
          email,
-         otp: newOtp
+         otp: newOtp,
+         expiresAt
       });
 
-      // Send Email
+      req.session.otpExpiresAt = expiresAt;
+
       await sendEmail(email, newOtp);
 
       return res.json({
          success: true,
-         message: "New OTP sent successfully"
+         expiresAt
       });
 
    } catch (error) {
@@ -184,53 +197,23 @@ const loadLogin = (req, res) => {
 }
 
 // Login function
+const login = (req, res, next) => {
+    passport.authenticate("local", (err, user, info) => {
+        if (err) return next(err);
 
-const login = async (req, res) => {
-   try {
-      const { email, password } = req.body;
+        if (!user) {
+            return res.json({
+                success: false,
+                message: info.message
+            });
+        }
 
-      const user = await User.findOne({ email });
+        req.login(user, (err) => {
+            if (err) return next(err);
 
-      if (!user) {
-         return res.json({
-            success: false,
-            message: "User not found"
-         });
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password);
-
-      if (!isMatch) {
-         return res.json({
-            success: false,
-            message: "Incorrect password"
-         });
-      }
-
-      if (!user.isVerified) {
-         return res.json({
-            success: false,
-            message: "Please verify your email first"
-         });
-      }
-      // Save session
-      req.session.user = {
-         id: user._id,
-         name: user.fullName,
-         email: user.email
-      };
-
-      return res.json({
-         success: true
-      });
-
-   } catch (error) {
-      console.log(error);
-      return res.json({
-         success: false,
-         message: "Something went wrong"
-      });
-   }
+            return res.json({ success: true });
+        });
+    })(req, res, next);
 };
 
 const logout = (req, res) => {
