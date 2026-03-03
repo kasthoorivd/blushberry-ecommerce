@@ -31,6 +31,10 @@ userRouter.get('/auth/google/callback',passport.authenticate('google',{
 
 )
 
+
+userRouter.get('/forgot-password',userController.forgotPassword)
+
+// userRouter.post('/forgot-password',userController.verifyOtp)
 userRouter.get('/logout',isLoggedIn,userController.logout)
 
 module.exports = userRouter

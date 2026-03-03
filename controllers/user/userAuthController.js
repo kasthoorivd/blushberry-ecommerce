@@ -41,10 +41,10 @@ const signup = async (req, res) => {
          });
       }
 
-      // ✅ Generate OTP
+      //  Generate OTP
       const otp = generateOtp();
-
-      // ✅ Create expiry time
+   
+      //  Create expiry time
       const expiresAt = Date.now() + 60 * 1000;
 
       await Otp.deleteMany({ email });
@@ -79,6 +79,9 @@ const signup = async (req, res) => {
       });
    }
 };
+
+
+
 
 const verifyOtp = async (req, res) => {
    try {
@@ -120,7 +123,7 @@ const verifyOtp = async (req, res) => {
       });
 
       console.log("User Saved Successfully:", newUser);
-await Otp.deleteOne({ email: tempUser.email });
+      await Otp.deleteOne({ email: tempUser.email });
 
 req.session.user = {
    id: newUser._id,
@@ -143,6 +146,8 @@ return res.json({ success: true });
       });
    }
 }
+
+
 
 const resendOtp = async (req, res) => {
    try {
@@ -188,6 +193,8 @@ const resendOtp = async (req, res) => {
    }
 };
 
+
+
 const loadLogin = (req, res) => {
    try {
       res.render('user/loginPage.ejs')
@@ -195,6 +202,8 @@ const loadLogin = (req, res) => {
       console.log(`error from loginPage ${error}`)
    }
 }
+
+
 
 // Login function
 const login = (req, res, next) => {
@@ -216,6 +225,8 @@ const login = (req, res, next) => {
     })(req, res, next);
 };
 
+
+
 const logout = (req, res) => {
    req.session.destroy((err) => {
       if (err) {
@@ -226,11 +237,14 @@ const logout = (req, res) => {
    })
 }
 
+
 const loadOtpPage = (req, res) => {
    res.render('user/otpPage.ejs')
 }
 
-
+const forgotPassword = (req,res) =>{
+   res.render('user/forgotPassword.ejs')
+}
 module.exports = {
    loadHomePage,
    loadSignUp,
@@ -240,6 +254,7 @@ module.exports = {
    logout,
    verifyOtp,
    resendOtp,
-   loadOtpPage
+   loadOtpPage,
+   forgotPassword
 
 };

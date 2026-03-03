@@ -195,6 +195,23 @@
       .container { flex-direction: column; width: 95vw; }
       .image-side { height: 200px; }
     }
+    .forgot-link {
+  text-align: right;
+  margin-top: 6px;
+}
+
+.forgot-link a {
+  color: #f700ff;           /* Blue color */
+  text-decoration: none;    /* Remove underline */
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.forgot-link a:hover {
+  color: #b3006b;           /* Darker blue on hover */
+  text-decoration: underline;
+  cursor: pointer;
+}
   </style>
 </head>
 <body>
@@ -227,7 +244,9 @@
   <button type="submit" class="btn-login">Login Now</button>
 
 </form>
-
+<p class="forgot-link">
+  <a href="/forgot-password">Forgot Password?</a>
+</p>
 <div class="or-divider"><span>Or continue with</span></div>
 
 <a href="http://localhost:3000/auth/google" class="social-btn">

@@ -158,143 +158,91 @@ button:hover {
   <!-- <button onclick="confirmOTP">Resend OTP</button> -->
 <span id="timer"></span>
 
-<button id="resendBtn" class="resend-btn">Resend OTP</button>
+<button id="resendBtn" class="resend-btn" >Resend OTP</button>
 
 
 
   <div id="message"></div>
 </div>
 </div>
- <script src="/js/otpTimer.js"></script>
 
+<script src="/js/otpTimer.js"></script>
 <script>
-function moveNext(current, nextId) {
-  if (current.value.length === 1) {
-    document.getElementById(nextId).focus();
-  }
-}
-
-async function confirmOTP() {
-
-  const otp = ['otp1','otp2','otp3','otp4','otp5','otp6']
-    .map(id => document.getElementById(id).value)
-    .join('');
-
-  const messageDiv = document.getElementById("message");
-  messageDiv.innerHTML = "";
-  
-  if (otp.length < 6) {
-    messageDiv.innerHTML = "<p class='error'>Please enter complete OTP</p>";
-    return;
+  // Move focus automatically
+  function moveNext(curr, nextId) {
+      if(curr.value.length === 1) document.getElementById(nextId).focus();
   }
 
-  try {
+  // Confirm OTP
+  async function confirmOTP() {
+      const otp = ['otp1','otp2','otp3','otp4','otp5','otp6']
+          .map(id => document.getElementById(id).value)
+          .join('');
 
-    const response = await fetch("/verifyOtp", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      credentials: "include",   //  VERY IMPORTANT for session
-      body: JSON.stringify({ otp })
-    });
+      if (otp.length < 6) {
+          document.getElementById("message").innerHTML = "<p class='error'>Please enter complete OTP</p>";
+          return;
+      }
 
-    const result = await response.json();
+      try {
+          const res = await fetch("/verifyOtp", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ otp })
+          });
+          const data = await res.json();
 
-    if (result.success) {
-
-      await Swal.fire({
-        icon: "success",
-        title: "OTP Verified 🎉",
-        text: "Your account has been created successfully!",
-        confirmButtonColor: "#3085d6"
-      });
-
-      // Redirect to login page
-      window.location.href = "/login";
-
-    } else {
-
-      Swal.fire({
-        icon: "error",
-        title: "Verification Failed ❌",
-        text: result.message || "Invalid OTP",
-        confirmButtonColor: "#d33"
-      });
-
-    }
-
-  } catch (error) {
-    console.log(error);
-
-    Swal.fire({
-      icon: "error",
-      title: "Server Error ⚠️",
-      text: "Something went wrong. Please try again."
-    });
+          if(data.success) {
+              Swal.fire({ icon: "success", title: "OTP Verified 🎉" });
+              window.location.href = "/login";
+          } else {
+              Swal.fire({ icon: "error", title: "Invalid OTP", text: data.message });
+          }
+      } catch (err) {
+          console.error(err);
+      }
   }
-}
 
+  // Resend OTP
+  async function resendOTP() {
+      const resendBtn = document.getElementById("resendBtn");
 
+      // Check cooldown
+      const endTime = parseInt(localStorage.getItem('otpEndTime') || 0);
+      if(Date.now() < endTime) return; // still cooldown
 
-  async function resendOTP () {
+      try {
+          resendBtn.disabled = true;
+          const res = await fetch("/resendOtp", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include"
+          });
+          const data = await res.json();
 
-  const resendBtn = document.getElementById('resendBtn');
+          if(data.success){
+              // set new 60s cooldown
+              const newEnd = Date.now() + 60*1000;
+              localStorage.setItem('otpEndTime', newEnd);
+              startOtpTimer("timer", "resendBtn", 60);
 
-  try {
-    resendBtn.disabled = true;
+              Swal.fire({ icon:"success", title:"OTP Sent 📩" });
+          } else {
+              resendBtn.disabled = false;
+          }
+      } catch (err) {
+          resendBtn.disabled = false;
+          console.error(err);
+      }
+  }
 
-    const response = await fetch('/resendOtp',{
-      method : 'POST',
-      headers :{
-        "Content-Type" :"application/json" 
-      },
-      credentials :'include'
-    })
-
-    const result = await response.json();
-
-    if(result.success) {
-
-      Swal.fire({
-        icon:"success",
-        title :"OTP sent 📩",
-        text:'A new OTP has been sent to your email'
-      });
-
-      //  Restart reusable timer
+  // Start timer on page load
+  document.addEventListener("DOMContentLoaded", () => {
       startOtpTimer("timer", "resendBtn", 60);
-
-    } else {
-
-      resendBtn.disabled = false;
-
-      Swal.fire({
-        icon:'error',
-        title:'Error ❌',
-        text :result.message || "unable to resend OTP "
-      })
-    }
-
-  } catch (error) {
-
-    resendBtn.disabled = false;
-
-    Swal.fire({
-      icon:'error',
-      title:'Server Error ⚠️',
-      text :'Something went wrong. Please try again'
-    })
-  }
-}
-
-if(result.success){
-   localStorage.setItem("otpEndTime", result.expiresAt);
-   location.reload();
-}
-
+      document.getElementById("resendBtn").addEventListener("click", resendOTP);
+  });
 </script>
-
 
 </body>
 </html>

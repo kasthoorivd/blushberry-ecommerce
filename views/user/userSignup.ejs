@@ -456,10 +456,7 @@ document.getElementById("signupForm").addEventListener("submit", async function(
         });
     }
 });
-if(result.success){
-   localStorage.setItem("otpEndTime", result.expiresAt);
-   window.location.href = result.redirectUrl;
-}
+
 </script>
 
 
