@@ -1,0 +1,312 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blush-Berry · Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink-soft:   #f9d4df;
+      --pink-mid:    #f4a7bc;
+      --pink-hot:    #e8527a;
+      --pink-deep:   #c93060;
+      --dark-nav:    #1a1a2e;
+      --sidebar-bg:  #f9d4df;
+      --text-dark:   #3a1a2e;
+      --text-mid:    #7a4a5e;
+      --text-light:  #b07090;
+      --white:       #fff;
+      --active-bg:   #fff;
+      --active-text: #c93060;
+      --sidebar-w:   220px;
+      --topbar-h:    58px;
+    }
+
+    /* ── Reset & base ── */
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #f5e8ee;
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ════════════════════════════════════
+       TOP NAVBAR
+    ════════════════════════════════════ */
+    .top-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--topbar-h);
+      background: var(--dark-nav);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px 0 calc(var(--sidebar-w) + 22px);
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+
+    .top-nav .nav-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+    .top-nav .nav-title span { color: var(--pink-mid); }
+
+    .top-nav .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    /* Bell icon */
+    .btn-bell {
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.6);
+      font-size: 18px;
+      position: relative;
+      transition: color 0.2s;
+      padding: 4px;
+    }
+    .btn-bell:hover { color: var(--pink-mid); }
+    .btn-bell .badge {
+      position: absolute; top: 2px; right: 2px;
+      width: 8px; height: 8px;
+      background: var(--pink-hot);
+      border-radius: 50%;
+      border: 1.5px solid var(--dark-nav);
+    }
+
+    /* User chip */
+    .user-chip {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 30px;
+      padding: 5px 14px 5px 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .user-chip:hover { background: rgba(255,255,255,0.13); }
+    .user-chip .avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--pink-hot);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: #fff;
+    }
+    .user-chip .uname {
+      font-size: 13px; font-weight: 600;
+      color: rgba(255,255,255,0.85);
+    }
+
+    /* ════════════════════════════════════
+       SIDEBAR
+    ════════════════════════════════════ */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      z-index: 101;
+      box-shadow: 2px 0 16px rgba(200,80,120,0.1);
+      overflow-y: auto;
+    }
+
+    /* Brand */
+    .sidebar-brand {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid rgba(200,100,140,0.15);
+    }
+    .sidebar-brand .logo {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.9rem;
+      color: var(--text-dark);
+      line-height: 1;
+    }
+
+    /* Nav links */
+    .sidebar-nav {
+      flex: 1;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-mid);
+      background: transparent;
+      transition: background 0.2s, color 0.2s, transform 0.15s;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+      text-align: left;
+    }
+    .nav-link:hover {
+      background: rgba(232,82,122,0.12);
+      color: var(--pink-deep);
+      transform: translateX(3px);
+    }
+    .nav-link.active {
+      background: var(--active-bg);
+      color: var(--active-text);
+      font-weight: 700;
+      box-shadow: 0 2px 12px rgba(200,48,96,0.15);
+    }
+    .nav-link .icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    /* Sidebar footer (settings / logout) */
+    .sidebar-footer {
+      padding: 12px;
+      border-top: 1px solid rgba(200,100,140,0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* ════════════════════════════════════
+       MAIN CONTENT WRAPPER
+       (used in body of each page)
+    ════════════════════════════════════ */
+    .main-content {
+      margin-left: var(--sidebar-w);
+      margin-top: var(--topbar-h);
+      padding: 28px 28px 80px;
+      flex: 1;
+    }
+
+    /* Mobile toggle */
+    .menu-toggle {
+      display: none;
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.7);
+      font-size: 22px;
+      padding: 4px 8px;
+    }
+
+    @media (max-width: 768px) {
+      .top-nav { padding-left: 16px; }
+      .menu-toggle { display: block; }
+      .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; }
+      .overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,0.4); z-index: 100;
+      }
+      .overlay.show { display: block; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ░░ TOP NAVBAR ░░ -->
+<nav class="top-nav">
+  <button class="menu-toggle" id="menuToggle">☰</button>
+  <span class="nav-title"><span>Blush-Berry</span> &nbsp;Admin Dashboard</span>
+
+  <div class="nav-right">
+    <!-- Bell notification -->
+    <button class="btn-bell" title="Notifications">
+      🔔
+      <span class="badge"></span>
+    </button>
+
+    <!-- User chip -->
+    <div class="user-chip">
+      <div class="avatar">👤</div>
+      <span class="uname"><%= typeof user !== 'undefined' ? user.name : 'Admin' %></span>
+    </div>
+  </div>
+</nav>
+
+<!-- ░░ MOBILE OVERLAY ░░ -->
+<div class="overlay" id="overlay"></div>
+
+<!-- ░░ SIDEBAR ░░ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">Blush-Berry</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="/admin/dashboard"         class="nav-link">
+      <span class="icon">🏠</span> Dashboard
+    </a>
+    <a href="/admin/customers"         class="nav-link ">
+      <span class="icon">👥</span> Customers
+    </a>
+    <a href="/admin/products"          class="nav-link ">
+      <span class="icon">🛍️</span> Products
+    </a>
+    <a href="/admin/orders"            class="nav-link ">
+      <span class="icon">📦</span> Orders
+    </a>
+    <a href="/admin/coupons"           class="nav-link">
+      <span class="icon">⭐</span> Coupon Management
+    </a>
+    <a href="/admin/sales-report"      class="nav-link">
+      <span class="icon">📊</span> Sales Report
+    </a>
+    <a href="/admin/categories"        class="nav-link >">
+      <span class="icon">⚙️</span> Category
+    </a>
+    <a href="/admin/offers"            class="nav-link">
+      <span class="icon">%</span> Offers
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a href="/admin/settings" class="nav-link ">
+      <span class="icon">⚙️</span> Settings
+    </a>
+    <a href="/admin/logout" class="nav-link">
+      <span class="icon">↩</span> Logout
+    </a>
+  </div>
+</aside>
+
+<!-- ░░ MAIN CONTENT STARTS ░░ -->
+<main class="main-content">
+
+<script>
+  /* Mobile sidebar toggle */
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar    = document.getElementById('sidebar');
+  const overlay    = document.getElementById('overlay');
+
+  menuToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('show');
+  });
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('show');
+  });
+</script>

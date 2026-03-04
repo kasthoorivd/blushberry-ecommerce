@@ -1,0 +1,57 @@
+
+
+</main><!-- /.main-content -->
+
+<!-- ░░ ADMIN FOOTER BAR ░░ -->
+<footer class="admin-footer">
+  <span class="footer-brand">Blush-Berry</span>
+  <span class="footer-sep">·</span>
+  <span class="footer-copy">&copy; <%= new Date().getFullYear() %> All rights reserved.</span>
+  <span class="footer-sep">·</span>
+  <span class="footer-version">v1.0.0</span>
+</footer>
+
+<style>
+  .admin-footer {
+    position: fixed;
+    bottom: 0;
+    left: var(--sidebar-w, 220px);
+    right: 0;
+    height: 42px;
+    background: #f9d4df;
+    border-top: 1px solid rgba(200,100,140,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 11.5px;
+    color: #b07090;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    z-index: 99;
+  }
+
+  .footer-brand {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.1rem;
+    color: #c93060;
+    line-height: 1;
+  }
+
+  .footer-sep { color: #e8a0b8; }
+
+  .footer-version {
+    background: rgba(232,82,122,0.12);
+    color: #c93060;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10.5px;
+  }
+
+  @media (max-width: 768px) {
+    .admin-footer { left: 0; }
+  }
+</style>
+
+</body>
+</html>

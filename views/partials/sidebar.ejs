@@ -1,0 +1,13 @@
+<% if (user) { %>
+  <div class="profile-sidebar">
+    <a href="/profile">
+      <img src="<%= user.googleId ? user.profilePhoto : '/uploads/' + user.photo %>" 
+           alt="Profile" class="profile-icon">
+      <span><%= user.name %></span>
+    </a>
+  </div>
+<% } else { %>
+  <div class="profile-sidebar">
+    <a href="/login">Login</a>
+  </div>
+<% } %>

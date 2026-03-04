@@ -1,246 +1,249 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Verify OTP</title>
+
   <style>
     body {
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #ffe5ec, #f8f8f8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-}
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #ffe5ec, #f8f8f8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
 
-/* Main Card Layout */
-.wrapper {
-  display: flex;
-  width: 850px;
-  background: #fff;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-}
+    .wrapper {
+      display: flex;
+      width: 850px;
+      background: #fff;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
 
-/* Left Image Section */
-.image-section {
-  width: 50%;
-  background: #ff4d6d;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+    .image-section {
+      width: 50%;
+      background: #ff4d6d;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-.image-section img {
-  width: 80%;
-}
+    .image-section img {
+      width: 80%;
+    }
 
-/* Right Content Section */
-.container {
-  width: 50%;
-  padding: 40px;
-  text-align: center;
-}
+    .container {
+      width: 50%;
+      padding: 40px;
+      text-align: center;
+    }
 
-h2 {
-  margin-bottom: 10px;
-  font-weight: 600;
-}
+    h2 {
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
 
-p {
-  color: #666;
-  font-size: 14px;
-}
+    p {
+      color: #666;
+      font-size: 14px;
+    }
 
-/* OTP Boxes */
-.otp-inputs {
-  display: flex;
-  justify-content: center;
-  margin: 25px 0;
-}
+    .otp-inputs {
+      display: flex;
+      justify-content: center;
+      margin: 25px 0;
+    }
 
-.otp-inputs input {
-  width: 55px;
-  height: 60px;
-  margin: 8px;
-  font-size: 22px;
-  font-weight: bold;
-  text-align: center;
-  border-radius: 12px;
-  border: 2px solid #eee;
-  background: #fafafa;
-  transition: 0.3s;
-}
+    .otp-inputs input {
+      width: 55px;
+      height: 60px;
+      margin: 8px;
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+      border-radius: 12px;
+      border: 2px solid #eee;
+      background: #fafafa;
+    }
 
-.otp-inputs input:focus {
-  border-color: #ff4d6d;
-  background: #fff;
-  box-shadow: 0 0 10px rgba(255,77,109,0.3);
-  outline: none;
-  transform: translateY(-3px);
-}
+    .otp-inputs input:focus {
+      border-color: #ff4d6d;
+      outline: none;
+    }
 
-/* Verify Button */
-button {
-  margin-top: 15px;
-  padding: 12px 25px;
-  background: #ff4d6d;
-  border: none;
-  color: white;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: 0.3s;
-}
+    button {
+      margin-top: 15px;
+      padding: 12px 25px;
+      background: #ff4d6d;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
 
-button:hover {
-  background: #e60039;
-  transform: translateY(-2px);
-}
+    #timer {
+      margin-top: 15px;
+      font-weight: 600;
+      color: #ff4d6d;
+    }
 
-.error {
-  color: red;
-  margin-top: 10px;
-}
+    #resendBtn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      background-color: #cccccc;
+      color: #666;
+      cursor: not-allowed;
+    }
 
-.success {
-  color: green;
-  margin-top: 10px;
-}
-
-/* Resend Button */
-#resendBtn {
-  padding: 10px 20px;
-  border-radius: 6px;
-  border: none;
-  font-weight: 600;
-  background-color: #cccccc;
-  color: #666;
-  cursor: not-allowed;
-  transition: 0.3s;
-}
-
-#resendBtn.enabled {
-  background-color: #ff4d6d;
-  color: white;
-  cursor: pointer;
-}
-
-#resendBtn.enabled:hover {
-  background-color: #e60039;
-}
+    #resendBtn.enabled {
+      background-color: #ff4d6d;
+      color: white;
+      cursor: pointer;
+    }
   </style>
 </head>
+
 <body>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<div class = 'wrapper'>
+
+<div class="wrapper">
   <div class="image-section">
-    <img src="https://cdn-icons-png.flaticon.com/512/295/295128.png" alt="OTP Verification">
+    <img src="https://cdn-icons-png.flaticon.com/512/295/295128.png" alt="OTP">
   </div>
 
-<div class="container">
-  <h2>Enter OTP</h2>
-  <p>Check your email for the OTP</p>
+  <div class="container">
+    <h2>Enter OTP</h2>
+    <p>Check your email for the OTP</p>
 
-  <div class="otp-inputs">
-    <input type="text" maxlength="1" id="otp1" oninput="moveNext(this,'otp2')" />
-    <input type="text" maxlength="1" id="otp2" oninput="moveNext(this,'otp3')" />
-    <input type="text" maxlength="1" id="otp3" oninput="moveNext(this,'otp4')" />
-     <input type="text" maxlength="1" id="otp4" oninput="moveNext(this,'otp5')" />
+    <div class="otp-inputs">
+      <input type="text" maxlength="1" id="otp1" oninput="moveNext(this,'otp2')" />
+      <input type="text" maxlength="1" id="otp2" oninput="moveNext(this,'otp3')" />
+      <input type="text" maxlength="1" id="otp3" oninput="moveNext(this,'otp4')" />
+      <input type="text" maxlength="1" id="otp4" oninput="moveNext(this,'otp5')" />
       <input type="text" maxlength="1" id="otp5" oninput="moveNext(this,'otp6')" />
-    <input type="text" maxlength="1" id="otp6" />
+      <input type="text" maxlength="1" id="otp6" />
+    </div>
+
+    <button onclick="confirmOTP()">Verify</button>
+
+    <p id="timer"></p>
+
+    <button id="resendBtn">Resend OTP</button>
   </div>
-
-  <button onclick="confirmOTP()">Verify</button>
-  <!-- <button onclick="confirmOTP">Resend OTP</button> -->
-<span id="timer"></span>
-
-<button id="resendBtn" class="resend-btn" >Resend OTP</button>
-
-
-
-  <div id="message"></div>
-</div>
 </div>
 
-<script src="/js/otpTimer.js"></script>
 <script>
-  // Move focus automatically
+  // ✅ Safe EJS injection
+  // let otpExpiresAt = <%= typeof expiresAt !== "undefined" ? expiresAt : "null" %>;
+  let otpExpiresAt = <%= JSON.stringify(expiresAt || null) %>
+
   function moveNext(curr, nextId) {
-      if(curr.value.length === 1) document.getElementById(nextId).focus();
+    if (curr.value.length === 1) {
+      document.getElementById(nextId)?.focus();
+    }
   }
 
-  // Confirm OTP
+  function startOtpTimer() {
+
+    const timer = document.getElementById("timer");
+    const resendBtn = document.getElementById("resendBtn");
+
+    if (!otpExpiresAt) {
+      timer.innerText = "No active OTP";
+      resendBtn.disabled = false;
+      resendBtn.classList.add("enabled");
+      return;
+    }
+
+    function updateTimer() {
+
+      const remaining = otpExpiresAt - Date.now();
+
+      if (remaining <= 0) {
+        timer.innerText = "OTP expired";
+        resendBtn.disabled = false;
+        resendBtn.classList.add("enabled");
+        return;
+      }
+
+      const seconds = Math.floor(remaining / 1000);
+      timer.innerText = `Resend OTP in ${seconds}s`;
+
+      setTimeout(updateTimer, 1000);
+    }
+
+    resendBtn.disabled = true;
+    resendBtn.classList.remove("enabled");
+
+    updateTimer();
+  }
+
   async function confirmOTP() {
-      const otp = ['otp1','otp2','otp3','otp4','otp5','otp6']
-          .map(id => document.getElementById(id).value)
-          .join('');
 
-      if (otp.length < 6) {
-          document.getElementById("message").innerHTML = "<p class='error'>Please enter complete OTP</p>";
-          return;
-      }
+    const otp = ['otp1','otp2','otp3','otp4','otp5','otp6']
+      .map(id => document.getElementById(id).value)
+      .join('');
 
-      try {
-          const res = await fetch("/verifyOtp", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              credentials: "include",
-              body: JSON.stringify({ otp })
-          });
-          const data = await res.json();
+    if (otp.length < 6) {
+      Swal.fire({ icon: "error", title: "Enter complete OTP" });
+      return;
+    }
 
-          if(data.success) {
-              Swal.fire({ icon: "success", title: "OTP Verified 🎉" });
-              window.location.href = "/login";
-          } else {
-              Swal.fire({ icon: "error", title: "Invalid OTP", text: data.message });
-          }
-      } catch (err) {
-          console.error(err);
-      }
+    const res = await fetch("/verifyOtp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ otp })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      Swal.fire({ icon: "success", title: "OTP Verified 🎉" })
+        .then(() => {
+          window.location.href = data.redirectUrl;
+        });
+    } else {
+      Swal.fire({ icon: "error", title: data.message });
+    }
   }
 
-  // Resend OTP
   async function resendOTP() {
-      const resendBtn = document.getElementById("resendBtn");
 
-      // Check cooldown
-      const endTime = parseInt(localStorage.getItem('otpEndTime') || 0);
-      if(Date.now() < endTime) return; // still cooldown
+    const resendBtn = document.getElementById("resendBtn");
+    if (resendBtn.disabled) return;
 
-      try {
-          resendBtn.disabled = true;
-          const res = await fetch("/resendOtp", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              credentials: "include"
-          });
-          const data = await res.json();
+    resendBtn.disabled = true;
 
-          if(data.success){
-              // set new 60s cooldown
-              const newEnd = Date.now() + 60*1000;
-              localStorage.setItem('otpEndTime', newEnd);
-              startOtpTimer("timer", "resendBtn", 60);
+    const res = await fetch("/resendOtp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include"
+    });
 
-              Swal.fire({ icon:"success", title:"OTP Sent 📩" });
-          } else {
-              resendBtn.disabled = false;
-          }
-      } catch (err) {
-          resendBtn.disabled = false;
-          console.error(err);
-      }
+    const data = await res.json();
+
+    if (data.success) {
+      otpExpiresAt = data.expiresAt;
+      startOtpTimer();
+      Swal.fire({ icon: "success", title: "OTP Sent 📩" });
+    } else {
+      resendBtn.disabled = false;
+      Swal.fire({ icon: "error", title: data.message });
+    }
   }
 
-  // Start timer on page load
   document.addEventListener("DOMContentLoaded", () => {
-      startOtpTimer("timer", "resendBtn", 60);
-      document.getElementById("resendBtn").addEventListener("click", resendOTP);
+    startOtpTimer();
+    document.getElementById("resendBtn").addEventListener("click", resendOTP);
   });
 </script>
 

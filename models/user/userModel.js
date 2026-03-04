@@ -29,6 +29,15 @@ const userSchema = new mongoose.Schema({
          type:[String], //['manual','google']
          default:[]
     },
+    isAdmin:{
+        type:Boolean,
+        default:false
+    },
+
+    isBlocked:{
+        type:Boolean,
+        default:false
+    },
 
     isVerified :{
         type:Boolean ,

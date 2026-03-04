@@ -265,14 +265,15 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
+    console.log("login page", email,password)
 
     try {
         const response = await fetch("/login", {
             method: "POST",
+            credentials: "include", 
             headers: {
                 "Content-Type": "application/json"
             },
-             credentials: "same-origin", 
             body: JSON.stringify({ email, password })
         });
 

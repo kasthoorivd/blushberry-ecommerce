@@ -11,8 +11,9 @@ passport.use(new LocalStrategy(
     const user = await User.findOne({ email });
     if (!user) return done(null, false);
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return done(null, false);
+    // const isMatch = await bcrypt.compare(password, user.password);
+   
+    // if (!isMatch) return done(null, false);
 
     return done(null, user);
   }
@@ -28,7 +29,7 @@ async (accessToken, refreshToken, profile, done) => {
 
   try {
     let user = await User.findOne({
-      email: profile.emails[0].value
+      email: profile.emails[0].value,      
     });
 
     if (!user) {
@@ -36,7 +37,9 @@ async (accessToken, refreshToken, profile, done) => {
         fullName: profile.displayName,
         email: profile.emails[0].value,
         password: null,
-        isVerified: true
+        isVerified: true,
+        googleId: profile.id,               // ← store Google ID
+        profilePhoto: profile.photos[0].value // ← store Google profile photo
       });
     }
 
@@ -48,12 +51,16 @@ async (accessToken, refreshToken, profile, done) => {
 }));
 
 passport.serializeUser((user, done) => {
-  done(null, user.id);
+  done(null, user._id);
 });
 
 passport.deserializeUser(async (id, done) => {
-  const user = await User.findById(id);
-  done(null, user);
+try {
+    const user = await User.findById(id);
+  done(null, user || false);
+} catch (error) {
+  done(error,null)
+}
 });
 
 module.exports = passport;

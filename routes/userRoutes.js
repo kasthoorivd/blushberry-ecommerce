@@ -4,15 +4,18 @@ const express = require('express')
 const userRouter = express.Router()
 
 const userController = require('../controllers/user/userAuthController')
+
+
 const {isLoggedIn,isLoggedOut} = require('../middleware/authMiddleware')
 
 
 userRouter.get('/',isLoggedIn,userController.loadHomePage)
 
 userRouter.get('/signup', isLoggedOut,userController.loadSignUp)
-userRouter.get('/login',isLoggedOut,userController.loadLogin) 
+// userRouter.get('/login',isLoggedOut,userController.loadLogin) 
+userRouter.get('/login',userController.loadLogin) 
+userRouter.post('/login',userController.login);
 
-userRouter.post('/login',userController.login)
 userRouter.post('/signup',userController.signup) 
 
 userRouter.get('/otp',userController.loadOtpPage)
@@ -30,10 +33,11 @@ userRouter.get('/auth/google/callback',passport.authenticate('google',{
 }
 
 )
-
-
-userRouter.get('/forgot-password',userController.forgotPassword)
-
+userRouter.get('/forgot-password',userController.LoadforgotPassword)
+userRouter.post('/api/forgot-password', userController.forgotPassword);
+userRouter.get('/reset-password', userController.showResetPage);
+userRouter.post('/api/auth/reset-password',userController.resetPassword);
+userRouter.get('/otp-forgot-password', userController.showForgotOtpPage);
 // userRouter.post('/forgot-password',userController.verifyOtp)
 userRouter.get('/logout',isLoggedIn,userController.logout)
 
