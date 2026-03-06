@@ -265,26 +265,33 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
-    console.log("login page", email,password)
 
     try {
+
         const response = await fetch("/login", {
             method: "POST",
-            credentials: "include", 
             headers: {
                 "Content-Type": "application/json"
             },
+            credentials: "include",
             body: JSON.stringify({ email, password })
         });
+
+        // check if response is JSON
+        const contentType = response.headers.get("content-type");
+
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Server returned HTML instead of JSON");
+        }
 
         const result = await response.json();
 
         if (result.success) {
 
             await Swal.fire({
-                icon: 'success',
-                title: 'Login Successful 🎉',
-                text: 'Redirecting to home...',
+                icon: "success",
+                title: "Login Successful 🎉",
+                text: "Redirecting to home...",
                 timer: 1500,
                 showConfirmButton: false
             });
@@ -294,26 +301,25 @@ document.getElementById("loginForm").addEventListener("submit", async function (
         } else {
 
             Swal.fire({
-                icon: 'error',
-                title: 'Login Failed ❌',
-                text: result.message,
-                confirmButtonColor: '#d33'
+                icon: "error",
+                title: "Login Failed",
+                text: result.message
             });
 
         }
 
     } catch (error) {
-        console.error("Error:", error);
+
+        console.error("Login Error:", error);
 
         Swal.fire({
-            icon: 'warning',
-            title: 'Oops!',
-            text: 'Something went wrong. Please try again.',
-            confirmButtonColor: '#3085d6'
+            icon: "error",
+            title: "Server Error",
+            text: "Something went wrong while logging in"
         });
+
     }
 });
 </script>
-  
 </body>
 </html>

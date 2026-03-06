@@ -24,7 +24,17 @@ const userSchema = new mongoose.Schema({
         type:String,
         default:null,
     },
-
+     profilePhoto:{
+        type:String
+     },
+     phoneNumber:{
+      type:Number,
+      type: String,
+      required: false,
+      unique: false,
+    //   sparse: true,
+      default: null,
+     },
     authProviders:{
          type:[String], //['manual','google']
          default:[]

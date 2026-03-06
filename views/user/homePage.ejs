@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
+<meta name="referrer" content="no-referrer">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Blush Berry – Lipsticks</title>
@@ -25,54 +25,11 @@
 </head>
 <body style="background:#fff;">
 
-  <!-- ═══════════════════════════════════════════════════
-       NAVBAR
-  ═══════════════════════════════════════════════════ -->
-  <nav style="position:sticky;top:0;z-index:1000;background:#fff;border-bottom:1px solid #f2e6e9;padding:0 48px;height:60px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,0.04);">
 
-  <!-- Logo -->
-  <a href="/" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#c0415a;letter-spacing:-0.5px;">
-    Blush<span style="color:#1a1a2e;">Berry</span>
-  </a>
+     <!-- Include Header Partial -->
 
-  <!-- Nav Links -->
-  <ul style="list-style:none;display:flex;gap:36px;align-items:center;">
-    <li><a href="/" class="nav-link" style="font-size:13px;font-weight:500;color:#c0415a;">Home</a></li>
-    <li><a href="#shop" class="nav-link" style="font-size:13px;font-weight:400;color:#555;">Shop</a></li>
-    <li><a href="#order" class="nav-link" style="font-size:13px;font-weight:400;color:#555;">Order</a></li>
-    <li><a href="#contact" class="nav-link" style="font-size:13px;font-weight:400;color:#555;">Contact</a></li>
+    <%- include('../partials/user/header') %>
 
-    <!-- Profile / Login -->
-    <% if (!user) { %>
-      <!-- Not logged in -->
-      <li>
-        <a href="/login" class="nav-link" style="font-size:13px;font-weight:400;color:#555;">
-          <svg width="20" height="20" fill="none" stroke="#555" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="8" r="4"/>
-            <path d="M6 20c0-3.33 5.33-5 6-5s6 1.67 6 5"/>
-          </svg>
-        </a>
-      </li>
-    <% } else { %>
-      <!-- Logged in -->
-      <li style="position:relative;">
-        <button id="profileBtn" style="background:none;border:none;cursor:pointer;padding:0;">
-          <svg width="20" height="20" fill="none" stroke="#555" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="8" r="4"/>
-            <path d="M6 20c0-3.33 5.33-5 6-5s6 1.67 6 5"/>
-          </svg>
-        </button>
-
-        <!-- Dropdown -->
-        <ul id="profileDropdown" style="display:none;position:absolute;top:28px;right:0;background:#fff;border:1px solid #eee;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);list-style:none;padding:8px 0;min-width:120px;z-index:10;">
-          <li><a href="/profile" style="display:block;padding:8px 16px;font-size:13px;color:#555;">My Profile</a></li>
-          <li><a href="/orders" style="display:block;padding:8px 16px;font-size:13px;color:#555;">My Orders</a></li>
-          <li><a href="/logout" style="display:block;padding:8px 16px;font-size:13px;color:#c0415a;">Log out</a></li>
-        </ul>
-      </li>
-    <% } %>
-  </ul>
-</nav>
   <!-- ═══════════════════════════════════════════════════
        HERO SECTION
   ═══════════════════════════════════════════════════ -->
@@ -454,116 +411,76 @@
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════════════
-       FOOTER
-  ═══════════════════════════════════════════════════ -->
-  <footer style="background:#111;color:#888;padding:56px 48px 32px;">
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:40px;margin-bottom:48px;">
+     <!-- Include Footer Partial -->
 
-      <!-- Customer Service -->
-      <div>
-        <h4 style="font-family:'Playfair Display',serif;font-size:15px;color:#fff;margin-bottom:20px;font-weight:700;">Customer Service</h4>
-        <ul style="list-style:none;">
-          <li style="margin-bottom:10px;"><a href="#" style="color:#888;font-size:13px;transition:color 0.2s;">Contact Us</a></li>
-          <li style="margin-bottom:10px;"><a href="#" style="color:#888;font-size:13px;">Shipping Policy</a></li>
-          <li style="margin-bottom:10px;"><a href="#" style="color:#888;font-size:13px;">Returns & Exchanges</a></li>
-          <li style="margin-bottom:10px;"><a href="#" style="color:#888;font-size:13px;">FAQs</a></li>
-        </ul>
-      </div>
-
-      <!-- Information -->
-      <div>
-        <h4 style="font-family:'Playfair Display',serif;font-size:15px;color:#fff;margin-bottom:20px;font-weight:700;">Information</h4>
-        <ul style="list-style:none;">
-          <li style="margin-bottom:10px;"><a href="#" style="color:#888;font-size:13px;">About Us</a></li>
-          <li style="margin-bottom:10px;"><a href="#" style="color:#888;font-size:13px;">Blog</a></li>
-          <li style="margin-bottom:10px;"><a href="#" style="color:#888;font-size:13px;">Our Profile</a></li>
-          <li style="margin-bottom:10px;"><a href="#" style="color:#888;font-size:13px;">Company Info</a></li>
-        </ul>
-      </div>
-
-      <!-- Follow Us -->
-      <div>
-        <h4 style="font-family:'Playfair Display',serif;font-size:15px;color:#fff;margin-bottom:20px;font-weight:700;">Follow Us</h4>
-        <div style="display:flex;gap:12px;margin-bottom:16px;">
-          <a href="#" style="width:36px;height:36px;background:#222;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;">📷</a>
-          <a href="#" style="width:36px;height:36px;background:#222;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#888;font-weight:700;">in</a>
-        </div>
-        <p style="font-size:12px;color:#555;line-height:1.6;">Follow us for daily beauty tips, new launches & exclusive deals.</p>
-      </div>
-
-      <!-- Contact -->
-      <div>
-        <h4 style="font-family:'Playfair Display',serif;font-size:15px;color:#fff;margin-bottom:20px;font-weight:700;">Contact Us</h4>
-        <p style="font-size:13px;color:#888;margin-bottom:10px;">📍 123 Beauty Blvd, New York, NY 10001</p>
-        <p style="font-size:13px;color:#888;margin-bottom:10px;">📞 +1 800 BLUSH-BB</p>
-        <p style="font-size:13px;color:#888;margin-bottom:20px;">✉️ hello@blushberry.com</p>
-        <div style="background:#1a1a2e;border-radius:8px;padding:14px;display:flex;gap:8px;">
-          <input type="email" placeholder="Your email..." style="flex:1;background:transparent;border:none;outline:none;color:#ccc;font-size:12px;font-family:'Poppins',sans-serif;" />
-          <button style="background:#c0415a;color:#fff;border:none;padding:6px 12px;border-radius:4px;font-size:11px;cursor:pointer;font-weight:500;">GO</button>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Footer Bottom -->
-    <div style="border-top:1px solid #1e1e1e;padding-top:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
-      <p style="font-size:12px;color:#444;">© 2024 BlushBerry. All rights reserved.</p>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <!-- Visa -->
-        <div style="background:#1a3a8f;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:3px;letter-spacing:1px;">VISA</div>
-        <!-- Mastercard-ish -->
-        <div style="display:flex;align-items:center;">
-          <div style="width:22px;height:22px;border-radius:50%;background:#eb001b;opacity:0.9;"></div>
-          <div style="width:22px;height:22px;border-radius:50%;background:#f79e1b;margin-left:-10px;opacity:0.9;"></div>
-        </div>
-        <!-- PayPal -->
-        <div style="background:#003087;color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:3px;letter-spacing:1px;">PayPal</div>
-      </div>
-    </div>
-  </footer>
-
+    <%- include('../partials/user/footer') %>
   <script>
 
   
   // Profile dropdown toggle
-  const profileBtn = document.getElementById('profileBtn');
-  const profileDropdown = document.getElementById('profileDropdown');
+  // const profileBtn = document.getElementById('profileBtn');
+  // const profileDropdown = document.getElementById('profileDropdown');
 
-  if(profileBtn){
-    profileBtn.addEventListener('click', () => {
-      profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block';
-    });
+  // if(profileBtn){
+  //   profileBtn.addEventListener('click', () => {
+  //     profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block';
+  //   });
 
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-      if(!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)){
-        profileDropdown.style.display = 'none';
-      }
-    });
-  }
+  //   // Close dropdown when clicking outside
+  //   document.addEventListener('click', (e) => {
+  //     if(!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)){
+  //       profileDropdown.style.display = 'none';
+  //     }
+  //   });
+  // }
 
-    // Smooth scroll for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
-      anchor.addEventListener('click', function(e) {
-        var target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth' });
-        }
-      });
-    });
+  //   // Smooth scroll for anchor links
+  //   document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+  //     anchor.addEventListener('click', function(e) {
+  //       var target = document.querySelector(this.getAttribute('href'));
+  //       if (target) {
+  //         e.preventDefault();
+  //         target.scrollIntoView({ behavior: 'smooth' });
+  //       }
+  //     });
+  //   });
 
-    // Wishlist heart toggle
-    document.querySelectorAll('button').forEach(function(btn) {
-      if (btn.textContent.trim() === '♡') {
-        btn.addEventListener('click', function() {
-          this.textContent = this.textContent === '♡' ? '♥' : '♡';
-          this.style.color = this.textContent === '♥' ? '#c0415a' : '#888';
-        });
-      }
-    });
-  </script>
+  //   // Wishlist heart toggle
+  //   document.querySelectorAll('button').forEach(function(btn) {
+  //     if (btn.textContent.trim() === '♡') {
+  //       btn.addEventListener('click', function() {
+  //         this.textContent = this.textContent === '♡' ? '♥' : '♡';
+  //         this.style.color = this.textContent === '♥' ? '#c0415a' : '#888';
+  //       });
+  //     }
+  //   });
+  // 
+  // var profileBtn = document.getElementById('profileBtn');
+  // var profileDropdown = document.getElementById('profileDropdown');
 
+  // if (profileBtn && profileDropdown) {
+
+  //   profileBtn.addEventListener('click', function (e) {
+  //     e.stopPropagation();
+  //     if (profileDropdown.style.display === 'block') {
+  //       profileDropdown.style.display = 'none';
+  //     } else {
+  //       profileDropdown.style.display = 'block';
+  //     }
+  //   });
+
+  //   document.addEventListener('click', function (e) {
+  //     if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+  //       profileDropdown.style.display = 'none';
+  //     }
+  //   });
+
+  // }
+</script>
+
+  
+
+
+  
 </body>
 </html>

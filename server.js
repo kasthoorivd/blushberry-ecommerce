@@ -2,12 +2,12 @@ const  express = require('express')
 const app = express() 
 require('dotenv').config();
 const morgan = require('morgan')
+const path = require('path')
 const session = require('express-session')
 const passport = require('./config/passport')
 const MongoStore = require('connect-mongo');
 
 
-const path = require('path') 
 const nocache = require('nocache')
 
 const connectDb = require('./config/connectDb')
