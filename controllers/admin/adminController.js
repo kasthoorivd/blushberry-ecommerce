@@ -7,8 +7,8 @@ const loadAdminLogin = (req, res) => {
 
 const loadDashboard = async (req, res) => {
    try {
-    const user = req.session.user || null   // ← add this
-    res.render('admin/dashboard', { user })  // ← pass user
+    const user = req.session.user || null   
+    res.render('admin/dashboard', { user })  
   } catch (error) {
     console.log(error)
   }

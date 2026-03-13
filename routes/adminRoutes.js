@@ -14,7 +14,9 @@ adminRouter.get('/dashboard', adminAuth, adminController.loadDashboard)
 adminRouter.get('/customers',adminAuth, customerController.loadCustomer)
 adminRouter.post('/customers/block/:id',   adminAuth, customerController.blockUser)
 adminRouter.post('/customers/unblock/:id', adminAuth, customerController.unblockUser)
-
+adminRouter.get('/customers/edit/:id',adminAuth,customerController.loadEditCustosmer)
+adminRouter.put('/customers/edit/:id',adminAuth,customerController.editCustomer)
+adminRouter.delete('/customers/delete/:id',adminAuth,customerController.deleteCustomer)
 
 adminRouter.get('/logout',adminAuth,adminController.adminLogout)
 

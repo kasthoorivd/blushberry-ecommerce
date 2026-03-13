@@ -105,8 +105,68 @@ const unblockUser = async (req, res) => {
   }
 };
 
+const loadEditCustosmer = async (req,res) => {
+  try {
+    const customer = await User.findById(req.params.id).lean()
+    if(!customer) return res.redirect('/admin/customers')
+    return res.render('admin/editCustomer',{customer,errors:null,success:null})
+  } catch (error) {
+    console.error('loadEditCustomer error:',error)
+    return res.redirect('/admin/customers')
+  }
+}
+
+
+const editCustomer = async (req, res) => {
+  try {
+    const { fullName, email, phoneNumber } = req.body
+    const userId = req.params.id
+
+    if (!fullName || !/^[A-Za-z\s]{3,}$/.test(fullName)) {
+      return res.json({ success: false, message: 'Enter a valid name (letters only, min 3 chars)' })
+    }
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.json({ success: false, message: 'Enter a valid email address' })
+    }
+
+    if (phoneNumber && !/^\d{10}$/.test(phoneNumber)) {
+      return res.json({ success: false, message: 'Enter a valid 10-digit phone number' })
+    }
+
+    const existing = await User.findOne({ email, _id: { $ne: userId } })
+    if (existing) {
+      return res.json({ success: false, message: 'Email already in use by another account' })
+    }
+
+    await User.findByIdAndUpdate(userId, {
+      fullName,
+      email,
+      phoneNumber: phoneNumber || null,
+    })
+
+    return res.json({ success: true })
+
+  } catch (error) {
+    console.error('editCustomer error:', error)
+    return res.json({ success: false, message: 'Something went wrong' })
+  }
+}
+
+const deleteCustomer = async(req,res) =>{
+  try {
+    await User.findByIdAndDelete(req.params.id)
+    return res.json({success:true,message:'Customer deleted successfully'})
+  } catch (error) {
+    console.log('deleteCustomer error :',error)
+    return res.json({success:true,message:'Failed to delete customer'})
+  }
+}
 module.exports = {
   loadCustomer,
   blockUser,
   unblockUser,
+  loadEditCustosmer,
+  editCustomer,
+  deleteCustomer
 };

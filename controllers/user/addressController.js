@@ -3,18 +3,20 @@ const Address = require('../../models/user/addressModel')
 
 const loadAddresses = async (req, res) => {
   try {
-    const user = req.session.user        // ← ADD THIS
+    const user = req.session.user
     const userId = user._id
     const addresses = await Address.find({ user: userId }).sort({ createdAt: -1 })
-    return res.render('user/addresses', { user, addresses })
+    return res.render('user/addresses', { user, addresses, successMsg: null, errorMsg: null })
   } catch (error) {
     console.error('loadAddresses error:', error)
     return res.redirect('/profile')
   }
 }
+
+
 const loadAddAddress = (req, res) => {
-   const user = req.session.user  
-   return res.render('user/editAddress', { user, address, errorMsg: null })
+  const user = req.session.user
+  return res.render('user/addAddress', { user, errorMsg: null })
 }
 
 
@@ -28,8 +30,13 @@ const addAddress = async (req, res) => {
       mobile, email, alternateNumber,
     } = req.body
 
+    // Re-fetch addresses so the page can re-render properly on error
+    const addresses = await Address.find({ user: userId }).sort({ createdAt: -1 })
+
     if (!name || !country || !state || !address || !pincode || !mobile || !email) {
       return res.render('user/addresses', {
+        user: req.session.user,
+        addresses,
         errorMsg: 'Please fill in all required fields',
         successMsg: null,
       })
@@ -37,6 +44,8 @@ const addAddress = async (req, res) => {
 
     if (!/^\d{6}$/.test(pincode)) {
       return res.render('user/addresses', {
+        user: req.session.user,
+        addresses,
         errorMsg: 'Pin code must be a 6-digit number',
         successMsg: null,
       })
@@ -44,6 +53,8 @@ const addAddress = async (req, res) => {
 
     if (!/^\d{10}$/.test(mobile)) {
       return res.render('user/addresses', {
+        user: req.session.user,
+        addresses,
         errorMsg: 'Mobile number must be 10 digits',
         successMsg: null,
       })
@@ -66,15 +77,11 @@ const addAddress = async (req, res) => {
 
     await newAddress.save()
 
-
-    return res.redirect('/profile?success=Address added successfully')
+    return res.redirect('/addresses?success=true')
 
   } catch (error) {
     console.error('addAddress error:', error)
-    return res.render('user/addresses', {
-      errorMsg: 'Something went wrong. Please try again.',
-      successMsg: null,
-    })
+    return res.redirect('/addresses')
   }
 }
 
@@ -83,11 +90,9 @@ const loadEditAddress = async (req, res) => {
   try {
     const userId = req.session.user._id
     const addressId = req.params.id
-
     const address = await Address.findOne({ _id: addressId, user: userId })
     if (!address) return res.redirect('/addresses')
-
-    return res.render('user/addresses', { address, errorMsg: null })
+    return res.render('user/addresses', { user: req.session.user, address, errorMsg: null })
   } catch (error) {
     console.error('loadEditAddress error:', error)
     return res.redirect('/addresses')
@@ -95,9 +100,10 @@ const loadEditAddress = async (req, res) => {
 }
 
 
+
 const editAddress = async (req, res) => {
   try {
-    const userId = req.session.user._id
+    const userId    = req.session.user._id
     const addressId = req.params.id
 
     const {
@@ -107,11 +113,15 @@ const editAddress = async (req, res) => {
     } = req.body
 
     if (!name || !country || !state || !address || !pincode || !mobile || !email) {
-      const existing = await Address.findById(addressId)
-      return res.render('user/addresses', {
-        address: existing,
-        errorMsg: 'Please fill in all required fields',
-      })
+      return res.json({ success: false, message: 'Please fill in all required fields' })
+    }
+
+    if (!/^\d{6}$/.test(pincode)) {
+      return res.json({ success: false, message: 'Pin code must be a 6-digit number' })
+    }
+
+    if (!/^\d{10}$/.test(mobile)) {
+      return res.json({ success: false, message: 'Mobile number must be 10 digits' })
     }
 
     await Address.findOneAndUpdate(
@@ -128,32 +138,34 @@ const editAddress = async (req, res) => {
       { new: true }
     )
 
-    return res.redirect('/profile?success=Address updated successfully')
+    return res.json({ success: true })
+
   } catch (error) {
     console.error('editAddress error:', error)
-    return res.redirect('/addresses')
+    return res.json({ success: false, message: 'Something went wrong' })
   }
 }
 
 
 const deleteAddress = async (req, res) => {
   try {
-    const userId = req.session.user._id
+    const userId    = req.session.user._id
     const addressId = req.params.id
 
     await Address.findOneAndDelete({ _id: addressId, user: userId })
 
-    return res.redirect('/profile?success=Address deleted successfully')
+    return res.json({ success: true })
+
   } catch (error) {
     console.error('deleteAddress error:', error)
-    return res.redirect('/addresses')
+    return res.json({ success: false, message: 'Failed to delete address' })
   }
 }
 
 
 const setDefaultAddress = async (req, res) => {
   try {
-    const userId = req.session.user._id
+    const userId    = req.session.user._id
     const addressId = req.params.id
 
     await Address.updateMany({ user: userId }, { isDefault: false })
@@ -162,12 +174,14 @@ const setDefaultAddress = async (req, res) => {
       { isDefault: true }
     )
 
-    return res.redirect('/profile?success=Default address updated')
+    return res.json({ success: true })
+
   } catch (error) {
     console.error('setDefaultAddress error:', error)
-    return res.redirect('/addresses')
+    return res.json({ success: false, message: 'Failed to set default' })
   }
 }
+
 
 module.exports = {
   loadAddresses,

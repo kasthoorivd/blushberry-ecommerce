@@ -12,7 +12,6 @@
     padding: 60px 20px 80px;
   }
 
-  /* ── Page Header ── */
   .page-header {
     max-width: 860px;
     margin: 0 auto 28px;
@@ -47,7 +46,6 @@
   }
   .btn-add-new:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,48,96,0.35); }
 
-  /* ── Flash ── */
   .flash-msg {
     max-width: 860px;
     margin: 0 auto 20px;
@@ -60,7 +58,6 @@
   .flash-msg.success { background: #e8f5e9; color: #4caf6e; }
   .flash-msg.error   { background: #fde8ee; color: #e8527a; }
 
-  /* ── Address Grid ── */
   .addr-grid {
     max-width: 860px;
     margin: 0 auto;
@@ -69,7 +66,6 @@
     gap: 20px;
   }
 
-  /* ── Address Card ── */
   .addr-card {
     background: #fff;
     border-radius: 20px;
@@ -122,7 +118,7 @@
     cursor: pointer; transition: all 0.15s;
     letter-spacing: 0.5px;
   }
-  .btn-edit-card  { background: #e8f4ff; color: #4a90d9; }
+  .btn-edit-card   { background: #e8f4ff; color: #4a90d9; }
   .btn-edit-card:hover { background: #4a90d9; color: #fff; }
   .btn-delete-card { background: #fde8f0; color: #e8527a; }
   .btn-delete-card:hover { background: #e8527a; color: #fff; }
@@ -130,7 +126,6 @@
   .btn-default-card:hover { background: #7c5cbf; color: #fff; }
   .btn-default-card:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* ── Empty State ── */
   .empty-state {
     max-width: 860px; margin: 60px auto;
     text-align: center; color: #b07090;
@@ -138,7 +133,6 @@
   .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
   .empty-state p { font-size: 15px; font-weight: 500; }
 
-  /* ── Modal Overlay ── */
   .modal-overlay {
     display: none;
     position: fixed; inset: 0;
@@ -150,7 +144,6 @@
   }
   .modal-overlay.open { display: flex; }
 
-  /* ── Modal Box ── */
   .modal-box {
     background: #fff;
     border-radius: 20px;
@@ -188,7 +181,6 @@
     margin-bottom: 32px; letter-spacing: 0.3px;
   }
 
-  /* ── Form inside modal ── */
   .section-label {
     font-size: 11px; font-weight: 600;
     letter-spacing: 2px; text-transform: uppercase;
@@ -262,8 +254,8 @@
   }
   .btn-add:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(200,48,96,0.35); }
   .btn-add:active { transform: translateY(0); }
+  .btn-add:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-  /* ── Delete Modal ── */
   .delete-modal-box {
     background: #fff; border-radius: 20px;
     padding: 36px 36px 32px; max-width: 400px; width: 100%;
@@ -301,13 +293,11 @@
 
 <div class="addr-page">
 
-  <!-- Header -->
   <div class="page-header">
     <h1 class="page-title">My Addresses</h1>
     <button class="btn-add-new" onclick="openAddModal()">＋ Add New Address</button>
   </div>
 
-  <!-- Flash -->
   <% if (typeof successMsg !== 'undefined' && successMsg) { %>
     <div class="flash-msg success">✓ <%= successMsg %></div>
   <% } %>
@@ -315,7 +305,6 @@
     <div class="flash-msg error">⚠ <%= errorMsg %></div>
   <% } %>
 
-  <!-- Address Cards -->
   <% if (addresses && addresses.length > 0) { %>
     <div class="addr-grid">
       <% addresses.forEach(function(addr, i) { %>
@@ -370,9 +359,7 @@
   <% } %>
 </div>
 
-<!-- ══════════════════════════════════ -->
-<!-- ADD Modal                          -->
-<!-- ══════════════════════════════════ -->
+<!-- ADD Modal — uses normal POST form (creating new resource) -->
 <div class="modal-overlay" id="addModal">
   <div class="modal-box">
     <div class="modal-header">
@@ -382,7 +369,6 @@
     <p class="modal-subtitle">Fill in the below details to add new address</p>
 
     <form id="addForm" action="/addresses/add" method="POST" novalidate>
-
       <div class="form-row cols-1">
         <div class="form-field" id="add-field-name">
           <label>Name</label>
@@ -390,7 +376,6 @@
           <span class="field-error">Name is required</span>
         </div>
       </div>
-
       <div class="form-row cols-2">
         <div class="form-field" id="add-field-country">
           <label>Country</label>
@@ -403,7 +388,6 @@
           <span class="field-error">State is required</span>
         </div>
       </div>
-
       <div class="form-row cols-1">
         <div class="form-field" id="add-field-address">
           <label>Address</label>
@@ -411,7 +395,6 @@
           <span class="field-error">Address is required</span>
         </div>
       </div>
-
       <div class="form-row cols-3">
         <div class="form-field" id="add-field-pincode">
           <label>Pin Code</label>
@@ -430,9 +413,7 @@
           <input type="text" name="landmark" placeholder="Near landmark">
         </div>
       </div>
-
       <div class="section-label">Contact Information</div>
-
       <div class="form-row cols-2">
         <div class="form-field" id="add-field-mobile">
           <label>Mobile Number</label>
@@ -445,22 +426,18 @@
           <span class="field-error">Valid email required</span>
         </div>
       </div>
-
       <div class="form-row cols-1">
         <div class="form-field">
           <label>Alternate Number <span class="optional-tag">(Optional)</span></label>
           <input type="tel" name="alternateNumber" placeholder="Alternate phone" maxlength="10">
         </div>
       </div>
-
       <button type="submit" class="btn-add">Add Address</button>
     </form>
   </div>
 </div>
 
-<!-- ══════════════════════════════════ -->
-<!-- EDIT Modal                         -->
-<!-- ══════════════════════════════════ -->
+<!-- EDIT Modal — submits via fetch PUT (no form action/method needed) -->
 <div class="modal-overlay" id="editModal">
   <div class="modal-box">
     <div class="modal-header">
@@ -469,8 +446,7 @@
     </div>
     <p class="modal-subtitle">Update your delivery address details</p>
 
-    <form id="editForm" method="POST" novalidate>
-
+    <form id="editForm" novalidate>
       <div class="form-row cols-1">
         <div class="form-field" id="edit-field-name">
           <label>Name</label>
@@ -478,7 +454,6 @@
           <span class="field-error">Name is required</span>
         </div>
       </div>
-
       <div class="form-row cols-2">
         <div class="form-field" id="edit-field-country">
           <label>Country</label>
@@ -491,7 +466,6 @@
           <span class="field-error">State is required</span>
         </div>
       </div>
-
       <div class="form-row cols-1">
         <div class="form-field" id="edit-field-address">
           <label>Address</label>
@@ -499,7 +473,6 @@
           <span class="field-error">Address is required</span>
         </div>
       </div>
-
       <div class="form-row cols-3">
         <div class="form-field" id="edit-field-pincode">
           <label>Pin Code</label>
@@ -518,9 +491,7 @@
           <input type="text" name="landmark" id="edit-landmark" placeholder="Near landmark">
         </div>
       </div>
-
       <div class="section-label">Contact Information</div>
-
       <div class="form-row cols-2">
         <div class="form-field" id="edit-field-mobile">
           <label>Mobile Number</label>
@@ -533,22 +504,18 @@
           <span class="field-error">Valid email required</span>
         </div>
       </div>
-
       <div class="form-row cols-1">
         <div class="form-field">
           <label>Alternate Number <span class="optional-tag">(Optional)</span></label>
           <input type="tel" name="alternateNumber" id="edit-alternateNumber" placeholder="Alternate phone" maxlength="10">
         </div>
       </div>
-
       <button type="submit" class="btn-add">Update Address</button>
     </form>
   </div>
 </div>
 
-<!-- ══════════════════════════════════ -->
-<!-- DELETE Confirm Modal               -->
-<!-- ══════════════════════════════════ -->
+<!-- DELETE Confirm Modal -->
 <div class="modal-overlay" id="deleteModal">
   <div class="delete-modal-box">
     <div class="delete-icon">🗑️</div>
@@ -556,9 +523,7 @@
     <p class="delete-msg">This action cannot be undone. Are you sure you want to remove this address?</p>
     <div class="delete-btns">
       <button class="btn-cancel-del" onclick="closeModal('deleteModal')">Cancel</button>
-      <form id="deleteForm" method="POST" style="flex:1;">
-        <button type="submit" class="btn-confirm-del" style="width:100%;">Delete</button>
-      </form>
+      <button class="btn-confirm-del" id="confirmDeleteBtn">Delete</button>
     </div>
   </div>
 </div>
@@ -586,9 +551,12 @@
     openModal('addModal')
   }
 
-  // ── Edit Modal — data attributes (no backtick conflict) ─
+  // ── Edit Modal ─────────────────────────────────────────
+  var currentEditId = null
+
   function openEditModal(btn) {
     var d = btn.dataset
+    currentEditId = d.id
     document.getElementById('edit-name').value            = d.name
     document.getElementById('edit-country').value         = d.country
     document.getElementById('edit-state').value           = d.state
@@ -600,30 +568,67 @@
     document.getElementById('edit-alternateNumber').value = d.alternate
     document.getElementById('edit-type-home').checked     = d.type === 'Home'
     document.getElementById('edit-type-work').checked     = d.type === 'Work'
-    document.getElementById('editForm').action            = '/addresses/edit/' + d.id
     clearErrors('editForm')
     openModal('editModal')
   }
 
   // ── Delete Modal ───────────────────────────────────────
+  var currentDeleteId = null
+
   function openDeleteModal(btn) {
-    document.getElementById('deleteForm').action = '/addresses/delete/' + btn.dataset.id
+    currentDeleteId = btn.dataset.id
     openModal('deleteModal')
   }
 
-  // ── Set Default ────────────────────────────────────────
+  // Confirm delete — fetch DELETE
+  document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+    var btn = this
+    btn.disabled = true
+    btn.textContent = 'Deleting…'
+
+    fetch('/addresses/delete/' + currentDeleteId, { method: 'DELETE' })
+      .then(function(res) {
+        if (res.ok) {
+          location.reload()
+        } else {
+          alert('Failed to delete. Please try again.')
+          btn.disabled = false
+          btn.textContent = 'Delete'
+        }
+      })
+      .catch(function() {
+        alert('Something went wrong.')
+        btn.disabled = false
+        btn.textContent = 'Delete'
+      })
+  })
+
+  // ── Set Default — fetch PATCH ──────────────────────────
   function setDefault(btn) {
-    fetch('/addresses/default/' + btn.dataset.id, { method: 'POST' })
-      .then(function() { location.reload() })
-      .catch(function() { alert('Something went wrong') })
+    btn.disabled = true
+    fetch('/addresses/default/' + btn.dataset.id, { method: 'PATCH' })
+      .then(function(res) {
+        if (res.ok) {
+          location.reload()
+        } else {
+          alert('Failed to set default. Please try again.')
+          btn.disabled = false
+        }
+      })
+      .catch(function() {
+        alert('Something went wrong.')
+        btn.disabled = false
+      })
   }
 
   // ── Validate helper ────────────────────────────────────
-  function validateForm(rules) {
+  function validateRules(rules) {
     var valid = true
     rules.forEach(function(r) {
       var fieldEl = document.getElementById(r.fieldId)
-      var inputEl = document.getElementById(r.inputId) || document.querySelector('#' + r.formId + ' [name="' + r.name + '"]')
+      var inputEl = r.inputId
+        ? document.getElementById(r.inputId)
+        : document.querySelector('#' + r.formId + ' [name="' + r.name + '"]')
       var val = inputEl ? inputEl.value : ''
       if (!r.check(val)) { fieldEl.classList.add('error'); valid = false }
       else fieldEl.classList.remove('error')
@@ -631,31 +636,25 @@
     return valid
   }
 
-  // ── Add form submit ────────────────────────────────────
+  // ── Add form submit — normal POST ──────────────────────
   document.getElementById('addForm').addEventListener('submit', function(e) {
     var form = this
     var rules = [
-      { fieldId: 'add-field-name',    name: 'name',    check: function(v) { return v.trim().length > 1 } },
-      { fieldId: 'add-field-country', name: 'country', check: function(v) { return v.trim().length > 0 } },
-      { fieldId: 'add-field-state',   name: 'state',   check: function(v) { return v.trim().length > 0 } },
-      { fieldId: 'add-field-address', name: 'address', check: function(v) { return v.trim().length > 5 } },
-      { fieldId: 'add-field-pincode', name: 'pincode', check: function(v) { return /^\d{6}$/.test(v.trim()) } },
-      { fieldId: 'add-field-mobile',  name: 'mobile',  check: function(v) { return /^\d{10}$/.test(v.trim()) } },
-      { fieldId: 'add-field-email',   name: 'email',   check: function(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) } },
+      { fieldId: 'add-field-name',    formId: 'addForm', name: 'name',    check: function(v) { return v.trim().length > 1 } },
+      { fieldId: 'add-field-country', formId: 'addForm', name: 'country', check: function(v) { return v.trim().length > 0 } },
+      { fieldId: 'add-field-state',   formId: 'addForm', name: 'state',   check: function(v) { return v.trim().length > 0 } },
+      { fieldId: 'add-field-address', formId: 'addForm', name: 'address', check: function(v) { return v.trim().length > 5 } },
+      { fieldId: 'add-field-pincode', formId: 'addForm', name: 'pincode', check: function(v) { return /^\d{6}$/.test(v.trim()) } },
+      { fieldId: 'add-field-mobile',  formId: 'addForm', name: 'mobile',  check: function(v) { return /^\d{10}$/.test(v.trim()) } },
+      { fieldId: 'add-field-email',   formId: 'addForm', name: 'email',   check: function(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) } },
     ]
-    var valid = true
-    rules.forEach(function(r) {
-      var fieldEl = document.getElementById(r.fieldId)
-      var inputEl = form.querySelector('[name="' + r.name + '"]')
-      var val = inputEl ? inputEl.value : ''
-      if (!r.check(val)) { fieldEl.classList.add('error'); valid = false }
-      else fieldEl.classList.remove('error')
-    })
-    if (!valid) e.preventDefault()
+    if (!validateRules(rules)) e.preventDefault()
   })
 
-  // ── Edit form submit ───────────────────────────────────
+  // ── Edit form submit — fetch PUT ───────────────────────
   document.getElementById('editForm').addEventListener('submit', function(e) {
+    e.preventDefault()
+
     var rules = [
       { fieldId: 'edit-field-name',    inputId: 'edit-name',    check: function(v) { return v.trim().length > 1 } },
       { fieldId: 'edit-field-country', inputId: 'edit-country', check: function(v) { return v.trim().length > 0 } },
@@ -665,15 +664,46 @@
       { fieldId: 'edit-field-mobile',  inputId: 'edit-mobile',  check: function(v) { return /^\d{10}$/.test(v.trim()) } },
       { fieldId: 'edit-field-email',   inputId: 'edit-email',   check: function(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) } },
     ]
-    var valid = true
-    rules.forEach(function(r) {
-      var fieldEl = document.getElementById(r.fieldId)
-      var inputEl = document.getElementById(r.inputId)
-      var val = inputEl ? inputEl.value : ''
-      if (!r.check(val)) { fieldEl.classList.add('error'); valid = false }
-      else fieldEl.classList.remove('error')
+    if (!validateRules(rules)) return
+
+    var submitBtn = this.querySelector('.btn-add')
+    submitBtn.disabled = true
+    submitBtn.textContent = 'Updating…'
+
+    // Collect form data as JSON
+    var body = {
+      name:            document.getElementById('edit-name').value,
+      country:         document.getElementById('edit-country').value,
+      state:           document.getElementById('edit-state').value,
+      address:         document.getElementById('edit-address').value,
+      pincode:         document.getElementById('edit-pincode').value,
+      landmark:        document.getElementById('edit-landmark').value,
+      mobile:          document.getElementById('edit-mobile').value,
+      email:           document.getElementById('edit-email').value,
+      alternateNumber: document.getElementById('edit-alternateNumber').value,
+      addressType:     document.querySelector('#editForm input[name="addressType"]:checked').value
+    }
+
+    fetch('/addresses/edit/' + currentEditId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     })
-    if (!valid) e.preventDefault()
+    .then(function(res) { return res.json() })
+    .then(function(data) {
+      if (data.success) {
+        location.reload()
+      } else {
+        alert(data.message || 'Failed to update address.')
+        submitBtn.disabled = false
+        submitBtn.textContent = 'Update Address'
+      }
+    })
+    .catch(function() {
+      alert('Something went wrong.')
+      submitBtn.disabled = false
+      submitBtn.textContent = 'Update Address'
+    })
   })
 
   // ── Numbers only ───────────────────────────────────────

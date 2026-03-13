@@ -7,6 +7,10 @@ const session = require('express-session')
 const passport = require('./config/passport')
 const MongoStore = require('connect-mongo');
 
+const methodOverride = require('method-override')
+app.use(methodOverride('_method'))   
+
+
 
 const nocache = require('nocache')
 
