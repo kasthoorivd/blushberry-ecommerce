@@ -1,0 +1,723 @@
+<%- include('../partials/user/header') %>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .addr-page {
+    min-height: 100vh;
+    background: #fdf6f8;
+    font-family: 'Jost', sans-serif;
+    padding: 60px 20px 80px;
+  }
+
+  .page-header {
+    max-width: 860px;
+    margin: 0 auto 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .page-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: #2a0e1e;
+    letter-spacing: 1.5px;
+  }
+
+  .btn-add-new {
+    background: linear-gradient(135deg, #e8527a, #c93060);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 22px;
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(200,48,96,0.25);
+    transition: transform 0.15s, box-shadow 0.2s;
+  }
+  .btn-add-new:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,48,96,0.35); }
+
+  .flash-msg {
+    max-width: 860px;
+    margin: 0 auto 20px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+  }
+  .flash-msg.success { background: #e8f5e9; color: #4caf6e; }
+  .flash-msg.error   { background: #fde8ee; color: #e8527a; }
+
+  .addr-grid {
+    max-width: 860px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(370px, 1fr));
+    gap: 20px;
+  }
+
+  .addr-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 40px rgba(200,80,120,0.10);
+    padding: 24px 24px 20px;
+    border: 1.5px solid transparent;
+    transition: border-color 0.2s, transform 0.2s;
+    animation: fadeUp 0.4s ease both;
+    position: relative;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .addr-card:hover { border-color: #f4a7bc; transform: translateY(-2px); }
+  .addr-card.default-card { border-color: #e8527a; }
+
+  .default-badge {
+    position: absolute; top: 16px; right: 16px;
+    background: linear-gradient(135deg, #e8527a, #c93060);
+    color: #fff; font-size: 9px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 20px;
+  }
+
+  .addr-type-tag {
+    display: inline-block;
+    background: #fde8f0; color: #e8527a;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 20px;
+    margin-bottom: 10px;
+  }
+
+  .addr-name { font-size: 15px; font-weight: 700; color: #2a0e1e; margin-bottom: 6px; }
+  .addr-detail { font-size: 13px; color: #b07090; line-height: 1.7; }
+
+  .addr-card-footer {
+    display: flex; gap: 8px;
+    margin-top: 16px; padding-top: 14px;
+    border-top: 1px solid #fde8f0;
+    flex-wrap: wrap;
+  }
+
+  .btn-card {
+    flex: 1; padding: 8px 10px;
+    border: none; border-radius: 8px;
+    font-family: 'Jost', sans-serif;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+    letter-spacing: 0.5px;
+  }
+  .btn-edit-card   { background: #e8f4ff; color: #4a90d9; }
+  .btn-edit-card:hover { background: #4a90d9; color: #fff; }
+  .btn-delete-card { background: #fde8f0; color: #e8527a; }
+  .btn-delete-card:hover { background: #e8527a; color: #fff; }
+  .btn-default-card { background: #f5f0ff; color: #7c5cbf; flex: 2; }
+  .btn-default-card:hover { background: #7c5cbf; color: #fff; }
+  .btn-default-card:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .empty-state {
+    max-width: 860px; margin: 60px auto;
+    text-align: center; color: #b07090;
+  }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state p { font-size: 15px; font-weight: 500; }
+
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(42,14,30,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal-box {
+    background: #fff;
+    border-radius: 20px;
+    width: 100%; max-width: 620px;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(200,48,96,0.2);
+    animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+    padding: 48px 48px 52px;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.92) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .modal-header {
+    display: flex; align-items: center;
+    justify-content: space-between; margin-bottom: 6px;
+  }
+  .modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px; font-weight: 600; color: #2a0e1e;
+    letter-spacing: 1px;
+  }
+  .modal-close {
+    width: 32px; height: 32px; border: none;
+    background: #fde8f0; color: #e8527a;
+    border-radius: 50%; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .modal-close:hover { background: #e8527a; color: #fff; }
+
+  .modal-subtitle {
+    font-size: 13px; color: #b07090;
+    margin-bottom: 32px; letter-spacing: 0.3px;
+  }
+
+  .section-label {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: #e8527a; margin: 24px 0 14px;
+    padding-bottom: 8px; border-bottom: 1.5px solid #fde8f0;
+  }
+
+  .form-row { display: grid; gap: 16px; margin-bottom: 16px; }
+  .form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .form-row.cols-1 { grid-template-columns: 1fr; }
+
+  .form-field { display: flex; flex-direction: column; gap: 6px; }
+
+  .form-field label {
+    font-size: 11.5px; font-weight: 600;
+    color: #7a3a5a; letter-spacing: 0.4px;
+  }
+
+  .form-field input,
+  .form-field textarea {
+    border: 1.5px solid #f0d0dc; border-radius: 10px;
+    padding: 10px 14px;
+    font-family: 'Jost', sans-serif;
+    font-size: 13.5px; color: #2a0e1e;
+    background: #fff; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s; width: 100%;
+  }
+  .form-field input:focus,
+  .form-field textarea:focus {
+    border-color: #e8527a;
+    box-shadow: 0 0 0 3px rgba(232,82,122,0.10);
+  }
+  .form-field input::placeholder,
+  .form-field textarea::placeholder { color: #d0a0b4; font-size: 12.5px; }
+  .form-field textarea { resize: none; height: 90px; }
+
+  .optional-tag { font-size: 10px; color: #c0a0b0; font-weight: 400; margin-left: 4px; }
+
+  .addr-type-row { display: flex; align-items: center; gap: 6px; flex-direction: column; }
+  .addr-type-row label {
+    font-size: 11.5px; font-weight: 600;
+    color: #7a3a5a; letter-spacing: 0.4px; align-self: flex-start;
+  }
+  .radio-group {
+    display: flex; gap: 20px; align-items: center;
+    padding: 10px 14px; border: 1.5px solid #f0d0dc;
+    border-radius: 10px; width: 100%; background: #fff;
+  }
+  .radio-option {
+    display: flex; align-items: center; gap: 6px;
+    cursor: pointer; font-size: 13px; color: #3a1a2e; font-weight: 500;
+  }
+  .radio-option input[type="radio"] {
+    accent-color: #e8527a; width: 15px; height: 15px; cursor: pointer;
+  }
+
+  .field-error { font-size: 11px; color: #e8527a; margin-top: 2px; display: none; }
+  .form-field.error input,
+  .form-field.error textarea { border-color: #e8527a; }
+  .form-field.error .field-error { display: block; }
+
+  .btn-add {
+    display: block; width: 100%; margin-top: 36px; padding: 14px;
+    background: linear-gradient(135deg, #e8527a, #c93060);
+    color: #fff; font-family: 'Jost', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; border: none; border-radius: 12px;
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(200,48,96,0.25);
+  }
+  .btn-add:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(200,48,96,0.35); }
+  .btn-add:active { transform: translateY(0); }
+  .btn-add:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .delete-modal-box {
+    background: #fff; border-radius: 20px;
+    padding: 36px 36px 32px; max-width: 400px; width: 100%;
+    text-align: center; box-shadow: 0 20px 60px rgba(200,48,96,0.2);
+    animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  .delete-icon { font-size: 40px; margin-bottom: 14px; }
+  .delete-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 600; color: #2a0e1e; margin-bottom: 8px;
+  }
+  .delete-msg { font-size: 13px; color: #b07090; margin-bottom: 24px; }
+  .delete-btns { display: flex; gap: 10px; }
+  .btn-cancel-del {
+    flex: 1; padding: 11px; background: #f5f5f5; color: #666;
+    border: none; border-radius: 10px;
+    font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-cancel-del:hover { background: #e0e0e0; }
+  .btn-confirm-del {
+    flex: 1; padding: 11px;
+    background: linear-gradient(135deg, #e8527a, #c93060);
+    color: #fff; border: none; border-radius: 10px;
+    font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; box-shadow: 0 4px 14px rgba(200,48,96,0.3);
+  }
+
+  @media (max-width: 600px) {
+    .modal-box { padding: 32px 24px 40px; }
+    .form-row.cols-2, .form-row.cols-3 { grid-template-columns: 1fr; }
+    .addr-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="addr-page">
+
+  <div class="page-header">
+    <h1 class="page-title">My Addresses</h1>
+    <button class="btn-add-new" onclick="openAddModal()">＋ Add New Address</button>
+  </div>
+
+  <% if (typeof successMsg !== 'undefined' && successMsg) { %>
+    <div class="flash-msg success">✓ <%= successMsg %></div>
+  <% } %>
+  <% if (typeof errorMsg !== 'undefined' && errorMsg) { %>
+    <div class="flash-msg error">⚠ <%= errorMsg %></div>
+  <% } %>
+
+  <% if (addresses && addresses.length > 0) { %>
+    <div class="addr-grid">
+      <% addresses.forEach(function(addr, i) { %>
+        <div class="addr-card <%= addr.isDefault ? 'default-card' : '' %>"
+             style="animation-delay: <%= i * 0.07 %>s">
+          <% if (addr.isDefault) { %><span class="default-badge">Default</span><% } %>
+          <span class="addr-type-tag"><%= addr.addressType || 'Home' %></span>
+          <div class="addr-name"><%= addr.name %></div>
+          <div class="addr-detail"><%= addr.address %></div>
+          <% if (addr.city) { %><div class="addr-detail"><%= addr.city %></div><% } %>
+          <div class="addr-detail"><%= addr.state %> – <%= addr.pincode %></div>
+          <div class="addr-detail"><%= addr.country %></div>
+          <% if (addr.landmark) { %><div class="addr-detail">Near: <%= addr.landmark %></div><% } %>
+          <div class="addr-detail" style="margin-top:6px;">📞 <%= addr.mobile %></div>
+          <div class="addr-detail">✉ <%= addr.email %></div>
+
+          <div class="addr-card-footer">
+            <button class="btn-card btn-edit-card"
+              data-id="<%= addr._id %>"
+              data-name="<%= addr.name %>"
+              data-country="<%= addr.country %>"
+              data-state="<%= addr.state %>"
+              data-address="<%= addr.address %>"
+              data-city="<%= addr.city || '' %>"
+              data-pincode="<%= addr.pincode %>"
+              data-type="<%= addr.addressType || 'Home' %>"
+              data-landmark="<%= addr.landmark || '' %>"
+              data-mobile="<%= addr.mobile %>"
+              data-email="<%= addr.email %>"
+              data-alternate="<%= addr.alternateNumber || '' %>"
+              onclick="openEditModal(this)">✏ Edit</button>
+
+            <button class="btn-card btn-delete-card"
+              data-id="<%= addr._id %>"
+              onclick="openDeleteModal(this)">🗑 Delete</button>
+
+            <button class="btn-card btn-default-card"
+              data-id="<%= addr._id %>"
+              <%= addr.isDefault ? 'disabled' : '' %>
+              onclick="setDefault(this)">
+              <%= addr.isDefault ? '★ Default' : '☆ Set Default' %>
+            </button>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <p>No addresses saved yet. Add one to get started!</p>
+    </div>
+  <% } %>
+</div>
+
+<!-- ADD Modal — uses normal POST form (creating new resource) -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 class="modal-title">Add new Address</h2>
+      <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+    </div>
+    <p class="modal-subtitle">Fill in the below details to add new address</p>
+
+    <form id="addForm" action="/addresses/add" method="POST" novalidate>
+      <div class="form-row cols-1">
+        <div class="form-field" id="add-field-name">
+          <label>Name</label>
+          <input type="text" name="name" placeholder="Full name">
+          <span class="field-error">Name is required</span>
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-field" id="add-field-country">
+          <label>Country</label>
+          <input type="text" name="country" placeholder="Country">
+          <span class="field-error">Country is required</span>
+        </div>
+        <div class="form-field" id="add-field-state">
+          <label>State</label>
+          <input type="text" name="state" placeholder="State">
+          <span class="field-error">State is required</span>
+        </div>
+      </div>
+      <div class="form-row cols-1">
+        <div class="form-field" id="add-field-address">
+          <label>Address</label>
+          <textarea name="address" placeholder="House / Flat No., Street, Area"></textarea>
+          <span class="field-error">Address is required</span>
+        </div>
+      </div>
+      <div class="form-row cols-3">
+        <div class="form-field" id="add-field-pincode">
+          <label>Pin Code</label>
+          <input type="text" name="pincode" placeholder="000000" maxlength="6">
+          <span class="field-error">Valid pin code required</span>
+        </div>
+        <div class="addr-type-row">
+          <label>Address Type</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="addressType" value="Home" checked> Home</label>
+            <label class="radio-option"><input type="radio" name="addressType" value="Work"> Work</label>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Landmark <span class="optional-tag">(Optional)</span></label>
+          <input type="text" name="landmark" placeholder="Near landmark">
+        </div>
+      </div>
+      <div class="section-label">Contact Information</div>
+      <div class="form-row cols-2">
+        <div class="form-field" id="add-field-mobile">
+          <label>Mobile Number</label>
+          <input type="tel" name="mobile" placeholder="10-digit number" maxlength="10">
+          <span class="field-error">Valid mobile number required</span>
+        </div>
+        <div class="form-field" id="add-field-email">
+          <label>E-mail</label>
+          <input type="email" name="email" placeholder="you@email.com">
+          <span class="field-error">Valid email required</span>
+        </div>
+      </div>
+      <div class="form-row cols-1">
+        <div class="form-field">
+          <label>Alternate Number <span class="optional-tag">(Optional)</span></label>
+          <input type="tel" name="alternateNumber" placeholder="Alternate phone" maxlength="10">
+        </div>
+      </div>
+      <button type="submit" class="btn-add">Add Address</button>
+    </form>
+  </div>
+</div>
+
+<!-- EDIT Modal — submits via fetch PUT (no form action/method needed) -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 class="modal-title">Edit Address</h2>
+      <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+    </div>
+    <p class="modal-subtitle">Update your delivery address details</p>
+
+    <form id="editForm" novalidate>
+      <div class="form-row cols-1">
+        <div class="form-field" id="edit-field-name">
+          <label>Name</label>
+          <input type="text" name="name" id="edit-name" placeholder="Full name">
+          <span class="field-error">Name is required</span>
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="form-field" id="edit-field-country">
+          <label>Country</label>
+          <input type="text" name="country" id="edit-country" placeholder="Country">
+          <span class="field-error">Country is required</span>
+        </div>
+        <div class="form-field" id="edit-field-state">
+          <label>State</label>
+          <input type="text" name="state" id="edit-state" placeholder="State">
+          <span class="field-error">State is required</span>
+        </div>
+      </div>
+      <div class="form-row cols-1">
+        <div class="form-field" id="edit-field-address">
+          <label>Address</label>
+          <textarea name="address" id="edit-address" placeholder="House / Flat No., Street, Area"></textarea>
+          <span class="field-error">Address is required</span>
+        </div>
+      </div>
+      <div class="form-row cols-3">
+        <div class="form-field" id="edit-field-pincode">
+          <label>Pin Code</label>
+          <input type="text" name="pincode" id="edit-pincode" placeholder="000000" maxlength="6">
+          <span class="field-error">Valid pin code required</span>
+        </div>
+        <div class="addr-type-row">
+          <label>Address Type</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="addressType" value="Home" id="edit-type-home"> Home</label>
+            <label class="radio-option"><input type="radio" name="addressType" value="Work" id="edit-type-work"> Work</label>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Landmark <span class="optional-tag">(Optional)</span></label>
+          <input type="text" name="landmark" id="edit-landmark" placeholder="Near landmark">
+        </div>
+      </div>
+      <div class="section-label">Contact Information</div>
+      <div class="form-row cols-2">
+        <div class="form-field" id="edit-field-mobile">
+          <label>Mobile Number</label>
+          <input type="tel" name="mobile" id="edit-mobile" placeholder="10-digit number" maxlength="10">
+          <span class="field-error">Valid mobile number required</span>
+        </div>
+        <div class="form-field" id="edit-field-email">
+          <label>E-mail</label>
+          <input type="email" name="email" id="edit-email" placeholder="you@email.com">
+          <span class="field-error">Valid email required</span>
+        </div>
+      </div>
+      <div class="form-row cols-1">
+        <div class="form-field">
+          <label>Alternate Number <span class="optional-tag">(Optional)</span></label>
+          <input type="tel" name="alternateNumber" id="edit-alternateNumber" placeholder="Alternate phone" maxlength="10">
+        </div>
+      </div>
+      <button type="submit" class="btn-add">Update Address</button>
+    </form>
+  </div>
+</div>
+
+<!-- DELETE Confirm Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="delete-modal-box">
+    <div class="delete-icon">🗑️</div>
+    <div class="delete-title">Delete Address?</div>
+    <p class="delete-msg">This action cannot be undone. Are you sure you want to remove this address?</p>
+    <div class="delete-btns">
+      <button class="btn-cancel-del" onclick="closeModal('deleteModal')">Cancel</button>
+      <button class="btn-confirm-del" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Modal helpers ──────────────────────────────────────
+  function openModal(id)  { document.getElementById(id).classList.add('open') }
+  function closeModal(id) { document.getElementById(id).classList.remove('open') }
+
+  document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('open')
+    })
+  })
+
+  function clearErrors(formId) {
+    var form = document.getElementById(formId)
+    if (form) form.querySelectorAll('.form-field').forEach(function(f) { f.classList.remove('error') })
+  }
+
+  // ── Add Modal ──────────────────────────────────────────
+  function openAddModal() {
+    document.getElementById('addForm').reset()
+    clearErrors('addForm')
+    openModal('addModal')
+  }
+
+  // ── Edit Modal ─────────────────────────────────────────
+  var currentEditId = null
+
+  function openEditModal(btn) {
+    var d = btn.dataset
+    currentEditId = d.id
+    document.getElementById('edit-name').value            = d.name
+    document.getElementById('edit-country').value         = d.country
+    document.getElementById('edit-state').value           = d.state
+    document.getElementById('edit-address').value         = d.address
+    document.getElementById('edit-pincode').value         = d.pincode
+    document.getElementById('edit-landmark').value        = d.landmark
+    document.getElementById('edit-mobile').value          = d.mobile
+    document.getElementById('edit-email').value           = d.email
+    document.getElementById('edit-alternateNumber').value = d.alternate
+    document.getElementById('edit-type-home').checked     = d.type === 'Home'
+    document.getElementById('edit-type-work').checked     = d.type === 'Work'
+    clearErrors('editForm')
+    openModal('editModal')
+  }
+
+  // ── Delete Modal ───────────────────────────────────────
+  var currentDeleteId = null
+
+  function openDeleteModal(btn) {
+    currentDeleteId = btn.dataset.id
+    openModal('deleteModal')
+  }
+
+  // Confirm delete — fetch DELETE
+  document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+    var btn = this
+    btn.disabled = true
+    btn.textContent = 'Deleting…'
+
+    fetch('/addresses/delete/' + currentDeleteId, { method: 'DELETE' })
+      .then(function(res) {
+        if (res.ok) {
+          location.reload()
+        } else {
+          alert('Failed to delete. Please try again.')
+          btn.disabled = false
+          btn.textContent = 'Delete'
+        }
+      })
+      .catch(function() {
+        alert('Something went wrong.')
+        btn.disabled = false
+        btn.textContent = 'Delete'
+      })
+  })
+
+  // ── Set Default — fetch PATCH ──────────────────────────
+  function setDefault(btn) {
+    btn.disabled = true
+    fetch('/addresses/default/' + btn.dataset.id, { method: 'PATCH' })
+      .then(function(res) {
+        if (res.ok) {
+          location.reload()
+        } else {
+          alert('Failed to set default. Please try again.')
+          btn.disabled = false
+        }
+      })
+      .catch(function() {
+        alert('Something went wrong.')
+        btn.disabled = false
+      })
+  }
+
+  // ── Validate helper ────────────────────────────────────
+  function validateRules(rules) {
+    var valid = true
+    rules.forEach(function(r) {
+      var fieldEl = document.getElementById(r.fieldId)
+      var inputEl = r.inputId
+        ? document.getElementById(r.inputId)
+        : document.querySelector('#' + r.formId + ' [name="' + r.name + '"]')
+      var val = inputEl ? inputEl.value : ''
+      if (!r.check(val)) { fieldEl.classList.add('error'); valid = false }
+      else fieldEl.classList.remove('error')
+    })
+    return valid
+  }
+
+  // ── Add form submit — normal POST ──────────────────────
+  document.getElementById('addForm').addEventListener('submit', function(e) {
+    var form = this
+    var rules = [
+      { fieldId: 'add-field-name',    formId: 'addForm', name: 'name',    check: function(v) { return v.trim().length > 1 } },
+      { fieldId: 'add-field-country', formId: 'addForm', name: 'country', check: function(v) { return v.trim().length > 0 } },
+      { fieldId: 'add-field-state',   formId: 'addForm', name: 'state',   check: function(v) { return v.trim().length > 0 } },
+      { fieldId: 'add-field-address', formId: 'addForm', name: 'address', check: function(v) { return v.trim().length > 5 } },
+      { fieldId: 'add-field-pincode', formId: 'addForm', name: 'pincode', check: function(v) { return /^\d{6}$/.test(v.trim()) } },
+      { fieldId: 'add-field-mobile',  formId: 'addForm', name: 'mobile',  check: function(v) { return /^\d{10}$/.test(v.trim()) } },
+      { fieldId: 'add-field-email',   formId: 'addForm', name: 'email',   check: function(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) } },
+    ]
+    if (!validateRules(rules)) e.preventDefault()
+  })
+
+  // ── Edit form submit — fetch PUT ───────────────────────
+  document.getElementById('editForm').addEventListener('submit', function(e) {
+    e.preventDefault()
+
+    var rules = [
+      { fieldId: 'edit-field-name',    inputId: 'edit-name',    check: function(v) { return v.trim().length > 1 } },
+      { fieldId: 'edit-field-country', inputId: 'edit-country', check: function(v) { return v.trim().length > 0 } },
+      { fieldId: 'edit-field-state',   inputId: 'edit-state',   check: function(v) { return v.trim().length > 0 } },
+      { fieldId: 'edit-field-address', inputId: 'edit-address', check: function(v) { return v.trim().length > 5 } },
+      { fieldId: 'edit-field-pincode', inputId: 'edit-pincode', check: function(v) { return /^\d{6}$/.test(v.trim()) } },
+      { fieldId: 'edit-field-mobile',  inputId: 'edit-mobile',  check: function(v) { return /^\d{10}$/.test(v.trim()) } },
+      { fieldId: 'edit-field-email',   inputId: 'edit-email',   check: function(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) } },
+    ]
+    if (!validateRules(rules)) return
+
+    var submitBtn = this.querySelector('.btn-add')
+    submitBtn.disabled = true
+    submitBtn.textContent = 'Updating…'
+
+    // Collect form data as JSON
+    var body = {
+      name:            document.getElementById('edit-name').value,
+      country:         document.getElementById('edit-country').value,
+      state:           document.getElementById('edit-state').value,
+      address:         document.getElementById('edit-address').value,
+      pincode:         document.getElementById('edit-pincode').value,
+      landmark:        document.getElementById('edit-landmark').value,
+      mobile:          document.getElementById('edit-mobile').value,
+      email:           document.getElementById('edit-email').value,
+      alternateNumber: document.getElementById('edit-alternateNumber').value,
+      addressType:     document.querySelector('#editForm input[name="addressType"]:checked').value
+    }
+
+    fetch('/addresses/edit/' + currentEditId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+    .then(function(res) { return res.json() })
+    .then(function(data) {
+      if (data.success) {
+        location.reload()
+      } else {
+        alert(data.message || 'Failed to update address.')
+        submitBtn.disabled = false
+        submitBtn.textContent = 'Update Address'
+      }
+    })
+    .catch(function() {
+      alert('Something went wrong.')
+      submitBtn.disabled = false
+      submitBtn.textContent = 'Update Address'
+    })
+  })
+
+  // ── Numbers only ───────────────────────────────────────
+  document.querySelectorAll('input[type="tel"], input[name="pincode"]').forEach(function(el) {
+    el.addEventListener('input', function() { this.value = this.value.replace(/\D/g, '') })
+  })
+
+  // ── Clear error on typing ──────────────────────────────
+  document.querySelectorAll('.form-field input, .form-field textarea').forEach(function(el) {
+    el.addEventListener('input', function() {
+      var field = this.closest('.form-field')
+      if (field) field.classList.remove('error')
+    })
+  })
+</script>
+
+<%- include('../partials/user/footer') %>

@@ -17,17 +17,37 @@ const userSchema = new mongoose.Schema({
 
     password :{
         type:String,
-        default:null
+        required:false
     },
 
     googleId:{
         type:String,
         default:null,
     },
-
+     profilePhoto:{
+        type:String
+     },
+     phoneNumber:{
+      type:Number,
+      type: String,
+      required: false,
+      unique: false,
+   
+      default: null,
+     },
+     
     authProviders:{
          type:[String], //['manual','google']
          default:[]
+    },
+    isAdmin:{
+        type:Boolean,
+        default:false
+    },
+
+    isBlocked:{
+        type:Boolean,
+        default:false
     },
 
     isVerified :{

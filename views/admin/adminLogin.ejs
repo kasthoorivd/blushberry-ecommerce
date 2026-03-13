@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blush-Berry · Admin Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --pink-soft: #f9d4df;
+    --pink-mid: #f4a7bc;
+    --pink-hot: #e8527a;
+    --pink-deep: #c93060;
+    --dark-nav: #efcee7;
+    --text-dark: #3a1a2e;
+    --text-light: #b07090;
+    --white: #fff;
+    --error: #d63060;
+    --success: #5cb85c;
+    --shadow: rgba(200,50,90,0.18);
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--dark-nav);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nav-bar {
+    background: var(--dark-nav);
+    color: rgba(255,255,255,0.45);
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    padding: 10px 28px; user-select: none;
+  }
+  .nav-bar span { color: var(--pink-mid); }
+
+  .page {
+    flex: 1; display: flex;
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+
+  .card {
+    display: flex; width: 680px; max-width: 100%;
+    border-radius: 22px; overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.45);
+    animation: slideUp 0.55s cubic-bezier(.22,1,.36,1) both;
+  }
+
+  @keyframes slideUp {
+    from { opacity:0; transform:translateY(30px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes shake {
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-7px); }
+    40%{ transform:translateX(7px); }
+    60%{ transform:translateX(-5px); }
+    80%{ transform:translateX(5px); }
+  }
+  .shake { animation: shake 0.45s ease; }
+
+  /* Left panel */
+  .panel-left {
+    flex: 0 0 310px;
+    background: var(--pink-soft);
+    padding: 46px 36px 40px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .brand {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2.5rem; color: var(--text-dark);
+    line-height: 1; margin-bottom: 4px; text-align: center;
+  }
+  .panel-title {
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 2.5px; color: var(--pink-hot);
+    text-transform: uppercase; margin-bottom: 5px;
+  }
+  .panel-sub {
+    font-size: 11.5px; color: var(--text-light);
+    text-align: center; margin-bottom: 22px; line-height: 1.55;
+  }
+
+  /* API error banner */
+  .api-error {
+    width: 100%;
+    background: #fde8ee; border: 1.5px solid var(--pink-hot);
+    border-radius: 10px; color: var(--pink-deep);
+    font-size: 12px; font-weight: 600;
+    padding: 9px 13px; margin-bottom: 12px;
+    text-align: center; display: none;
+  }
+  .api-error.show { display: block; animation: slideUp 0.2s ease; }
+
+  /* Form */
+  form { width: 100%; }
+
+  .field { position: relative; margin-bottom: 14px; }
+  .field input {
+    width: 100%; background: var(--white);
+    border: 1.8px solid transparent; border-radius: 10px;
+    padding: 11px 14px 11px 40px;
+    font-family: 'Nunito', sans-serif; font-size: 13px; color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+  .field input::placeholder { color: var(--text-light); }
+  .field input:focus {
+    border-color: var(--pink-hot);
+    box-shadow: 0 0 0 3px rgba(232,82,122,0.12);
+  }
+  .field input.valid   { border-color: var(--success); }
+  .field input.invalid { border-color: var(--error); }
+
+  .field-icon {
+    position: absolute; left: 13px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light); font-size: 14px;
+    pointer-events: none; transition: color 0.2s;
+  }
+  .field input:focus ~ .field-icon { color: var(--pink-hot); }
+
+  .toggle-pw {
+    position: absolute; right: 12px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: var(--text-light); font-size: 14px;
+    padding: 0; line-height: 1; transition: color 0.2s;
+  }
+  .toggle-pw:hover { color: var(--pink-hot); }
+
+  .error-msg {
+    display: block; font-size: 10.5px; color: var(--error);
+    margin-top: -10px; margin-bottom: 6px; padding-left: 4px;
+    min-height: 14px; opacity: 0; transform: translateY(-4px);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .error-msg.show { opacity: 1; transform: translateY(0); }
+
+  /* Strength bar */
+  .strength-wrap {
+    margin-top: -10px; margin-bottom: 6px;
+    height: 4px; border-radius: 4px; background: #e8c0cc;
+    overflow: hidden; display: none;
+  }
+  .strength-wrap.visible { display: block; }
+  .strength-bar {
+    height: 100%; border-radius: 4px; width: 0;
+    transition: width 0.4s, background 0.4s;
+  }
+
+  /* Submit button */
+  .btn-login {
+    width: 100%;
+    background: linear-gradient(135deg, var(--pink-hot), var(--pink-deep));
+    color: var(--white); border: none; border-radius: 10px;
+    padding: 12px; font-family: 'Nunito', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: 1px;
+    cursor: pointer; margin-top: 4px; margin-bottom: 16px;
+    position: relative; overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 6px 20px rgba(200,48,96,0.35);
+  }
+  .btn-login:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(200,48,96,0.45);
+  }
+  .btn-login:disabled { opacity: 0.75; cursor: not-allowed; }
+  .btn-login .btn-text { transition: opacity 0.2s; }
+  .btn-login .spinner {
+    display: none; position: absolute; inset: 0;
+    align-items: center; justify-content: center;
+  }
+  .btn-login.loading .btn-text { opacity: 0; }
+  .btn-login.loading .spinner { display: flex; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin-ring {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* Divider & social */
+  .divider {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px; width: 100%;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--pink-mid);
+  }
+  .divider span { font-size: 11px; color: var(--text-light); font-weight: 600; }
+
+  .social-btn {
+    width: 100%; display: flex; align-items: center; gap: 10px;
+    background: var(--white); border: 1.5px solid #e8c8d5;
+    border-radius: 10px; padding: 9px 14px;
+    font-family: 'Nunito', sans-serif; font-size: 12.5px; font-weight: 600;
+    color: var(--text-dark); cursor: pointer; margin-bottom: 9px;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  }
+  .social-btn:hover {
+    border-color: var(--pink-hot);
+    box-shadow: 0 4px 14px var(--shadow);
+    transform: translateY(-1px);
+  }
+  .social-btn img { width: 18px; height: 18px; }
+
+  /* Right image */
+  .panel-right {
+    flex: 1;
+    background: #c9a0ac url('https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=700&q=80') center/cover no-repeat;
+    min-height: 420px; position: relative;
+  }
+  .panel-right::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(160deg, rgba(249,80,120,0.15) 0%, transparent 60%);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed; top: 22px; right: 22px;
+    padding: 13px 20px; border-radius: 12px;
+    font-size: 13px; font-weight: 700; color: #fff;
+    display: flex; align-items: center; gap: 9px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.22);
+    transform: translateX(130%);
+    transition: transform 0.4s cubic-bezier(.22,1,.36,1);
+    z-index: 999;
+  }
+  .toast.show { transform: translateX(0); }
+  .toast.success { background: linear-gradient(135deg,#4caf6e,#38a057); }
+  .toast.error   { background: linear-gradient(135deg,#e8527a,#c93060); }
+
+  @media (max-width:600px) {
+    .panel-right { display: none; }
+    .card { width: 100%; max-width: 370px; }
+    .panel-left { flex: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav-bar"><span>Blush-Berry</span> &nbsp;Admin Login</div>
+
+<div class="page">
+  <div class="card">
+
+    <div class="panel-left" id="panelLeft">
+      <div class="brand">Blush-Berry</div>
+      <div class="panel-title">Admin Login</div>
+      <p class="panel-sub">Enter your credentials to access the dashboard.</p>
+
+      <!-- Server / network error banner -->
+      <div class="api-error" id="apiBanner"></div>
+
+      <form id="loginForm" novalidate>
+        <!-- Email -->
+        <div class="field">
+          <input type="email" id="email" placeholder="Email" autocomplete="username">
+          <span class="field-icon">✉</span>
+        </div>
+        <span class="error-msg" id="emailErr"></span>
+
+        <!-- Password -->
+        <div class="field">
+          <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+          <span class="field-icon">🔒</span>
+          <button type="button" class="toggle-pw" id="togglePw">👁</button>
+        </div>
+        <div class="strength-wrap" id="strengthWrap">
+          <div class="strength-bar" id="strengthBar"></div>
+        </div>
+        <span class="error-msg" id="passwordErr"></span>
+
+        <button type="submit" class="btn-login" id="loginBtn">
+          <span class="btn-text">Login Now</span>
+          <div class="spinner"><div class="spin-ring"></div></div>
+        </button>
+      </form>
+
+      <div class="divider"><span>Login with Others</span></div>
+
+      <button class="social-btn" onclick="socialLogin('Google')">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
+        Login with Google
+      </button>
+      
+    </div>
+
+    <div class="panel-right"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  const emailInput    = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const loginBtn      = document.getElementById('loginBtn');
+
+  function validateEmail() {
+    const val = emailInput.value.trim();
+    const err = document.getElementById('emailErr');
+    if (!val) { showErr(emailInput, err, 'Email is required'); return false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { showErr(emailInput, err, 'Enter a valid email'); return false; }
+    clearErr(emailInput, err); return true;
+  }
+
+  function validatePassword() {
+    const val = passwordInput.value;
+    const err = document.getElementById('passwordErr');
+    if (!val) { showErr(passwordInput, err, 'Password is required'); return false; }
+    if (val.length < 4) { showErr(passwordInput, err, 'Password too short'); return false; }
+    clearErr(passwordInput, err); return true;
+  }
+
+  function showErr(input, el, msg) {
+    input.classList.add('invalid'); input.classList.remove('valid');
+    el.textContent = msg; el.classList.add('show');
+  }
+  function clearErr(input, el) {
+    input.classList.remove('invalid'); input.classList.add('valid');
+    el.classList.remove('show');
+  }
+
+  // document.getElementById('togglePw').addEventListener('click', () => {
+  //   const pw = document.getElementById('password');
+  //   pw.type = pw.type === 'password' ? 'text' : 'password';
+  // });
+
+  // function socialLogin(provider) {
+  //   Swal.fire({
+  //     icon: 'info',
+  //     title: `${provider} Login`,
+  //     text: `${provider} login is not configured yet.`,
+  //     confirmButtonColor: '#e8527a'
+  //   });
+  // }
+
+  // document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  //   e.preventDefault();
+
+  //   const okEmail = validateEmail();
+  //   const okPass  = validatePassword();
+  //   if (!okEmail || !okPass) return;
+
+  //   loginBtn.classList.add('loading');
+  //   loginBtn.disabled = true;
+
+  //   // Show success and redirect directly to /admin/dashboard
+  //   await Swal.fire({
+  //     icon: 'success',
+  //     title: 'Login Successful 🎉',
+  //     text: 'Redirecting to dashboard...',
+  //     timer: 1500,
+  //     showConfirmButton: false
+  //   });
+
+  //   window.location.href = '/admin/dashboard';
+  // });
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const okEmail = validateEmail();
+  const okPass  = validatePassword();
+  if (!okEmail || !okPass) return;
+
+  loginBtn.classList.add('loading');
+  loginBtn.disabled = true;
+
+  try {
+    const res = await fetch('/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: emailInput.value.trim(),
+        password: passwordInput.value
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      await Swal.fire({
+        icon: 'success',
+        title: 'Login Successful 🎉',
+        text: 'Redirecting to dashboard...',
+        timer: 1500,
+        showConfirmButton: false
+      });
+      window.location.href = data.redirectUrl;
+
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: data.message || 'Invalid credentials',
+        confirmButtonColor: '#e8527a'
+      });
+    }
+
+  } catch (err) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Server Error',
+      text: 'Something went wrong. Please try again.',
+      confirmButtonColor: '#e8527a'
+    });
+    console.error('[Admin Login Error]', err);
+
+  } finally {
+    loginBtn.classList.remove('loading');
+    loginBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

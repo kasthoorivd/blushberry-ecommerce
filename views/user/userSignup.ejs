@@ -16,7 +16,6 @@
       flex-direction: column;
     }
 
-    /* Top label */
     .top-label {
       color: #ccc;
       font-size: 13px;
@@ -24,7 +23,6 @@
       font-weight: 400;
     }
 
-    /* Outer card */
     .card {
       background: #f9c8d0;
       border-radius: 18px;
@@ -37,7 +35,6 @@
       min-height: 390px;
     }
 
-    /* Left panel */
     .left-panel {
       width: 240px;
       flex-shrink: 0;
@@ -57,7 +54,6 @@
       margin-bottom: 28px;
     }
 
-    /* Lipstick swatch rows */
     .swatch-row {
       display: flex;
       align-items: center;
@@ -93,7 +89,6 @@
       margin-left: 0;
     }
 
-    /* Right panel */
     .right-panel {
       flex: 1;
       background: #fff;
@@ -121,7 +116,6 @@
       margin-bottom: 20px;
     }
 
-    /* Social buttons */
     .social-row {
       display: flex;
       gap: 10px;
@@ -172,7 +166,6 @@
     .or-divider::before { left: 0; }
     .or-divider::after  { right: 0; }
 
-    /* Inputs */
     .input-wrap {
       position: relative;
       margin-bottom: 0;
@@ -194,6 +187,20 @@
     .input-field::placeholder { color: #bbb; font-size: 12.5px; }
     .input-field:focus { border-bottom-color: #e07090; }
 
+    /* ── Validation styles (only new addition) ── */
+    .input-wrap.error .input-field {
+      border-bottom-color: #E8527A;
+    }
+    .field-error {
+      display: none;
+      font-size: 10.5px;
+      color: #E8527A;
+      margin-top: 3px;
+      padding-left: 2px;
+      font-weight: 500;
+    }
+    .input-wrap.error .field-error { display: block; }
+
     .input-divider {
       border: none;
       border-top: 1.5px solid #f0f0f0;
@@ -212,7 +219,6 @@
       line-height: 1;
     }
 
-    /* Submit button */
     .btn-create {
       width: 100%;
       background: #e8808a;
@@ -253,65 +259,47 @@
 
   <div class="card">
 
-    <!-- ── LEFT PANEL ── -->
     <div class="left-panel">
       <div class="brand-logo">Blush-Berry</div>
 
-      <!-- Swatch 1: Dark burgundy -->
       <div class="swatch-row">
         <div class="swatch-label" style="background:#c8606a;">BEAUTY</div>
         <div class="swatch-brush" style="background:#8b2030;"></div>
         <div class="swatch-stroke" style="background:linear-gradient(90deg,#6a1020,#a02030,#c85060,#b03040);"></div>
       </div>
-
-      <!-- Swatch 2: Mauve -->
       <div class="swatch-row">
         <div class="swatch-label" style="background:#d08090;">BEAUTY</div>
         <div class="swatch-brush" style="background:#9a5060;"></div>
         <div class="swatch-stroke" style="background:linear-gradient(90deg,#8a4050,#b07080,#d0a0a8,#c09090);"></div>
       </div>
-
-      <!-- Swatch 3: Nude brown -->
       <div class="swatch-row">
         <div class="swatch-label" style="background:#c89070;">BEAUTY</div>
         <div class="swatch-brush" style="background:#8a5030;"></div>
         <div class="swatch-stroke" style="background:linear-gradient(90deg,#7a4020,#a87050,#d0a080,#c09060);"></div>
       </div>
-
-      <!-- Swatch 4: Warm terracotta -->
       <div class="swatch-row">
         <div class="swatch-label" style="background:#d07060;">BEAUTY</div>
         <div class="swatch-brush" style="background:#a84030;"></div>
         <div class="swatch-stroke" style="background:linear-gradient(90deg,#902010,#c06050,#e09080,#d07060);"></div>
       </div>
-
-      <!-- Swatch 5: Red -->
       <div class="swatch-row">
         <div class="swatch-label" style="background:#e04050;">BEAUTY</div>
         <div class="swatch-brush" style="background:#a01020;"></div>
         <div class="swatch-stroke" style="background:linear-gradient(90deg,#800010,#c02030,#e85060,#d03040);"></div>
       </div>
-
-      <!-- Swatch 6: Soft pink -->
       <div class="swatch-row">
         <div class="swatch-label" style="background:#e8a0b0;">BEAUTY</div>
         <div class="swatch-brush" style="background:#c07080;"></div>
         <div class="swatch-stroke" style="background:linear-gradient(90deg,#b06070,#d090a0,#f0c0cc,#e8b0bc);"></div>
       </div>
+    </div>
 
-    </div><!-- /left-panel -->
-
-    <!-- ── RIGHT PANEL ── -->
     <div class="right-panel">
-
       <span class="lang">English (UK)</span>
-
       <h2 class="title">Create Account</h2>
 
-      <!-- Social Buttons -->
       <div class="social-row">
         <a href="http://localhost:3000/auth/google" class="btn-social">
-          <!-- Google G -->
           <svg width="16" height="16" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -320,26 +308,26 @@
           </svg>
           Sign up with Google
         </a>
-        
       </div>
 
       <div class="or-divider">– OR –</div>
 
-      <!-- Form -->
       <form id="signupForm">
 
-        <div class="input-wrap">
-          <input type="text" name="fullName" placeholder="Full Name" class="input-field" required />
+        <div class="input-wrap" id="wrap-fullName">
+          <input type="text" name="fullName" placeholder="Full Name" class="input-field" />
+          <span class="field-error">Full name is required</span>
         </div>
         <hr class="input-divider" />
 
-        <div class="input-wrap">
-          <input type="email" name="email" placeholder="Email Address" class="input-field" required />
+        <div class="input-wrap" id="wrap-email">
+          <input type="email" name="email" placeholder="Email Address" class="input-field" />
+          <span class="field-error">Please enter a valid email address</span>
         </div>
         <hr class="input-divider" />
 
-        <div class="input-wrap">
-          <input type="password" name="password" id="pw1" placeholder="Password" class="input-field" required />
+        <div class="input-wrap" id="wrap-password">
+          <input type="password" name="password" id="pw1" placeholder="Password" class="input-field" />
           <span class="eye-icon" onclick="togglePw('pw1', this)" title="Show/Hide">
             <svg width="17" height="17" fill="none" stroke="#ccc" stroke-width="1.8" viewBox="0 0 24 24">
               <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
@@ -347,11 +335,12 @@
               <line x1="1" y1="1" x2="23" y2="23"/>
             </svg>
           </span>
+          <span class="field-error">Password must be at least 6 characters</span>
         </div>
         <hr class="input-divider" />
 
-        <div class="input-wrap">
-          <input type="password" name="confirmPassword" id="pw2" placeholder="Confirm Password" class="input-field" required />
+        <div class="input-wrap" id="wrap-confirmPassword">
+          <input type="password" name="confirmPassword" id="pw2" placeholder="Confirm Password" class="input-field" />
           <span class="eye-icon" onclick="togglePw('pw2', this)" title="Show/Hide">
             <svg width="17" height="17" fill="none" stroke="#ccc" stroke-width="1.8" viewBox="0 0 24 24">
               <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
@@ -359,107 +348,134 @@
               <line x1="1" y1="1" x2="23" y2="23"/>
             </svg>
           </span>
+          <span class="field-error">Passwords do not match</span>
         </div>
 
-        <button  class="btn-create">Create Account</button>
+        <button type="submit" class="btn-create">Create Account</button>
 
       </form>
 
-     <script>
-function togglePw(id, icon) {
-    const input = document.getElementById(id);
+      <script>
+        function togglePw(id, icon) {
+          var input = document.getElementById(id)
+          if (input.type === "password") {
+            input.type = "text"
+            icon.innerHTML = '<svg width="17" height="17" fill="none" stroke="#e07090" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+          } else {
+            input.type = "password"
+            icon.innerHTML = '<svg width="17" height="17" fill="none" stroke="#ccc" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+          }
+        }
+      </script>
 
-    if (input.type === "password") {
-        input.type = "text";
-
-        // Change to open eye
-        icon.innerHTML = `
-        <svg width="17" height="17" fill="none" stroke="#e07090" stroke-width="1.8" viewBox="0 0 24 24">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>`;
-    } else {
-        input.type = "password";
-
-        // Change to closed eye
-        icon.innerHTML = `
-        <svg width="17" height="17" fill="none" stroke="#ccc" stroke-width="1.8" viewBox="0 0 24 24">
-          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-          <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-          <line x1="1" y1="1" x2="23" y2="23"/>
-        </svg>`;
-    }
-}
-</script>
-      
       <p class="login-link">Already have an account? <a href="/login">Log in</a></p>
+    </div>
 
-    </div><!-- /right-panel -->
-
-  </div><!-- /card -->
+  </div>
 
 <script>
-document.getElementById("signupForm").addEventListener("submit", async function(e) {
-    e.preventDefault(); // VERY IMPORTANT
+  // ── Clear error on typing ──────────────────────────────
+  document.querySelectorAll('.input-field').forEach(function(input) {
+    input.addEventListener('input', function() {
+      this.closest('.input-wrap').classList.remove('error')
+    })
+  })
 
-    const fullName = document.querySelector("input[name='fullName']").value;
-    const email = document.querySelector("input[name='email']").value;
-    const password = document.querySelector("input[name='password']").value;
-    const confirmPassword = document.querySelector("input[name='confirmPassword']").value;
+  document.getElementById("signupForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
 
+    var fullName        = document.querySelector("input[name='fullName']")
+    var email           = document.querySelector("input[name='email']")
+    var password        = document.querySelector("input[name='password']")
+    var confirmPassword = document.querySelector("input[name='confirmPassword']")
+
+    var wrapFullName        = document.getElementById('wrap-fullName')
+    var wrapEmail           = document.getElementById('wrap-email')
+    var wrapPassword        = document.getElementById('wrap-password')
+    var wrapConfirmPassword = document.getElementById('wrap-confirmPassword')
+
+    // Reset all errors
+    wrapFullName.classList.remove('error')
+    wrapEmail.classList.remove('error')
+    wrapPassword.classList.remove('error')
+    wrapConfirmPassword.classList.remove('error')
+
+    var valid = true
+
+    // Full name
+    if (fullName.value.trim().length < 2) {
+      wrapFullName.classList.add('error')
+      valid = false
+    }
+
+    // Email
+    if (!email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+      wrapEmail.classList.add('error')
+      valid = false
+    }
+
+    // Password
+    if (password.value.trim().length < 6) {
+      wrapPassword.classList.add('error')
+      wrapPassword.querySelector('.field-error').textContent = 'Password must be at least 6 characters'
+      valid = false
+    }
+
+    // Confirm password
+    if (confirmPassword.value.trim() === '') {
+      wrapConfirmPassword.classList.add('error')
+      wrapConfirmPassword.querySelector('.field-error').textContent = 'Please confirm your password'
+      valid = false
+    } else if (confirmPassword.value !== password.value) {
+      wrapConfirmPassword.classList.add('error')
+      wrapConfirmPassword.querySelector('.field-error').textContent = 'Passwords do not match'
+      valid = false
+    }
+
+    if (!valid) return  // stop — don't hit server
+
+    // ── Your original fetch code below, unchanged ──────────
     try {
-        const response = await fetch("/signup", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                fullName,
-                email,
-                password,
-                confirmPassword
-            })
+      var response = await fetch("/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName        : fullName.value,
+          email           : email.value,
+          password        : password.value,
+          confirmPassword : confirmPassword.value
+        })
+      });
+
+      var result = await response.json();
+
+      if (result.success) {
+        await Swal.fire({
+          icon: "success",
+          title: "OTP Sent 📩",
+          text: "Please check your email for the OTP.",
+          confirmButtonColor: "#3085d6"
         });
-
-        const result = await response.json();
-
-        if (result.success) {
-
-            await Swal.fire({
-                icon: "success",
-                title: "OTP Sent 📩",
-                text: "Please check your email for the OTP.",
-                confirmButtonColor: "#3085d6"
-            });
-
-            // ✅ Redirect to OTP page
-            window.location.href = result.redirectUrl;
-
-        } else {
-
-            Swal.fire({
-                icon: "error",
-                title: "Signup Failed ❌",
-                text: result.message,
-                confirmButtonColor: "#d33"
-            });
-
-        }
+        window.location.href = result.redirectUrl;
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Signup Failed ❌",
+          text: result.message,
+          confirmButtonColor: "#d33"
+        });
+      }
 
     } catch (error) {
-        console.log(error);
-
-        Swal.fire({
-            icon: "error",
-            title: "Server Error ⚠️",
-            text: "Something went wrong. Please try again."
-        });
+      console.log(error);
+      Swal.fire({
+        icon: "error",
+        title: "Server Error ⚠️",
+        text: "Something went wrong. Please try again."
+      });
     }
-});
-
+  });
 </script>
-
-
 
 </body>
 </html>

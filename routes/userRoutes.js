@@ -1,40 +1,90 @@
 const passport = require('passport')
 const express = require('express')
-
+const multer = require('multer')
+const path = require('path')
 const userRouter = express.Router()
 
 const userController = require('../controllers/user/userAuthController')
-const {isLoggedIn,isLoggedOut} = require('../middleware/authMiddleware')
+const profileController = require('../controllers/user/profileController')
+const addressController = require('../controllers/user/addressController')
+const {isLoggedIn, isLoggedOut} = require('../middleware/authMiddleware')
 
 
-userRouter.get('/',isLoggedIn,userController.loadHomePage)
 
-userRouter.get('/signup', isLoggedOut,userController.loadSignUp)
-userRouter.get('/login',isLoggedOut,userController.loadLogin) 
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'public/uploads/profiles/'),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname)
+    cb(null, `profile-${req.session.user._id}-${Date.now()}${ext}`)
+  }
+})
 
-userRouter.post('/login',userController.login)
-userRouter.post('/signup',userController.signup) 
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp']
+    allowed.includes(file.mimetype) ? cb(null, true) : cb(new Error('Only JPG/PNG allowed'))
+  }
+}) 
 
-userRouter.get('/otp',userController.loadOtpPage)
-userRouter.post('/verifyOtp',userController.verifyOtp)
-userRouter.post('/resendOtp',userController.resendOtp)
+// home
+userRouter.get('/', userController.loadHomePage)
+
+// signup
+userRouter.get('/signup', isLoggedOut, userController.loadSignUp)
+userRouter.post('/signup', isLoggedOut, userController.signup)
+
+// login
+userRouter.get('/login', isLoggedOut, userController.loadLogin)
+userRouter.post('/login', isLoggedOut, userController.login)
+
+// otp
+userRouter.get('/otp', userController.loadOtpPage)
+userRouter.post('/verifyOtp', userController.verifyOtp)
+userRouter.post('/resendOtp', userController.resendOtp)
+
+// google auth 
+userRouter.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
 
 
-userRouter.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}))
+userRouter.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
 
-userRouter.get('/auth/google/callback',passport.authenticate('google',{
-    failureRedirect:'/login'
-}),
-(req,res) => {
-    res.redirect('/')
-}
+    req.session.user = req.user; 
+    res.redirect('/');
+  }
+);
 
-)
+// forgot password
+userRouter.get('/forgot-password', userController.LoadforgotPassword)
+userRouter.post('/api/forgot-password', userController.forgotPassword)
+userRouter.get('/reset-password', userController.showResetPage)
+userRouter.post('/api/auth/reset-password', userController.resetPassword)
+userRouter.get('/otp-forgot-password', userController.showForgotOtpPage)
 
 
-userRouter.get('/forgot-password',userController.forgotPassword)
+//profile
+userRouter.get('/profile',profileController.loadProfile)
+userRouter.post('/profile',upload.single('profilePhoto'),profileController.updateProfile)
+userRouter.put('/profile/changepassword',profileController.changePassword)
+userRouter.post('/profile/request-email-change',profileController.requestEmailChange);
 
-// userRouter.post('/forgot-password',userController.verifyOtp)
-userRouter.get('/logout',isLoggedIn,userController.logout)
+
+
+// address
+userRouter.get('/addresses', addressController.loadAddresses)
+userRouter.get('/addresses/add', addressController.loadAddAddress)
+userRouter.post('/addresses/add',addressController.addAddress)
+userRouter.get('/addresses/edit/:id',addressController.loadEditAddress)
+userRouter.put('/addresses/edit/:id', addressController.editAddress)
+userRouter.delete('/addresses/delete/:id', addressController.deleteAddress)
+userRouter.patch('/addresses/default/:id', addressController.setDefaultAddress)
+
+
+
+// logout
+userRouter.get('/logout', isLoggedIn, userController.logout)
 
 module.exports = userRouter

@@ -1,0 +1,55 @@
+<!-- 
+
+<% if (user) { %>
+  <div class="profile-sidebar">
+    <a href="/profile">
+      <img 
+        src="<%= user.googleId ? user.profilePhoto : '/uploads/' + (user.photo || 'default.png') %>" 
+        alt="Profile" 
+        class="profile-icon"
+      >
+      <span><%= user.fullName || user.name %></span>
+    </a>
+  </div>
+<% } else { %>
+  <div class="profile-sidebar">
+    <a href="/login">Login</a>
+  </div>
+<% } %> -->
+
+<!-- 
+
+
+<% if (user) { %>
+  <!-- LOGGED IN: show profile photo + first name -->
+  <div style="display:flex;align-items:center;gap:8px;">
+    <img 
+      src="<%= user.googleId ? user.profilePhoto : (user.photo ? '/uploads/' + user.photo : '/uploads/default.png') %>" 
+      alt="Profile"
+      onerror="this.src='/uploads/default.png'"
+      style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #f0e6e9;"
+    >
+    <span style="font-size:13px;font-weight:600;color:#1a1a2e;font-family:'Poppins',sans-serif;">
+      <%= user.fullName ? user.fullName.split(' ')[0] : (user.name ? user.name.split(' ')[0] : 'Account') %>
+    </span>
+  </div>
+
+<% } else { %>
+  <!-- NOT LOGGED IN: show Login button -->
+  <a href="/login" style="display:flex;align-items:center;gap:6px;text-decoration:none;background:#c0415a;color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;font-family:'Poppins',sans-serif;">
+    <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M6 20c0-3.33 5.33-5 6-5s6 1.67 6 5"/>
+    </svg>
+    Login
+  </a>
+ 
+<!-- <% } else (!user){ %>
+   <a href="/signup" style="display:flex;align-items:center;gap:6px;text-decoration:none;background:#c0415a;color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;font-family:'Poppins',sans-serif;">
+    <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M6 20c0-3.33 5.33-5 6-5s6 1.67 6 5"/>
+    </svg>
+    Login
+  </a> -->
+<% } %>

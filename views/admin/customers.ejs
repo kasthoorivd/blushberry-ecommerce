@@ -1,0 +1,533 @@
+<%- include('../partials/admin/adminSidebar') %>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap');
+
+  .customers-wrap {
+    font-family: 'Nunito', sans-serif;
+    padding: 10px 4px 60px;
+  }
+
+  .page-heading {
+    font-size: 22px; font-weight: 800;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: #3a1a2e; margin-bottom: 20px;
+  }
+
+  .controls-bar {
+    display: flex; align-items: center;
+    justify-content: flex-end; gap: 10px;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+
+  .ctrl-label { font-size: 12px; font-weight: 700; color: #b07090; letter-spacing: 0.5px; }
+
+  .ctrl-select {
+    background: #fff; border: 1.5px solid #f4a7bc; border-radius: 8px;
+    padding: 6px 28px 6px 10px; font-family: 'Nunito', sans-serif;
+    font-size: 12px; font-weight: 600; color: #3a1a2e;
+    outline: none; cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23b07090'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 9px center;
+    transition: border-color 0.2s;
+  }
+  .ctrl-select:focus { border-color: #e8527a; }
+
+  .ctrl-input {
+    background: #fff; border: 1.5px solid #f4a7bc; border-radius: 8px;
+    padding: 6px 12px; font-family: 'Nunito', sans-serif;
+    font-size: 12px; color: #3a1a2e; outline: none; width: 140px;
+    transition: border-color 0.2s;
+  }
+  .ctrl-input:focus { border-color: #e8527a; }
+  .ctrl-input::placeholder { color: #c0a0b0; }
+
+  .table-card {
+    background: #fff; border-radius: 18px;
+    overflow: hidden; box-shadow: 0 4px 24px rgba(200,80,120,0.10);
+  }
+
+  .customers-table { width: 100%; border-collapse: collapse; }
+
+  .customers-table thead tr { background: linear-gradient(135deg, #e8527a, #c93060); }
+  .customers-table thead th {
+    padding: 13px 16px; font-size: 11.5px; font-weight: 800;
+    letter-spacing: 1.5px; text-transform: uppercase; color: #fff;
+    text-align: left; white-space: nowrap;
+  }
+  .customers-table thead th:first-child { width: 60px; text-align: center; }
+
+  .customers-table tbody tr {
+    border-bottom: 1px solid #fde8f0; transition: background 0.15s;
+    animation: rowIn 0.3s ease both;
+  }
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .customers-table tbody tr:nth-child(even) { background: #fff8fb; }
+  .customers-table tbody tr:hover { background: #fde8f0; }
+  .customers-table tbody tr:last-child { border-bottom: none; }
+
+  .customers-table tbody td {
+    padding: 11px 16px; font-size: 13px;
+    color: #3a1a2e; font-weight: 600; vertical-align: middle;
+  }
+  .customers-table tbody td:first-child {
+    text-align: center; font-weight: 700; color: #b07090; font-size: 12px;
+  }
+
+  .toggle { position: relative; display: inline-block; width: 36px; height: 20px; }
+  .toggle input { display: none; }
+  .toggle-slider {
+    position: absolute; inset: 0; background: #e0c0cc;
+    border-radius: 20px; cursor: pointer; transition: background 0.25s;
+  }
+  .toggle-slider::before {
+    content: ''; position: absolute;
+    width: 14px; height: 14px; left: 3px; top: 3px;
+    background: #fff; border-radius: 50%;
+    transition: transform 0.25s; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .toggle input:checked + .toggle-slider { background: #e8527a; }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+  .action-btns { display: flex; gap: 7px; align-items: center; }
+
+  .btn-act {
+    width: 30px; height: 30px; border: none; border-radius: 8px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-edit-c  { background: #e8f5e9; color: #4caf6e; }
+  .btn-edit-c:hover  { background: #4caf6e; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(76,175,110,0.3); }
+  .btn-delete-c { background: #fde8ee; color: #e8527a; }
+  .btn-delete-c:hover { background: #e8527a; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(232,82,122,0.3); }
+
+  .pagination-bar {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 6px; padding: 14px 20px;
+    border-top: 1px solid #fde8f0; background: #fff8fb;
+  }
+  .page-info { font-size: 11.5px; color: #b07090; font-weight: 600; margin-right: 6px; }
+  .btn-page {
+    width: 28px; height: 28px; border: 1.5px solid #f4a7bc;
+    background: #fff; border-radius: 7px; font-size: 13px; color: #c93060;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; transition: all 0.2s;
+  }
+  .btn-page:hover, .btn-page.active {
+    background: linear-gradient(135deg, #e8527a, #c93060);
+    border-color: transparent; color: #fff; box-shadow: 0 3px 10px rgba(200,48,96,0.3);
+  }
+  .btn-page:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── Modals ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(42,14,30,0.5); backdrop-filter: blur(4px);
+    z-index: 1000; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.92) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* Edit modal */
+  .edit-modal-box {
+    background: #fff; border-radius: 20px; width: 100%; max-width: 460px;
+    box-shadow: 0 20px 60px rgba(200,48,96,0.2);
+    animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+    padding: 36px 36px 32px;
+  }
+
+  .modal-header {
+    display: flex; align-items: center;
+    justify-content: space-between; margin-bottom: 24px;
+  }
+  .modal-title { font-size: 18px; font-weight: 800; color: #2a0e1e; letter-spacing: 1px; }
+  .modal-close {
+    width: 30px; height: 30px; border: none; background: #fde8f0;
+    color: #e8527a; border-radius: 50%; font-size: 15px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+  }
+  .modal-close:hover { background: #e8527a; color: #fff; }
+
+  .form-field { margin-bottom: 16px; }
+  .form-field label {
+    display: block; font-size: 11px; font-weight: 700;
+    color: #b07090; text-transform: uppercase;
+    letter-spacing: 0.5px; margin-bottom: 6px;
+  }
+  .form-field input {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid #f4a7bc; border-radius: 10px;
+    font-family: 'Nunito', sans-serif; font-size: 13px;
+    color: #3a1a2e; background: #fff8fb; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-field input:focus {
+    border-color: #e8527a;
+    box-shadow: 0 0 0 3px rgba(232,82,122,0.10);
+    background: #fff;
+  }
+  .form-field input.input-error { border-color: #e8527a; }
+  .field-error { font-size: 11px; color: #e8527a; margin-top: 4px; display: none; }
+  .field-error.show { display: block; }
+
+  .edit-success {
+    background: #e8f5e9; color: #2d7a4f;
+    padding: 10px 14px; border-radius: 8px;
+    font-size: 12px; font-weight: 700; margin-bottom: 16px; display: none;
+  }
+  .edit-success.show { display: block; }
+
+  .btn-save {
+    width: 100%; padding: 12px; margin-top: 8px;
+    background: linear-gradient(135deg, #e8527a, #c93060);
+    color: #fff; border: none; border-radius: 10px;
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(200,48,96,0.25);
+  }
+  .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,48,96,0.35); }
+  .btn-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* Delete modal */
+  .delete-modal-box {
+    background: #fff; border-radius: 20px; padding: 36px 36px 32px;
+    max-width: 400px; width: 100%; text-align: center;
+    box-shadow: 0 20px 60px rgba(200,48,96,0.2);
+    animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  .delete-icon { font-size: 40px; margin-bottom: 14px; }
+  .delete-title { font-size: 20px; font-weight: 800; color: #2a0e1e; margin-bottom: 8px; }
+  .delete-msg { font-size: 13px; color: #b07090; margin-bottom: 24px; }
+  .delete-btns { display: flex; gap: 10px; }
+  .btn-cancel-del {
+    flex: 1; padding: 11px; background: #f5f5f5; color: #666;
+    border: none; border-radius: 10px; font-family: 'Nunito', sans-serif;
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.15s;
+  }
+  .btn-cancel-del:hover { background: #e0e0e0; }
+  .btn-confirm-del {
+    flex: 1; padding: 11px;
+    background: linear-gradient(135deg, #e8527a, #c93060);
+    color: #fff; border: none; border-radius: 10px;
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; box-shadow: 0 4px 14px rgba(200,48,96,0.3);
+  }
+  .btn-confirm-del:disabled { opacity: 0.6; cursor: not-allowed; }
+</style>
+
+<div class="customers-wrap">
+
+  <div class="page-heading">Customers</div>
+
+  <div class="controls-bar">
+    <span class="ctrl-label">Sort</span>
+    <select class="ctrl-select" id="sortField">
+      <option value="name">Name</option>
+      <option value="email">Email</option>
+      <option value="createdAt">Date</option>
+    </select>
+    <span class="ctrl-label">By</span>
+    <select class="ctrl-select" id="sortOrder">
+      <option value="asc">Ascending</option>
+      <option value="desc">Descending</option>
+    </select>
+    <span class="ctrl-label">Filter</span>
+    <input type="text" class="ctrl-input" id="filterInput" placeholder="Search...">
+  </div>
+
+  <div class="table-card">
+    <table class="customers-table">
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Mobile</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="customersBody">
+        <% if (customers && customers.length > 0) { %>
+          <% customers.forEach((customer, index) => { %>
+            <tr style="animation-delay: <%= index * 0.04 %>s" id="row-<%= customer._id %>">
+              <td><%= (currentPage - 1) * limit + index + 1 %></td>
+              <td class="td-name"><%= customer.fullName %></td>
+              <td class="td-email"><%= customer.email %></td>
+              <td><%= customer.phoneNumber || '—' %></td>
+              <td>
+                <label class="toggle">
+                  <input type="checkbox"
+                    <%= customer.isBlocked ? '' : 'checked' %>
+                    onchange="toggleStatus('<%= customer._id %>', this.checked)">
+                  <span class="toggle-slider"></span>
+                </label>
+              </td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-act btn-edit-c"
+                    data-id="<%= customer._id %>"
+                    data-name="<%= customer.fullName %>"
+                    data-email="<%= customer.email %>"
+                    data-phone="<%= customer.phoneNumber || '' %>"
+                    onclick="openEditModal(this)" title="Edit">✏️</button>
+                  <button class="btn-act btn-delete-c"
+                    data-id="<%= customer._id %>"
+                    data-name="<%= customer.fullName %>"
+                    onclick="openDeleteModal(this)" title="Delete">🗑</button>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="6" style="text-align:center; padding:40px; color:#b07090; font-size:14px;">
+              No customers found.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+
+    <div class="pagination-bar">
+      <span class="page-info"><%= currentPage %> of <%= totalPages %> Pages</span>
+      <button class="btn-page" onclick="goToPage(<%= currentPage - 1 %>)" <%= currentPage <= 1 ? 'disabled' : '' %>>‹</button>
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <button class="btn-page <%= i === currentPage ? 'active' : '' %>" onclick="goToPage(<%= i %>)"><%= i %></button>
+      <% } %>
+      <button class="btn-page" onclick="goToPage(<%= currentPage + 1 %>)" <%= currentPage >= totalPages ? 'disabled' : '' %>>›</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Edit Modal ── -->
+<div class="modal-overlay" id="editModal">
+  <div class="edit-modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Edit Customer</div>
+      <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+    </div>
+
+    <div class="edit-success" id="editSuccess">✓ Customer updated successfully</div>
+
+    <div class="form-field">
+      <label>Full Name</label>
+      <input type="text" id="edit-fullName" placeholder="Full name">
+      <div class="field-error" id="err-fullName"></div>
+    </div>
+    <div class="form-field">
+      <label>Email Address</label>
+      <input type="email" id="edit-email" placeholder="email@example.com">
+      <div class="field-error" id="err-email"></div>
+    </div>
+    <div class="form-field">
+      <label>Phone Number</label>
+      <input type="tel" id="edit-phone" placeholder="10-digit number" maxlength="10">
+      <div class="field-error" id="err-phone"></div>
+    </div>
+
+    <button class="btn-save" id="saveBtn" onclick="saveCustomer()">Save Changes</button>
+  </div>
+</div>
+
+<!-- ── Delete Modal ── -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="delete-modal-box">
+    <div class="delete-icon">🗑️</div>
+    <div class="delete-title">Delete Customer?</div>
+    <p class="delete-msg" id="deleteMsg">This cannot be undone.</p>
+    <div class="delete-btns">
+      <button class="btn-cancel-del" onclick="closeModal('deleteModal')">Cancel</button>
+      <button class="btn-confirm-del" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── URL / pagination ──────────────────────────────────────────
+  const urlParams = new URLSearchParams(window.location.search)
+  document.getElementById('filterInput').value = urlParams.get('search')    || ''
+  document.getElementById('sortField').value   = urlParams.get('sortField') || 'createdAt'
+  document.getElementById('sortOrder').value   = urlParams.get('sortOrder') || 'desc'
+
+  function applyParams(overrides = {}) {
+    const params = new URLSearchParams(window.location.search)
+    Object.entries(overrides).forEach(([k, v]) => {
+      if (v) params.set(k, v); else params.delete(k)
+    })
+    params.set('page', 1)
+    window.location.search = params.toString()
+  }
+
+  document.getElementById('sortField').addEventListener('change', function() { applyParams({ sortField: this.value }) })
+  document.getElementById('sortOrder').addEventListener('change', function() { applyParams({ sortOrder: this.value }) })
+
+  let searchTimer
+  document.getElementById('filterInput').addEventListener('input', function() {
+    clearTimeout(searchTimer)
+    searchTimer = setTimeout(() => applyParams({ search: this.value.trim() || null }), 400)
+  })
+
+  function goToPage(page) {
+    const params = new URLSearchParams(window.location.search)
+    params.set('page', page)
+    window.location.search = params.toString()
+  }
+
+  // ── Toggle block/unblock ──────────────────────────────────────
+  function toggleStatus(id, isChecked) {
+    const action = isChecked ? 'unblock' : 'block'
+    if (!confirm('Are you sure you want to ' + action + ' this customer?')) {
+      location.reload(); return
+    }
+    fetch('/admin/customers/' + action + '/' + id, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => { alert(data.message); location.reload() })
+    .catch(() => { alert('Something went wrong'); location.reload() })
+  }
+
+  // ── Modal helpers ─────────────────────────────────────────────
+  function closeModal(id) { document.getElementById(id).classList.remove('open') }
+
+  document.querySelectorAll('.modal-overlay').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('open')
+    })
+  })
+
+  // ── Edit Modal ────────────────────────────────────────────────
+  let currentEditId = null
+
+  function openEditModal(btn) {
+    currentEditId = btn.dataset.id
+    document.getElementById('edit-fullName').value = btn.dataset.name
+    document.getElementById('edit-email').value    = btn.dataset.email
+    document.getElementById('edit-phone').value    = btn.dataset.phone
+
+    // clear errors and success
+    document.getElementById('editSuccess').classList.remove('show')
+    ;['fullName','email','phone'].forEach(function(f) {
+      document.getElementById('err-' + f).classList.remove('show')
+      document.getElementById('err-' + f).textContent = ''
+    })
+
+    document.getElementById('editModal').classList.add('open')
+  }
+
+  function saveCustomer() {
+    const fullName    = document.getElementById('edit-fullName').value.trim()
+    const email       = document.getElementById('edit-email').value.trim()
+    const phoneNumber = document.getElementById('edit-phone').value.trim()
+
+    // Client-side validation
+    let valid = true
+
+    function showErr(field, msg) {
+      const el = document.getElementById('err-' + field)
+      el.textContent = msg; el.classList.add('show')
+      document.getElementById('edit-' + (field === 'phone' ? 'phone' : field)).classList.add('input-error')
+      valid = false
+    }
+    function clearErr(field) {
+      document.getElementById('err-' + field).classList.remove('show')
+      document.getElementById('edit-' + (field === 'phone' ? 'phone' : field)).classList.remove('input-error')
+    }
+
+    clearErr('fullName'); clearErr('email'); clearErr('phone')
+
+    if (!fullName || !/^[A-Za-z\s]{3,}$/.test(fullName))
+      showErr('fullName', 'Enter a valid name (letters only, min 3 chars)')
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      showErr('email', 'Enter a valid email address')
+
+    if (phoneNumber && !/^\d{10}$/.test(phoneNumber))
+      showErr('phone', 'Enter a valid 10-digit number')
+
+    if (!valid) return
+
+    const btn = document.getElementById('saveBtn')
+    btn.disabled = true; btn.textContent = 'Saving…'
+
+    fetch('/admin/customers/edit/' + currentEditId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fullName, email, phoneNumber })
+    })
+    .then(res => res.json())
+    .then(function(data) {
+      if (data.success) {
+        // Update the row in the table without reloading
+        const row = document.getElementById('row-' + currentEditId)
+        if (row) {
+          row.querySelector('.td-name').textContent  = fullName
+          row.querySelector('.td-email').textContent = email
+        }
+        document.getElementById('editSuccess').classList.add('show')
+        setTimeout(function() {
+          closeModal('editModal')
+          document.getElementById('editSuccess').classList.remove('show')
+        }, 1200)
+      } else {
+        alert(data.message || 'Failed to update customer')
+      }
+    })
+    .catch(function() { alert('Something went wrong') })
+    .finally(function() {
+      btn.disabled = false; btn.textContent = 'Save Changes'
+    })
+  }
+
+  // numbers only for phone
+  document.getElementById('edit-phone').addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '')
+  })
+
+  // ── Delete Modal ──────────────────────────────────────────────
+  let currentDeleteId = null
+
+  function openDeleteModal(btn) {
+    currentDeleteId = btn.dataset.id
+    document.getElementById('deleteMsg').textContent =
+      'This will permanently remove "' + btn.dataset.name + '". This cannot be undone.'
+    document.getElementById('deleteModal').classList.add('open')
+  }
+
+  document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+    if (!currentDeleteId) return
+    const btn = this
+    btn.disabled = true; btn.textContent = 'Deleting…'
+
+    fetch('/admin/customers/delete/' + currentDeleteId, {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(function(data) {
+      if (data.success) {
+        closeModal('deleteModal')
+        // Remove the row instantly without reload
+        const row = document.getElementById('row-' + currentDeleteId)
+        if (row) row.remove()
+      } else {
+        alert(data.message || 'Failed to delete')
+        btn.disabled = false; btn.textContent = 'Delete'
+      }
+    })
+    .catch(function() {
+      alert('Something went wrong')
+      btn.disabled = false; btn.textContent = 'Delete'
+    })
+  })
+</script>
+
+<%- include('../partials/admin/adminFooter') %>

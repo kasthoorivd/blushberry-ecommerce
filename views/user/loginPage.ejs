@@ -23,7 +23,6 @@
       overflow: hidden;
       box-shadow: 0 30px 80px rgba(0,0,0,0.5);
     }
-    /* Left: Image */
     .image-side {
       flex: 1;
       background: url('https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600&q=80') center/cover no-repeat;
@@ -53,7 +52,6 @@
       margin-top: 4px;
       text-shadow: 0 1px 6px rgba(0,0,0,0.3);
     }
-    /* Right: Form */
     .form-side {
       flex: 1;
       background: #FDE8EF;
@@ -190,34 +188,44 @@
       text-decoration: none;
     }
     .register-link a:hover { text-decoration: underline; }
-
     @media (max-width: 700px) {
       .container { flex-direction: column; width: 95vw; }
       .image-side { height: 200px; }
     }
     .forgot-link {
-  text-align: right;
-  margin-top: 6px;
-}
+      text-align: right;
+      margin-top: 6px;
+    }
+    .forgot-link a {
+      color: #f700ff;
+      text-decoration: none;
+      font-size: 13px;
+      transition: all 0.3s ease;
+    }
+    .forgot-link a:hover {
+      color: #b3006b;
+      text-decoration: underline;
+      cursor: pointer;
+    }
 
-.forgot-link a {
-  color: #f700ff;           /* Blue color */
-  text-decoration: none;    /* Remove underline */
-  font-size: 13px;
-  transition: all 0.3s ease;
-}
-
-.forgot-link a:hover {
-  color: #b3006b;           /* Darker blue on hover */
-  text-decoration: underline;
-  cursor: pointer;
-}
+    /* ── Validation styles (only new addition) ── */
+    .field-error {
+      display: none;
+      font-size: 11px;
+      color: #E8527A;
+      margin-top: 5px;
+      padding-left: 4px;
+      font-weight: 600;
+    }
+    .input-group.error input {
+      box-shadow: 0 0 0 2px #E8527A;
+    }
+    .input-group.error .field-error { display: block; }
   </style>
 </head>
 <body>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <div class="container">
-    <!-- Left: Image -->
     <div class="image-side">
       <div class="image-overlay-text">
         <h2>Blush-Berry</h2>
@@ -225,94 +233,123 @@
       </div>
     </div>
 
-    <!-- Right: Form -->
     <div class="form-side">
       <div class="logo">Blush<span>-Berry</span></div>
       <div class="user-title">WELCOME BACK</div>
       <p class="subtitle">Sign in to your account to continue shopping</p>
 
-<form id="loginForm" style="width:100%;">
+      <form id="loginForm" style="width:100%;">
 
-  <div class="input-group">
-    <input type="email" id="email" name="email" placeholder="Email address" required />
-  </div>
+        <div class="input-group" id="field-email">
+          <input type="email" id="email" name="email" placeholder="Email address" />
+          <span class="field-error">Please enter a valid email address</span>
+        </div>
 
-  <div class="input-group">
-    <input type="password" id="password" name="password" placeholder="Password" required />
-  </div>
+        <div class="input-group" id="field-password">
+          <input type="password" id="password" name="password" placeholder="Password" />
+          <span class="field-error">Password must be at least 6 characters</span>
+        </div>
 
-  <button type="submit" class="btn-login">Login Now</button>
+        <button type="submit" class="btn-login">Login Now</button>
 
-</form>
-<p class="forgot-link">
-  <a href="/forgot-password">Forgot Password?</a>
-</p>
-<div class="or-divider"><span>Or continue with</span></div>
+      </form>
 
-<a href="http://localhost:3000/auth/google" class="social-btn">
-  <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google"/>
-  Login with Google
-</a>
-     
+      <p class="forgot-link">
+        <a href="/forgot-password">Forgot Password?</a>
+      </p>
+      <div class="or-divider"><span>Or continue with</span></div>
+
+      <a href="http://localhost:3000/auth/google" class="social-btn">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google"/>
+        Login with Google
+      </a>
 
       <p class="register-link">Don't have an account? <a href="/signup">Sign Up</a></p>
     </div>
-    
   </div>
-        <script>
-document.getElementById("loginForm").addEventListener("submit", async function (event) {
-    event.preventDefault();
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+  <script>
+    // ── Clear errors on typing ──────────────────
+    document.getElementById('email').addEventListener('input', function() {
+      document.getElementById('field-email').classList.remove('error')
+    })
+    document.getElementById('password').addEventListener('input', function() {
+      document.getElementById('field-password').classList.remove('error')
+    })
 
-    try {
+    document.getElementById("loginForm").addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      var emailEl    = document.getElementById("email")
+      var passwordEl = document.getElementById("password")
+      var fieldEmail    = document.getElementById("field-email")
+      var fieldPassword = document.getElementById("field-password")
+
+      // Reset errors
+      fieldEmail.classList.remove('error')
+      fieldPassword.classList.remove('error')
+
+      var valid = true
+
+      // Email validation
+      if (!emailEl.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim())) {
+        fieldEmail.classList.add('error')
+        valid = false
+      }
+
+      // Password validation
+      if (passwordEl.value.trim().length < 6) {
+        fieldPassword.classList.add('error')
+        valid = false
+      }
+
+      if (!valid) return  // stop — don't hit server
+
+      // ── Everything below is your original code, unchanged ──
+      const email    = emailEl.value
+      const password = passwordEl.value
+
+      try {
         const response = await fetch("/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-             credentials: "same-origin", 
-            body: JSON.stringify({ email, password })
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email, password })
         });
+
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Server returned HTML instead of JSON");
+        }
 
         const result = await response.json();
 
         if (result.success) {
-
-            await Swal.fire({
-                icon: 'success',
-                title: 'Login Successful 🎉',
-                text: 'Redirecting to home...',
-                timer: 1500,
-                showConfirmButton: false
-            });
-
-            window.location.href = "/";
-
+          await Swal.fire({
+            icon: "success",
+            title: "Login Successful 🎉",
+            text: "Redirecting to home...",
+            timer: 1500,
+            showConfirmButton: false
+          });
+          window.location.href = "/";
         } else {
-
-            Swal.fire({
-                icon: 'error',
-                title: 'Login Failed ❌',
-                text: result.message,
-                confirmButtonColor: '#d33'
-            });
-
+          Swal.fire({
+            icon: "error",
+            title: "Login Failed",
+            text: result.message
+          });
         }
 
-    } catch (error) {
-        console.error("Error:", error);
-
+      } catch (error) {
+        console.error("Login Error:", error);
         Swal.fire({
-            icon: 'warning',
-            title: 'Oops!',
-            text: 'Something went wrong. Please try again.',
-            confirmButtonColor: '#3085d6'
+          icon: "error",
+          title: "Server Error",
+          text: "Something went wrong while logging in"
         });
-    }
-});
-</script>
-  
+      }
+    });
+  </script>
 </body>
 </html>

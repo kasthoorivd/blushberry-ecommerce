@@ -13,7 +13,7 @@ function startOtpTimer(timerId, buttonId, duration=60){
     if(!endTime){
         endTime = Date.now() + duration*1000;
         localStorage.setItem('otpEndTime', endTime);
-    } else {
+    } else {  
         endTime = parseInt(endTime);
     }
 
