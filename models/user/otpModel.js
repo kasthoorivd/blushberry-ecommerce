@@ -11,12 +11,19 @@ const otpSchema = new mongoose.Schema({
     },
     createdAt: {
         type: Date,
-        default: Date.now,
-        expires: 60
+        default: Date.now
     },
-     purpose: { type: String, 
-        enum: ['signup', 'forgot'],
-         required: true }
+    expiresAt: {        
+        type: Number,
+        required: true
+    },
+    purpose: {
+        type: String,
+        enum: ['signup', 'forgot',"emailChange"],
+        required: true
+    }
 });
+
+otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 module.exports = mongoose.model("Otp", otpSchema);

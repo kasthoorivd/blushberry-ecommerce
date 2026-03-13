@@ -3,247 +3,363 @@
 <head>
   <meta charset="UTF-8">
   <title>Verify OTP</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red: #e63950;
+      --red-dark: #c72d41;
+      --red-soft: #fff0f2;
+      --gray: #6b7280;
+      --light: #f9fafb;
+      --border: #e5e7eb;
+      --text: #111827;
+    }
+
     body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #ffe5ec, #f8f8f8);
+      font-family: 'DM Sans', sans-serif;
+      background: var(--light);
+      min-height: 100vh;
       display: flex;
-      justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
+      justify-content: center;
+      padding: 20px;
     }
 
-    .wrapper {
-      display: flex;
-      width: 850px;
+    .card {
       background: #fff;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    }
-
-    .image-section {
-      width: 50%;
-      background: #ff4d6d;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .image-section img {
-      width: 80%;
-    }
-
-    .container {
-      width: 50%;
-      padding: 40px;
+      border-radius: 24px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+      width: 100%;
+      max-width: 460px;
+      padding: 48px 44px 40px;
       text-align: center;
+    }
+
+    .icon-wrap {
+      width: 68px;
+      height: 68px;
+      background: var(--red-soft);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+
+    .icon-wrap svg {
+      width: 32px;
+      height: 32px;
+      stroke: var(--red);
     }
 
     h2 {
-      margin-bottom: 10px;
-      font-weight: 600;
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      color: var(--text);
+      margin-bottom: 8px;
     }
 
-    p {
-      color: #666;
+    .subtitle {
+      color: var(--gray);
       font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 32px;
     }
 
-    .otp-inputs {
+    .otp-row {
       display: flex;
       justify-content: center;
-      margin: 25px 0;
+      gap: 10px;
+      margin-bottom: 32px;
     }
 
-    .otp-inputs input {
-      width: 55px;
-      height: 60px;
-      margin: 8px;
+    .otp-row input {
+      width: 52px;
+      height: 58px;
       font-size: 22px;
-      font-weight: bold;
+      font-weight: 700;
       text-align: center;
+      border: 2px solid var(--border);
       border-radius: 12px;
-      border: 2px solid #eee;
-      background: #fafafa;
-    }
-
-    .otp-inputs input:focus {
-      border-color: #ff4d6d;
+      background: var(--light);
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
       outline: none;
+      caret-color: var(--red);
     }
 
-    button {
-      margin-top: 15px;
-      padding: 12px 25px;
-      background: #ff4d6d;
+    .otp-row input:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 4px rgba(230,57,80,0.12);
+      transform: translateY(-2px);
+      background: #fff;
+    }
+
+    .otp-row input.filled {
+      border-color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .otp-row input.error {
+      border-color: #f87171;
+      background: #fff5f5;
+      animation: shake 0.3s ease;
+    }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .btn-verify {
+      width: 100%;
+      padding: 14px;
+      background: var(--red);
+      color: #fff;
       border: none;
-      color: white;
-      border-radius: 8px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
       cursor: pointer;
-      font-weight: 600;
+      transition: background 0.2s, transform 0.15s;
+      letter-spacing: 0.3px;
     }
 
-    #timer {
-      margin-top: 15px;
-      font-weight: 600;
-      color: #ff4d6d;
+    .btn-verify:hover { background: var(--red-dark); transform: translateY(-1px); }
+    .btn-verify:active { transform: translateY(0); }
+    .btn-verify:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; transform: none; }
+
+    .timer-row {
+      margin-top: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 14px;
+      color: var(--gray);
+      flex-wrap: wrap;
     }
 
+    #timerDisplay {
+      font-weight: 700;
+      color: var(--red);
+      min-width: 38px;
+      display: inline-block;
+    }
+
+    #timerDisplay.expired { color: #9ca3af; }
+
+    /* Resend is ALWAYS clickable */
     #resendBtn {
-      padding: 10px 20px;
-      border-radius: 6px;
+      background: none;
       border: none;
+      font-size: 14px;
       font-weight: 600;
-      background-color: #cccccc;
-      color: #666;
-      cursor: not-allowed;
+      color: var(--red);
+      cursor: pointer;
+      padding: 0;
+      transition: color 0.2s;
+      text-decoration: underline;
+      text-underline-offset: 3px;
     }
 
-    #resendBtn.enabled {
-      background-color: #ff4d6d;
-      color: white;
-      cursor: pointer;
-    }
+    #resendBtn:hover { color: var(--red-dark); }
+    #resendBtn:disabled { color: #9ca3af; cursor: not-allowed; text-decoration: none; }
   </style>
 </head>
-
 <body>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<div class="wrapper">
-  <div class="image-section">
-    <img src="https://cdn-icons-png.flaticon.com/512/295/295128.png" alt="OTP">
+<div class="card">
+  <div class="icon-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="3"/>
+      <path d="M2 8l10 6 10-6"/>
+    </svg>
   </div>
 
-  <div class="container">
-    <h2>Enter OTP</h2>
-    <p>Check your email for the OTP</p>
+  <h2>Check your email</h2>
+  <p class="subtitle">We sent a 6-digit code to your inbox.<br>Enter it below to continue.</p>
 
-    <div class="otp-inputs">
-      <input type="text" maxlength="1" id="otp1" oninput="moveNext(this,'otp2')" />
-      <input type="text" maxlength="1" id="otp2" oninput="moveNext(this,'otp3')" />
-      <input type="text" maxlength="1" id="otp3" oninput="moveNext(this,'otp4')" />
-      <input type="text" maxlength="1" id="otp4" oninput="moveNext(this,'otp5')" />
-      <input type="text" maxlength="1" id="otp5" oninput="moveNext(this,'otp6')" />
-      <input type="text" maxlength="1" id="otp6" />
-    </div>
+  <div class="otp-row">
+    <input type="text" inputmode="numeric" maxlength="1" id="d0" autocomplete="one-time-code" />
+    <input type="text" inputmode="numeric" maxlength="1" id="d1" />
+    <input type="text" inputmode="numeric" maxlength="1" id="d2" />
+    <input type="text" inputmode="numeric" maxlength="1" id="d3" />
+    <input type="text" inputmode="numeric" maxlength="1" id="d4" />
+    <input type="text" inputmode="numeric" maxlength="1" id="d5" />
+  </div>
 
-    <button onclick="confirmOTP()">Verify</button>
+  <button class="btn-verify" id="verifyBtn" onclick="confirmOTP()">Verify Code</button>
 
-    <p id="timer"></p>
-
+  <div class="timer-row">
+    <span id="timerText"></span>
+    <span id="timerDisplay"></span>
+    <span id="orSep"></span>
     <button id="resendBtn">Resend OTP</button>
   </div>
 </div>
 
 <script>
-  // ✅ Safe EJS injection
-  // let otpExpiresAt = <%= typeof expiresAt !== "undefined" ? expiresAt : "null" %>;
-  let otpExpiresAt = <%= JSON.stringify(expiresAt || null) %>
+  // expiresAt is a Unix ms timestamp injected by EJS
+  let otpExpiresAt = <%- JSON.stringify(expiresAt || null) %>;
+  let timerInterval = null;
+  const inputs = Array.from(document.querySelectorAll('.otp-row input'));
 
-  function moveNext(curr, nextId) {
-    if (curr.value.length === 1) {
-      document.getElementById(nextId)?.focus();
-    }
-  }
+  /* ── Input behaviour ── */
+  inputs.forEach((inp, i) => {
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace') {
+        if (inp.value) {
+          inp.value = '';
+          inp.classList.remove('filled');
+        } else if (i > 0) {
+          inputs[i-1].focus();
+          inputs[i-1].value = '';
+          inputs[i-1].classList.remove('filled');
+        }
+        e.preventDefault();
+      }
+    });
 
-  function startOtpTimer() {
+    inp.addEventListener('input', () => {
+      inp.value = inp.value.replace(/\D/g, '').slice(-1);
+      if (inp.value) {
+        inp.classList.add('filled');
+        inp.classList.remove('error');
+        if (i < inputs.length - 1) inputs[i+1].focus();
+      } else {
+        inp.classList.remove('filled');
+      }
+    });
 
-    const timer = document.getElementById("timer");
-    const resendBtn = document.getElementById("resendBtn");
+    inp.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'');
+      pasted.split('').slice(0, 6).forEach((ch, idx) => {
+        if (inputs[idx]) { inputs[idx].value = ch; inputs[idx].classList.add('filled'); }
+      });
+      inputs[Math.min(pasted.length, 5)].focus();
+    });
+
+    inp.addEventListener('focus', () => inp.select());
+  });
+
+  /* ── Timer (display only — resend is always enabled) ── */
+  function startTimer() {
+    clearInterval(timerInterval);
+    const display   = document.getElementById('timerDisplay');
+    const timerText = document.getElementById('timerText');
+    const orSep     = document.getElementById('orSep');
 
     if (!otpExpiresAt) {
-      timer.innerText = "No active OTP";
-      resendBtn.disabled = false;
-      resendBtn.classList.add("enabled");
+      timerText.textContent = '';
+      display.textContent   = '';
+      orSep.textContent     = '';
       return;
     }
 
-    function updateTimer() {
-
+    function tick() {
       const remaining = otpExpiresAt - Date.now();
-
       if (remaining <= 0) {
-        timer.innerText = "OTP expired";
-        resendBtn.disabled = false;
-        resendBtn.classList.add("enabled");
+        timerText.textContent = 'OTP expired.';
+        display.textContent   = '';
+        display.classList.add('expired');
+        orSep.textContent     = '·';
+        clearInterval(timerInterval);
         return;
       }
-
-      const seconds = Math.floor(remaining / 1000);
-      timer.innerText = `Resend OTP in ${seconds}s`;
-
-      setTimeout(updateTimer, 1000);
+      const totalSec = Math.ceil(remaining / 1000);
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      display.textContent   = `${m}:${String(s).padStart(2,'0')}`;
+      display.classList.remove('expired');
+      timerText.textContent = 'OTP expires in';
+      orSep.textContent     = '·';
     }
 
-    resendBtn.disabled = true;
-    resendBtn.classList.remove("enabled");
-
-    updateTimer();
+    tick();
+    timerInterval = setInterval(tick, 500);
   }
 
+  /* ── Verify ── */
   async function confirmOTP() {
+    const otp = inputs.map(i => i.value).join('');
 
-    const otp = ['otp1','otp2','otp3','otp4','otp5','otp6']
-      .map(id => document.getElementById(id).value)
-      .join('');
-
-    if (otp.length < 6) {
-      Swal.fire({ icon: "error", title: "Enter complete OTP" });
+    if (otp.length < 6 || inputs.some(i => !i.value)) {
+      inputs.forEach(i => { if (!i.value) i.classList.add('error'); });
+      Swal.fire({ icon: 'error', title: 'Incomplete OTP', text: 'Please fill all 6 digits.' });
       return;
     }
 
-    const res = await fetch("/verifyOtp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ otp })
-    });
+    const btn = document.getElementById('verifyBtn');
+    btn.disabled = true;
+    btn.textContent = 'Verifying…';
 
-    const data = await res.json();
+    try {
+      const res = await fetch('/verifyOtp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ otp })
+      });
+      const data = await res.json();
 
-    if (data.success) {
-      Swal.fire({ icon: "success", title: "OTP Verified 🎉" })
-        .then(() => {
-          window.location.href = data.redirectUrl;
-        });
-    } else {
-      Swal.fire({ icon: "error", title: data.message });
+      if (data.success) {
+        Swal.fire({ icon: 'success', title: 'Verified! 🎉', showConfirmButton: false, timer: 1200 })
+          .then(() => window.location.href = data.redirectUrl);
+      } else {
+        inputs.forEach(i => i.classList.add('error'));
+        Swal.fire({ icon: 'error', title: 'Invalid OTP', text: data.message });
+        btn.disabled = false;
+        btn.textContent = 'Verify Code';
+      }
+    } catch {
+      Swal.fire({ icon: 'error', title: 'Network error. Try again.' });
+      btn.disabled = false;
+      btn.textContent = 'Verify Code';
     }
   }
 
+  /* ── Resend (always available) ── */
   async function resendOTP() {
+    const btn = document.getElementById('resendBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
 
-    const resendBtn = document.getElementById("resendBtn");
-    if (resendBtn.disabled) return;
+    try {
+      const res = await fetch('/resendOtp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      });
+      const data = await res.json();
 
-    resendBtn.disabled = true;
-
-    const res = await fetch("/resendOtp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include"
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      otpExpiresAt = data.expiresAt;
-      startOtpTimer();
-      Swal.fire({ icon: "success", title: "OTP Sent 📩" });
-    } else {
-      resendBtn.disabled = false;
-      Swal.fire({ icon: "error", title: data.message });
+      if (data.success) {
+        otpExpiresAt = data.expiresAt;   // update to new expiry
+        inputs.forEach(i => { i.value = ''; i.classList.remove('filled','error'); });
+        inputs[0].focus();
+        startTimer();                    // restart countdown from new expiry
+        Swal.fire({ icon: 'success', title: 'OTP Sent!', text: 'Check your email.', timer: 1500, showConfirmButton: false });
+      } else {
+        Swal.fire({ icon: 'error', title: data.message });
+      }
+    } catch {
+      Swal.fire({ icon: 'error', title: 'Network error. Try again.' });
     }
+
+    btn.disabled = false;
+    btn.textContent = 'Resend OTP';
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    startOtpTimer();
-    document.getElementById("resendBtn").addEventListener("click", resendOTP);
+  document.addEventListener('DOMContentLoaded', () => {
+    inputs[0].focus();
+    startTimer();
+    document.getElementById('resendBtn').addEventListener('click', resendOTP);
   });
 </script>
 

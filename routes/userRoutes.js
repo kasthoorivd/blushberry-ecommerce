@@ -69,6 +69,8 @@ userRouter.get('/otp-forgot-password', userController.showForgotOtpPage)
 userRouter.get('/profile',profileController.loadProfile)
 userRouter.post('/profile',upload.single('profilePhoto'),profileController.updateProfile)
 userRouter.post('/profile/changepassword',profileController.changePassword)
+userRouter.post('/profile/request-email-change',profileController.requestEmailChange);
+
 
 
 // address
@@ -79,6 +81,7 @@ userRouter.get('/addresses/edit/:id',addressController.loadEditAddress)
 userRouter.post('/addresses/edit/:id', addressController.editAddress)
 userRouter.post('/addresses/delete/:id', addressController.deleteAddress)
 userRouter.post('/addresses/default/:id', addressController.setDefaultAddress)
+
 
 
 // logout

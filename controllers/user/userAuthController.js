@@ -53,7 +53,7 @@ const signup = async (req, res) => {
 
     // Generate OTP
     const otp = generateOtp();
-    const expiresAt = Date.now() + 60 * 1000;
+    const expiresAt = Date.now() + 5 * 60 * 1000;
 
     await Otp.deleteMany({ email });
     await Otp.create({ email, otp, expiresAt, purpose: 'signup' });
@@ -76,13 +76,24 @@ const signup = async (req, res) => {
 };
 
 
-// Verify OTP (signup or forgot password)
+// Verify OTP (signup, forgot password, or email change)
 const verifyOtp = async (req, res) => {
   try {
     const { otp } = req.body;
 
-    const flow = req.session.tempUser ? 'signup' : 'forgot';
-    const email = flow === 'signup' ? req.session.tempUser.email : req.session.forgotEmail;
+    // Determine which flow we're in
+    let flow, email;
+
+    if (req.session.tempUser) {
+      flow  = 'signup';
+      email = req.session.tempUser.email;
+    } else if (req.session.pendingEmail) {
+      flow  = 'emailChange';
+      email = req.session.pendingEmail;  // OTP was sent to the NEW email
+    } else {
+      flow  = 'forgot';
+      email = req.session.forgotEmail;
+    }
 
     if (!email) {
       return res.json({ success: false, message: "Session expired. Please start again." });
@@ -98,15 +109,15 @@ const verifyOtp = async (req, res) => {
       return res.json({ success: false, message: "OTP expired, please resend OTP" });
     }
 
-    const otpToCheck = otpRecord.otp;
-    if (!otpToCheck) {
+    if (!otpRecord.otp) {
       return res.json({ success: false, message: "OTP not generated. Please resend OTP." });
     }
 
-    if (otpToCheck.toString() !== otp.toString()) {
+    if (otpRecord.otp.toString() !== otp.toString()) {
       return res.json({ success: false, message: "Invalid OTP" });
     }
 
+    // ── Signup flow ──
     if (flow === 'signup') {
       const hashedPassword = await bcrypt.hash(req.session.tempUser.password, 10);
       const newUser = await User.create({
@@ -125,7 +136,6 @@ const verifyOtp = async (req, res) => {
           await Otp.deleteOne({ email, purpose: flow });
           req.session.tempUser = null;
 
-         
           req.session.user = {
             _id: newUser._id,
             email: newUser.email,
@@ -136,8 +146,21 @@ const verifyOtp = async (req, res) => {
         });
       });
 
+    // ── Email change flow ──
+    } else if (flow === 'emailChange') {
+      const userId = req.session.user?._id;
+
+      await User.findByIdAndUpdate(userId, { email });
+      await Otp.deleteOne({ email, purpose: flow });
+
+      // Update session with new email
+      req.session.user.email = email;
+      req.session.pendingEmail = null;
+
+      return res.json({ success: true, redirectUrl: '/profile', message: 'Email updated successfully' });
+
+    // ── Forgot password flow ──
     } else {
-      // Forgot password flow
       req.session.canResetPassword = true;
       await Otp.deleteOne({ email, purpose: flow });
       return res.json({ success: true, redirectUrl: '/reset-password' });
@@ -152,10 +175,19 @@ const verifyOtp = async (req, res) => {
 
 const resendOtp = async (req, res) => {
   try {
-    const flow = req.session.tempUser ? 'signup' : 'forgot';
-    const email = flow === 'signup'
-      ? req.session.tempUser?.email
-      : req.session.forgotEmail;
+    // Determine flow — same logic as verifyOtp
+    let flow, email;
+
+    if (req.session.tempUser) {
+      flow  = 'signup';
+      email = req.session.tempUser.email;
+    } else if (req.session.pendingEmail) {
+      flow  = 'emailChange';
+      email = req.session.pendingEmail;
+    } else {
+      flow  = 'forgot';
+      email = req.session.forgotEmail;
+    }
 
     if (!email) {
       return res.status(400).json({
@@ -167,7 +199,7 @@ const resendOtp = async (req, res) => {
     await Otp.deleteMany({ email, purpose: flow });
 
     const newOtp = generateOtp();
-    const expiresAt = Date.now() + 60 * 1000;
+    const expiresAt = Date.now() + 5 * 60 * 1000;
 
     await Otp.create({ email, otp: newOtp, expiresAt, purpose: flow });
 
@@ -206,7 +238,6 @@ const login = async (req, res) => {
       return res.json({ success: false, message: "User not found" });
     }
 
-    // Google-only accounts have no password — block plain login attempt
     if (!user.password) {
       return res.json({
         success: false,
@@ -218,6 +249,14 @@ const login = async (req, res) => {
 
     if (!isMatch) {
       return res.json({ success: false, message: "Invalid password" });
+    }
+
+    if (user.isBlocked) {
+      return res.json({
+        success: false,
+        redirectURL: '/login',
+        message: 'user is blocked, cannot login'
+      });
     }
 
     req.session.user = {
@@ -238,7 +277,6 @@ const login = async (req, res) => {
 const LoadforgotPassword = (req, res) => {
   res.render('user/forgotPassword.ejs');
 };
-
 
 
 const forgotPassword = async (req, res) => {
@@ -271,11 +309,19 @@ const forgotPassword = async (req, res) => {
 };
 
 
-
 // Show OTP page for forgot password
-const showForgotOtpPage = (req, res) => {
+const showForgotOtpPage = async (req, res) => {
   if (!req.session.forgotEmail) return res.redirect('/forgot-password');
-  res.render('user/otpPage.ejs', { isForgotPassword: true });
+
+  const otpRecord = await Otp.findOne({ email: req.session.forgotEmail, purpose: 'forgot' });
+
+  const expiresAt = otpRecord
+    ? (otpRecord.expiresAt instanceof Date
+        ? otpRecord.expiresAt.getTime()
+        : Number(otpRecord.expiresAt))
+    : null;
+
+  res.render('user/otpPage.ejs', { isForgotPassword: true, expiresAt });
 };
 
 
@@ -315,20 +361,28 @@ const resetPassword = async (req, res) => {
 };
 
 
-
+// Load OTP page
 const loadOtpPage = async (req, res) => {
   try {
-    const email = req.session.tempUser?.email || req.session.forgotEmail;
+    const email   = req.session.tempUser?.email 
+                  || req.session.pendingEmail 
+                  || req.session.forgotEmail;
+
+    const purpose = req.session.tempUser    ? 'signup'
+                  : req.session.pendingEmail ? 'emailChange'
+                  : 'forgot';
 
     if (!email) return res.redirect('/signup');
 
-    const otpRecord = await Otp.findOne({ email }).sort({ createdAt: -1 });
+    const otpRecord = await Otp.findOne({ email, purpose });
 
     if (!otpRecord) return res.redirect('/signup');
 
-    const expireTime = new Date(otpRecord.createdAt).getTime() + 60 * 1000;
+    const expiresAt = otpRecord.expiresAt instanceof Date
+      ? otpRecord.expiresAt.getTime()
+      : Number(otpRecord.expiresAt);
 
-    res.render('user/otpPage.ejs', { expiresAt: expireTime });
+    res.render('user/otpPage.ejs', { expiresAt });
 
   } catch (error) {
     console.error(error);
@@ -336,6 +390,45 @@ const loadOtpPage = async (req, res) => {
   }
 };
 
+
+// Request email change — sends OTP to new email, then redirects to OTP page
+const requestEmailChange = async (req, res) => {
+  try {
+    const { newEmail } = req.body;
+    const userId = req.session.user?._id;
+
+    if (!userId) {
+      return res.json({ success: false, message: "Not logged in" });
+    }
+
+    if (!newEmail) {
+      return res.json({ success: false, message: "New email is required" });
+    }
+
+    // Check new email not already taken
+    const existing = await User.findOne({ email: newEmail });
+    if (existing) {
+      return res.json({ success: false, message: "Email already in use" });
+    }
+
+    const otp = generateOtp();
+    const expiresAt = Date.now() + 5 * 60 * 1000;
+
+    await Otp.deleteMany({ email: newEmail, purpose: 'emailChange' });
+    await Otp.create({ email: newEmail, otp, expiresAt, purpose: 'emailChange' });
+
+    // Store new email in session — verifyOtp will read this
+    req.session.pendingEmail = newEmail;
+
+    await sendEmail(newEmail, otp);
+
+    return res.json({ success: true, redirectUrl: '/otp' });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 
 const logout = async (req, res) => {
@@ -365,5 +458,6 @@ module.exports = {
   forgotPassword,
   showResetPage,
   resetPassword,
-  showForgotOtpPage
+  showForgotOtpPage,
+  requestEmailChange,
 };

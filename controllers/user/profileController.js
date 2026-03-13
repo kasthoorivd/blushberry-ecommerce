@@ -1,7 +1,10 @@
 const User = require('../../models/user/userModel')
+const Otp = require('../../models/user/otpModel')
 const Address = require('../../models/user/addressModel')
 const bcrypt = require('bcrypt')
 const mongoose = require('mongoose')
+const generateOtp = require('../../utils/generateOtp')
+const sendEmail = require('../../utils/sendEmail')
 
 
 const loadProfile = async (req, res) => {
@@ -20,7 +23,6 @@ const loadProfile = async (req, res) => {
 
 
 const updateProfile = async (req, res) => {
-
     try {
         console.log("SESSION:", req.session.user);
         console.log("BODY:", req.body);
@@ -30,7 +32,7 @@ const updateProfile = async (req, res) => {
             return res.render('user/userProfile', { error: "User not found", user: findUser });
         }
 
-        const { fullName, email, phoneNumber } = req.body;
+        const { fullName, phoneNumber } = req.body;  // ← email removed from here
         const errors = {};
 
         const nameRegex = /^[A-Za-z\s]{3,}$/;
@@ -47,18 +49,6 @@ const updateProfile = async (req, res) => {
             errors.phoneNumber = "Enter a valid 10-digit phone number";
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!email) {
-            errors.email = "Email is required";
-        } else if (!emailRegex.test(email)) {
-            errors.email = "Enter a valid email address";
-        } else {
-            const existingUser = await User.findOne({ email });
-            if (existingUser && email != req.session.user.email) {
-                errors.email = "Email already registered";
-            }
-        }
-
         if (Object.keys(errors).length > 0) {
             return res.render('user/userProfile', {
                 errors,
@@ -71,6 +61,7 @@ const updateProfile = async (req, res) => {
         if (req.file) {
             updateData.profilePhoto = '/uploads/profiles/' + req.file.filename;
         }
+
         const updatedUser = await User.findByIdAndUpdate(
             req.session.user._id,
             updateData,
@@ -79,10 +70,9 @@ const updateProfile = async (req, res) => {
 
         req.session.user = {
             _id: updatedUser._id,
-            fullName: updatedUser.fullName,   // ← key fix
+            fullName: updatedUser.fullName,
             email: updatedUser.email,
             isBlocked: updatedUser.isBlocked
-
         };
 
         res.redirect('/profile');
@@ -148,9 +138,54 @@ const changePassword = async (req, res) => {
 };
 
 
+// Step 1: Validate new email, send OTP to it, redirect to /otp page
+const requestEmailChange = async (req, res) => {
+    try {
+        const { newEmail } = req.body;
+        const userId = req.session.user?._id;
+
+        if (!userId) {
+            return res.json({ success: false, message: "Not logged in" });
+        }
+
+        if (!newEmail) {
+            return res.json({ success: false, message: "New email is required" });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(newEmail)) {
+            return res.json({ success: false, message: "Enter a valid email address" });
+        }
+
+        // Make sure new email isn't already taken by someone else
+        const existing = await User.findOne({ email: newEmail });
+        if (existing) {
+            return res.json({ success: false, message: "Email already in use" });
+        }
+
+        const otp = generateOtp();
+        const expiresAt = Date.now() + 5 * 60 * 1000;
+
+        await Otp.deleteMany({ email: newEmail, purpose: 'emailChange' });
+        await Otp.create({ email: newEmail, otp, expiresAt, purpose: 'emailChange' });
+
+        // Save new email in session — verifyOtp in userAuthController will read this
+        req.session.pendingEmail = newEmail;
+
+        await sendEmail(newEmail, otp);
+
+        return res.json({ success: true, redirectUrl: '/otp' });
+
+    } catch (err) {
+        console.error('requestEmailChange error:', err);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
+
 
 module.exports = {
     loadProfile,
     updateProfile,
-    changePassword
+    changePassword,
+    requestEmailChange      // ← export new function
 }
