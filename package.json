@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cloudinary": "^1.41.3",
     "connect-mongo": "^4.6.0",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
@@ -11,6 +12,7 @@
     "mongoose": "^9.2.1",
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
+    "multer-storage-cloudinary": "^4.0.0",
     "nocache": "^4.0.0",
     "nodemailer": "^8.0.1",
     "nodemon": "^3.1.13",

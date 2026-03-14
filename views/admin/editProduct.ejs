@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Product | Blushberry Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:          #0d0608;
+      --surface:     #130a0d;
+      --surface2:    #1c1014;
+      --border:      #2e1a20;
+      --accent:      #f4a7bc;
+      --accent-dim:  #d4839d;
+      --accent-glow: rgba(244,167,188,0.07);
+      --text:        #fdf0f3;
+      --muted:       #8a6d74;
+      --danger-dim:  rgba(192,57,43,0.14);
+      --radius:      8px;
+      --radius-lg:   12px;
+      --display:     'Playfair Display', Georgia, serif;
+      --body:        'DM Sans', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 60% at 90% 0%, rgba(244,167,188,0.06) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 40% at 5% 100%, rgba(244,167,188,0.04) 0%, transparent 50%);
+      color: var(--text); font-family: var(--body); font-weight: 300; line-height: 1.6; min-height: 100vh;
+    }
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    .admin-main    { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .admin-content { flex: 1; padding: 2.5rem; width: 100%; max-width: 900px; margin: 0 auto; }
+
+    .page-header { margin-bottom: 2rem; padding-bottom: 1.4rem; border-bottom: 1px solid rgba(244,167,188,0.1); }
+    .breadcrumb { display: flex; align-items: center; gap: 0.45rem; font-size: 0.7rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    .breadcrumb a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb-sep { opacity: 0.35; font-size: 0.58rem; }
+    .page-title { font-family: var(--display); font-size: 1.9rem; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+    .page-title span { color: var(--accent); }
+    .editing-chip { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(244,167,188,0.1); border: 1px solid rgba(244,167,188,0.22); color: var(--accent); font-size: 0.75rem; padding: 0.3rem 0.75rem; border-radius: 999px; margin-top: 0.6rem; }
+
+    .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1.5rem; }
+    .section-header { padding: 1rem 1.4rem; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; gap: 0.65rem; }
+    .section-icon { width: 30px; height: 30px; background: rgba(244,167,188,0.1); border: 1px solid rgba(244,167,188,0.2); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 0.78rem; flex-shrink: 0; }
+    .section-title { font-family: var(--display); font-size: 0.95rem; font-weight: 600; color: var(--text); }
+    .section-body { padding: 1.4rem; }
+
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+    .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.42rem; }
+    .form-label { font-size: 0.7rem; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+    .required { color: var(--accent); }
+    .optional  { text-transform: none; letter-spacing: 0; font-size: 0.68rem; font-weight: 300; }
+    .form-control { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 0.65rem 0.9rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.86rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; resize: vertical; width: 100%; }
+    .form-control::placeholder { color: var(--muted); opacity: 0.7; }
+    .form-control:focus { border-color: rgba(244,167,188,0.5); box-shadow: 0 0 0 3px rgba(244,167,188,0.06); }
+    .form-control.is-invalid { border-color: #e06c6c; }
+    .form-error { font-size: 0.72rem; color: #e06c6c; display: none; align-items: center; gap: 0.3rem; margin-top: 0.2rem; }
+    .form-error.visible { display: flex; }
+    .form-hint { font-size: 0.72rem; color: var(--muted); }
+
+    /* existing images */
+    .existing-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+    .existing-item { position: relative; aspect-ratio: 1; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+    .existing-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .existing-remove { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.65rem; transition: background 0.2s; }
+    .existing-remove:hover { background: #c0392b; }
+    .existing-badge { position: absolute; bottom: 4px; left: 4px; background: rgba(244,167,188,0.85); color: #1a0a10; font-size: 0.6rem; font-weight: 600; padding: 0.15rem 0.4rem; border-radius: 999px; }
+
+    .image-upload-area { border: 2px dashed var(--border); border-radius: var(--radius-lg); padding: 1.5rem; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; position: relative; }
+    .image-upload-area:hover { border-color: var(--accent-dim); background: var(--accent-glow); }
+    .image-upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .upload-icon { font-size: 1.5rem; color: var(--muted); margin-bottom: 0.5rem; }
+    .upload-text { font-size: 0.84rem; color: var(--muted); }
+    .upload-text strong { color: var(--accent); }
+    .upload-sub { font-size: 0.72rem; color: var(--muted); margin-top: 0.25rem; }
+    .image-previews { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.75rem; margin-top: 1rem; }
+    .preview-item { position: relative; aspect-ratio: 1; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); background: var(--surface2); }
+    .preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .preview-remove { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.65); color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.65rem; transition: background 0.2s; }
+    .preview-remove:hover { background: #c0392b; }
+    .img-count-note { font-size: 0.72rem; color: var(--muted); margin-top: 0.5rem; }
+    .img-count-note.error { color: #e06c6c; }
+
+    /* cropper modal */
+    .cropper-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 1.5rem; }
+    .cropper-modal-overlay.open { display: flex; }
+    .cropper-modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); width: 100%; max-width: 620px; overflow: hidden; }
+    .cropper-modal-header { padding: 1rem 1.4rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface2); }
+    .cropper-modal-title { font-family: var(--display); font-size: 1rem; font-weight: 600; color: var(--text); }
+    .cropper-modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; }
+    .cropper-container-wrap { padding: 1.2rem; max-height: 420px; overflow: hidden; }
+    .cropper-container-wrap img { max-width: 100%; display: block; }
+    .cropper-actions { padding: 1rem 1.4rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; }
+    .btn-crop-cancel { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.55rem 1.1rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.84rem; cursor: pointer; transition: all 0.2s; }
+    .btn-crop-cancel:hover { border-color: var(--accent-dim); color: var(--accent); }
+    .btn-crop-confirm { background: var(--accent); color: #1a0a10; border: none; padding: 0.55rem 1.4rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.84rem; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+    .btn-crop-confirm:hover { background: var(--accent-dim); }
+
+    /* variants */
+    .variant-list { display: flex; flex-direction: column; gap: 1rem; }
+    .variant-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem; position: relative; }
+    .variant-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .variant-label { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+    .btn-remove-variant { background: transparent; border: 1px solid rgba(192,57,43,0.3); color: #e06c6c; width: 26px; height: 26px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.72rem; transition: all 0.18s; }
+    .btn-remove-variant:hover { background: var(--danger-dim); border-color: rgba(192,57,43,0.5); }
+    .shade-img-wrap { display: flex; align-items: center; gap: 0.75rem; }
+    .shade-img-preview { width: 48px; height: 48px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); overflow: hidden; flex-shrink: 0; position: relative; cursor: pointer; }
+    .shade-img-preview img { width: 100%; height: 100%; object-fit: cover; display: none; }
+    .shade-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.1rem; }
+    .shade-img-input { display: none; }
+    .btn-shade-img { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.38rem 0.75rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.76rem; cursor: pointer; transition: all 0.18s; white-space: nowrap; }
+    .btn-shade-img:hover { border-color: var(--accent-dim); color: var(--accent); }
+    .btn-add-variant { display: inline-flex; align-items: center; gap: 0.45rem; background: transparent; border: 1px dashed var(--border); color: var(--muted); padding: 0.65rem 1.2rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.84rem; cursor: pointer; transition: all 0.2s; width: 100%; justify-content: center; margin-top: 0.5rem; }
+    .btn-add-variant:hover { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
+
+    .form-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .btn-back { display: inline-flex; align-items: center; gap: 0.45rem; background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.62rem 1.2rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.85rem; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .btn-back:hover { border-color: var(--accent-dim); color: var(--accent); }
+    .btn-submit { display: inline-flex; align-items: center; gap: 0.45rem; background: var(--accent); color: #1a0a10; border: none; padding: 0.62rem 1.6rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: background 0.2s, transform 0.15s; }
+    .btn-submit:hover { background: var(--accent-dim); transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    @media (max-width: 640px) {
+      .admin-content { padding: 1.1rem; }
+      .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+      .form-footer { flex-direction: column-reverse; align-items: stretch; }
+      .btn-back, .btn-submit { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="admin-wrapper">
+  <%- include('../partials/admin/adminSidebar') %>
+  <div class="admin-main">
+    <div class="admin-content">
+
+      <!-- HEADER -->
+      <div class="page-header">
+        <div class="breadcrumb">
+          <a href="/admin/dashboard">Dashboard</a>
+          <span class="breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+          <a href="/admin/products">Products</a>
+          <span class="breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+          <span>Edit</span>
+        </div>
+        <h1 class="page-title">Edit <span>Product</span></h1>
+        <div class="editing-chip"><i class="fas fa-pen" style="font-size:0.65rem"></i> Editing: <%= product.name %></div>
+      </div>
+
+      <form id="editProductForm" novalidate>
+
+        <!-- ── BASIC INFO ── -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon"><i class="fas fa-info-circle"></i></div>
+            <span class="section-title">Basic Information</span>
+          </div>
+          <div class="section-body">
+            <div class="form-grid-2" style="margin-bottom:1.1rem;">
+              <div class="form-group">
+                <label class="form-label">Product Name <span class="required">*</span></label>
+                <input type="text" class="form-control" id="name" value="<%= product.name %>" maxlength="100" />
+                <span class="form-error" id="errName"><i class="fas fa-exclamation-circle"></i> <span id="errNameText"></span></span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Category <span class="required">*</span></label>
+                <select class="form-control" id="categoryId">
+                  <option value="">— Select category —</option>
+                  <% categories.forEach(function(cat) { %>
+                    <option value="<%= cat._id %>" <%= product.categoryId && product.categoryId._id && product.categoryId._id.toString() === cat._id.toString() ? 'selected' : '' %>>
+                      <%= cat.name %>
+                    </option>
+                  <% }); %>
+                </select>
+                <span class="form-error" id="errCategory"><i class="fas fa-exclamation-circle"></i> Please select a category.</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description <span class="required">*</span></label>
+              <textarea class="form-control" id="description" rows="4" maxlength="1000"><%= product.description %></textarea>
+              <span class="form-error" id="errDesc"><i class="fas fa-exclamation-circle"></i> <span id="errDescText"></span></span>
+            </div>
+            <div style="margin-top:1.1rem;">
+              <div class="form-group" style="max-width:200px;">
+                <label class="form-label">Product Offer % <span class="optional">(optional)</span></label>
+                <input type="number" class="form-control" id="offer" value="<%= product.offer > 0 ? product.offer : '' %>" placeholder="0" min="0" max="100" step="1" />
+                <span class="form-error" id="errOffer"><i class="fas fa-exclamation-circle"></i> <span id="errOfferText"></span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PRODUCT IMAGES ── -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon"><i class="fas fa-images"></i></div>
+            <span class="section-title">Product Images <span style="color:var(--muted);font-size:0.75rem;font-family:var(--body);font-weight:300;">(min 3 total)</span></span>
+          </div>
+          <div class="section-body">
+
+            <!-- existing images from DB -->
+            <% if (product.images && product.images.length > 0) { %>
+              <p style="font-size:0.72rem;color:var(--muted);margin-bottom:0.6rem;">Current images — click × to remove</p>
+              <div class="existing-images" id="existingImages">
+                <% product.images.forEach(function(img, i) { %>
+                  <div class="existing-item" id="existing-<%= i %>">
+                    <img src="<%= img %>" alt="product image" />
+                    <% if (i === 0) { %><span class="existing-badge">Main</span><% } %>
+                    <button type="button" class="existing-remove" onclick="removeExisting(<%= i %>)"><i class="fas fa-times"></i></button>
+                  </div>
+                <% }); %>
+              </div>
+            <% } %>
+
+            <!-- add more images -->
+            <div class="image-upload-area" style="margin-top:0.75rem;">
+              <input type="file" id="imageFileInput" accept="image/*" multiple />
+              <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+              <div class="upload-text"><strong>Click to add more images</strong></div>
+              <div class="upload-sub">Each new image will be cropped before upload</div>
+            </div>
+            <div class="image-previews" id="imagePreviews"></div>
+            <p class="img-count-note" id="imgCountNote"></p>
+          </div>
+        </div>
+
+        <!-- ── SHADE VARIANTS ── -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon"><i class="fas fa-palette"></i></div>
+            <span class="section-title">Shade Variants</span>
+          </div>
+          <div class="section-body">
+            <div class="variant-list" id="variantList"></div>
+            <button type="button" class="btn-add-variant" onclick="addVariant()">
+              <i class="fas fa-plus"></i> Add Shade
+            </button>
+            <span class="form-error" id="errVariants" style="margin-top:0.5rem;"><i class="fas fa-exclamation-circle"></i> At least one shade variant is required.</span>
+          </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="form-footer">
+          <a href="/admin/products" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Products</a>
+          <button type="submit" class="btn-submit" id="btnSubmit">
+            <i class="fas fa-save"></i> Update Product
+          </button>
+        </div>
+
+      </form>
+    </div>
+    <%- include('../partials/admin/adminFooter') %>
+  </div>
+</div>
+
+<!-- CROPPER MODAL -->
+<div class="cropper-modal-overlay" id="cropperModal">
+  <div class="cropper-modal">
+    <div class="cropper-modal-header">
+      <span class="cropper-modal-title">Crop Image</span>
+      <button class="cropper-modal-close" onclick="closeCropper()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="cropper-container-wrap">
+      <img id="cropperImage" src="" alt="crop" />
+    </div>
+    <div class="cropper-actions">
+      <button class="btn-crop-cancel" onclick="closeCropper()">Cancel</button>
+      <button class="btn-crop-confirm" onclick="confirmCrop()"><i class="fas fa-crop-alt"></i> Crop & Use</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script>
+  var PRODUCT_ID = '<%= product._id %>';
+
+  /* existing images from DB — track which ones to keep */
+  var existingImages = <%- JSON.stringify(product.images || []) %>;
+  var removedExisting = [];
+
+  /* new images added via cropper */
+  var newCroppedImages = [];
+
+  var variantCount    = 0;
+  var cropperInstance = null;
+  var currentCropCallback = null;
+
+  /* ── TOAST ── */
+  function showToast(message, type) {
+    Swal.fire({
+      toast: true, position: 'top-end', icon: type, title: message,
+      showConfirmButton: false, timer: 3500, timerProgressBar: true,
+      background: '#130a0d', color: '#fdf0f3',
+      iconColor: type === 'success' ? '#f4a7bc' : '#e06c6c'
+    });
+  }
+
+  /* ── EXISTING IMAGE REMOVAL ── */
+  function removeExisting(index) {
+    var item = document.getElementById('existing-' + index);
+    if (item) {
+      item.style.transition = 'opacity 0.3s';
+      item.style.opacity = '0';
+      setTimeout(function() { item.remove(); }, 300);
+    }
+    removedExisting.push(existingImages[index]);
+    updateImgCountNote();
+  }
+
+  /* ── CROPPER ── */
+  function openCropper(src, onConfirm) {
+    currentCropCallback = onConfirm;
+    var img = document.getElementById('cropperImage');
+    img.src = src;
+    document.getElementById('cropperModal').classList.add('open');
+    if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+    cropperInstance = new Cropper(img, {
+      aspectRatio: 1, viewMode: 2, dragMode: 'move',
+      autoCropArea: 0.9, responsive: true, background: false
+    });
+  }
+
+  function closeCropper() {
+    document.getElementById('cropperModal').classList.remove('open');
+    if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+    currentCropCallback = null;
+  }
+
+  function confirmCrop() {
+    if (!cropperInstance) return;
+    var canvas = cropperInstance.getCroppedCanvas({ width: 800, height: 800 });
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    if (currentCropCallback) currentCropCallback(dataUrl);
+    closeCropper();
+  }
+
+  /* ── NEW IMAGE UPLOAD ── */
+  document.getElementById('imageFileInput').addEventListener('change', function(e) {
+    var files = Array.from(e.target.files);
+    if (!files.length) return;
+    processNextFile(files, 0);
+    this.value = '';
+  });
+
+  function processNextFile(files, index) {
+    if (index >= files.length) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      openCropper(e.target.result, function(croppedDataUrl) {
+        newCroppedImages.push(croppedDataUrl);
+        renderNewPreviews();
+        processNextFile(files, index + 1);
+      });
+    };
+    reader.readAsDataURL(files[index]);
+  }
+
+  function renderNewPreviews() {
+    var container = document.getElementById('imagePreviews');
+    container.innerHTML = '';
+    newCroppedImages.forEach(function(src, i) {
+      var item = document.createElement('div');
+      item.className = 'preview-item';
+      item.innerHTML =
+        '<img src="' + src + '" />' +
+        '<button type="button" class="preview-remove" onclick="removeNew(' + i + ')"><i class="fas fa-times"></i></button>';
+      container.appendChild(item);
+    });
+    updateImgCountNote();
+  }
+
+  function removeNew(index) {
+    newCroppedImages.splice(index, 1);
+    renderNewPreviews();
+  }
+
+  function getTotalImageCount() {
+    var kept = existingImages.filter(function(img) { return !removedExisting.includes(img); }).length;
+    return kept + newCroppedImages.length;
+  }
+
+  function updateImgCountNote() {
+    var total = getTotalImageCount();
+    var note  = document.getElementById('imgCountNote');
+    note.textContent = total + ' image' + (total !== 1 ? 's' : '') + ' total' + (total < 3 ? ' — minimum 3 required' : ' ✓');
+    note.className = 'img-count-note' + (total < 3 ? ' error' : '');
+  }
+
+  updateImgCountNote();
+
+  /* ── VARIANTS ── */
+  function addVariant(data) {
+    variantCount++;
+    var id   = 'variant-' + variantCount;
+    var d    = data || {};
+    var list = document.getElementById('variantList');
+    var card = document.createElement('div');
+    card.className = 'variant-card';
+    card.id = id;
+    card.innerHTML = `
+      <div class="variant-header">
+        <span class="variant-label">Shade ${variantCount}</span>
+        <button type="button" class="btn-remove-variant" onclick="removeVariant('${id}')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="form-grid-3" style="margin-bottom:1rem;">
+        <div class="form-group">
+          <label class="form-label">Shade Name <span class="required">*</span></label>
+          <input type="text" class="form-control variant-shade" placeholder="e.g. Ruby Red" value="${d.shade || ''}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Original Price <span class="required">*</span></label>
+          <input type="number" class="form-control variant-price" placeholder="599" min="0" value="${d.varientPrice || ''}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sale Price</label>
+          <input type="number" class="form-control variant-sale" placeholder="auto-calculated" min="0" value="${d.salePrice || ''}" />
+        </div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Stock <span class="required">*</span></label>
+          <input type="number" class="form-control variant-stock" placeholder="0" min="0" value="${d.stock || ''}" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Shade Image <span class="optional">(optional)</span></label>
+          <div class="shade-img-wrap">
+            <div class="shade-img-preview" onclick="triggerShadeImg('${id}')" ${d.image ? 'data-image="' + d.image + '"' : ''}>
+              <div class="shade-img-placeholder" style="${d.image ? 'display:none' : ''}"><i class="fas fa-image"></i></div>
+              <img class="shade-img-thumb" src="${d.image || ''}" style="${d.image ? 'display:block' : ''}" />
+            </div>
+            <button type="button" class="btn-shade-img" onclick="triggerShadeImg('${id}')">
+              <i class="fas fa-upload"></i> ${d.image ? 'Change swatch' : 'Upload swatch'}
+            </button>
+            <input type="file" class="shade-img-input" id="shadeFile-${id}" accept="image/*" onchange="handleShadeImg('${id}', this)" />
+          </div>
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  }
+
+  function removeVariant(id) {
+    var card = document.getElementById(id);
+    if (card) card.remove();
+  }
+
+  function triggerShadeImg(variantId) {
+    document.getElementById('shadeFile-' + variantId).click();
+  }
+
+  function handleShadeImg(variantId, input) {
+    if (!input.files[0]) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      openCropper(e.target.result, function(croppedDataUrl) {
+        var card    = document.getElementById(variantId);
+        var preview = card.querySelector('.shade-img-preview');
+        var thumb   = preview.querySelector('.shade-img-thumb');
+        var ph      = preview.querySelector('.shade-img-placeholder');
+        thumb.src           = croppedDataUrl;
+        thumb.style.display = 'block';
+        ph.style.display    = 'none';
+        preview.dataset.image = croppedDataUrl;
+      });
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  /* load existing variants */
+  <% if (product.variants && product.variants.length > 0) { %>
+    <% product.variants.forEach(function(v) { %>
+      addVariant({
+        shade:        '<%- v.shade.replace(/'/g, "\\'") %>',
+        varientPrice: <%= v.varientPrice %>,
+        salePrice:    <%= v.salePrice || 0 %>,
+        stock:        <%= v.stock %>,
+        image:        '<%- v.image || "" %>'
+      });
+    <% }); %>
+  <% } else { %>
+    addVariant();
+  <% } %>
+
+  /* ── VALIDATION ── */
+  function clearErr(inputId, errId) {
+    var el = document.getElementById(inputId);
+    if (el) el.classList.remove('is-invalid');
+    var err = document.getElementById(errId);
+    if (err) err.classList.remove('visible');
+  }
+  function showErr(inputId, errId, errTextId, msg) {
+    var el = document.getElementById(inputId);
+    if (el) el.classList.add('is-invalid');
+    var err = document.getElementById(errId);
+    if (err) err.classList.add('visible');
+    if (errTextId) { var txt = document.getElementById(errTextId); if (txt) txt.textContent = msg; }
+  }
+
+  function validate() {
+    var ok = true;
+
+    var name = document.getElementById('name').value.trim();
+    clearErr('name','errName');
+    if (!name) { showErr('name','errName','errNameText','Product name is required.'); ok = false; }
+    else if (/^\d+$/.test(name)) { showErr('name','errName','errNameText','Name cannot be only numbers.'); ok = false; }
+    else if (name.length < 3) { showErr('name','errName','errNameText','Name must be at least 3 characters.'); ok = false; }
+
+    var cat = document.getElementById('categoryId').value;
+    clearErr('categoryId','errCategory');
+    if (!cat) { showErr('categoryId','errCategory',null,''); ok = false; }
+
+    var desc = document.getElementById('description').value.trim();
+    clearErr('description','errDesc');
+    if (!desc) { showErr('description','errDesc','errDescText','Description is required.'); ok = false; }
+    else if (desc.length < 10) { showErr('description','errDesc','errDescText','Must be at least 10 characters.'); ok = false; }
+
+    var offer = document.getElementById('offer').value;
+    clearErr('offer','errOffer');
+    if (offer !== '') {
+      var on = Number(offer);
+      if (isNaN(on) || on < 0 || on > 100) { showErr('offer','errOffer','errOfferText','Offer must be 0–100.'); ok = false; }
+    }
+
+    if (getTotalImageCount() < 3) {
+      document.getElementById('imgCountNote').className = 'img-count-note error';
+      showToast('Please keep at least 3 product images.', 'error');
+      ok = false;
+    }
+
+    var cards = document.querySelectorAll('.variant-card');
+    var errV  = document.getElementById('errVariants');
+    if (cards.length === 0) { errV.classList.add('visible'); ok = false; }
+    else {
+      errV.classList.remove('visible');
+      cards.forEach(function(card) {
+        if (!card.querySelector('.variant-shade').value.trim() ||
+            !card.querySelector('.variant-price').value ||
+            card.querySelector('.variant-stock').value === '') {
+          showToast('Please fill all required fields for each shade.', 'error');
+          ok = false;
+        }
+      });
+    }
+
+    return ok;
+  }
+
+  function collectVariants() {
+    var variants = [];
+    document.querySelectorAll('.variant-card').forEach(function(card) {
+      var preview = card.querySelector('.shade-img-preview');
+      variants.push({
+        shade:        card.querySelector('.variant-shade').value.trim(),
+        varientPrice: Number(card.querySelector('.variant-price').value),
+        salePrice:    Number(card.querySelector('.variant-sale').value) || 0,
+        stock:        Number(card.querySelector('.variant-stock').value),
+        image:        preview.dataset.image || ''
+      });
+    });
+    return variants;
+  }
+
+  /* ── SUBMIT ── */
+  function setLoading(loading) {
+    var btn = document.getElementById('btnSubmit');
+    btn.disabled = loading;
+    btn.innerHTML = loading
+      ? '<i class="fas fa-spinner fa-spin"></i> Saving…'
+      : '<i class="fas fa-save"></i> Update Product';
+  }
+
+  document.getElementById('editProductForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!validate()) return;
+    setLoading(true);
+
+    var keptImages = existingImages.filter(function(img) { return !removedExisting.includes(img); });
+
+    try {
+      var payload = {
+        name:           document.getElementById('name').value.trim(),
+        description:    document.getElementById('description').value.trim(),
+        categoryId:     document.getElementById('categoryId').value,
+        offer:          document.getElementById('offer').value || 0,
+        existingImages: keptImages,
+        newImages:      newCroppedImages,
+        variants:       collectVariants()
+      };
+
+      var res  = await fetch('/admin/editProduct/' + PRODUCT_ID, {
+        method:  'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload)
+      });
+      var data = await res.json();
+
+      if (data.success) {
+        sessionStorage.setItem('prod_toast_msg',  data.message);
+        sessionStorage.setItem('prod_toast_type', 'success');
+        window.location.href = '/admin/products';
+      } else {
+        showToast(data.message, 'error');
+        setLoading(false);
+      }
+    } catch(err) {
+      console.error(err);
+      showToast('Something went wrong. Please try again.', 'error');
+      setLoading(false);
+    }
+  });
+</script>
+</body>
+</html>

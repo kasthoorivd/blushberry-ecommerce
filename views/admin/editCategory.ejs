@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Category | Blushberry Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:          #0d0608;
+      --surface:     #130a0d;
+      --surface2:    #1c1014;
+      --border:      #2e1a20;
+      --accent:      #f4a7bc;
+      --accent-dim:  #d4839d;
+      --text:        #fdf0f3;
+      --muted:       #8a6d74;
+      --radius:      8px;
+      --radius-lg:   12px;
+      --display:     'Playfair Display', Georgia, serif;
+      --body:        'DM Sans', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 60% at 90% 0%,   rgba(244,167,188,0.06) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 40% at 5%  100%, rgba(244,167,188,0.04) 0%, transparent 50%);
+      color: var(--text); font-family: var(--body); font-weight: 300; line-height: 1.6; min-height: 100vh;
+    }
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    .admin-main    { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .admin-content { flex: 1; padding: 2.5rem; width: 100%; max-width: 720px; margin: 0 auto; }
+
+    .page-header { margin-bottom: 2rem; padding-bottom: 1.4rem; border-bottom: 1px solid rgba(244,167,188,0.1); }
+    .breadcrumb { display: flex; align-items: center; gap: 0.45rem; font-size: 0.7rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    .breadcrumb a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb-sep { opacity: 0.35; font-size: 0.58rem; }
+    .page-title { font-family: var(--display); font-size: 1.9rem; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+    .page-title span { color: var(--accent); }
+    .editing-chip { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(244,167,188,0.1); border: 1px solid rgba(244,167,188,0.22); color: var(--accent); font-size: 0.75rem; padding: 0.3rem 0.75rem; border-radius: 999px; margin-top: 0.6rem; }
+    .editing-chip i { font-size: 0.65rem; }
+
+    .form-card { background: var(--surface); border: 1px solid rgba(244,167,188,0.18); border-radius: var(--radius-lg); overflow: hidden; }
+    .form-card-header { padding: 1.25rem 1.6rem; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; gap: 0.7rem; }
+    .form-card-icon { width: 34px; height: 34px; background: rgba(244,167,188,0.12); border: 1px solid rgba(244,167,188,0.25); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 0.85rem; }
+    .form-card-title { font-family: var(--display); font-size: 1rem; font-weight: 600; color: var(--text); }
+    .form-card-sub   { font-size: 0.76rem; color: var(--muted); margin-top: 0.1rem; }
+
+    .form-body { padding: 1.75rem 1.6rem; display: flex; flex-direction: column; gap: 1.35rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.45rem; }
+    .form-label { font-size: 0.7rem; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+    .required { color: var(--accent); }
+    .optional  { color: var(--muted); font-size: 0.68rem; text-transform: none; letter-spacing: 0; font-weight: 300; }
+
+    .form-control {
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+      padding: 0.7rem 1rem; border-radius: var(--radius);
+      font-family: var(--body); font-size: 0.88rem; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s; resize: vertical; width: 100%;
+    }
+    .form-control::placeholder { color: var(--muted); opacity: 0.7; }
+    .form-control:focus { border-color: rgba(244,167,188,0.5); box-shadow: 0 0 0 3px rgba(244,167,188,0.06); }
+    .form-control.is-invalid { border-color: #e06c6c; box-shadow: 0 0 0 3px rgba(224,108,108,0.08); }
+    .form-control.is-valid   { border-color: rgba(46,204,113,0.5); }
+
+    .form-error {
+      font-size: 0.73rem; color: #e06c6c;
+      display: none; gap: 0.3rem; align-items: flex-start;
+      background: rgba(192,57,43,0.08); border: 1px solid rgba(192,57,43,0.2);
+      padding: 0.5rem 0.75rem; border-radius: var(--radius);
+      line-height: 1.5;
+    }
+    .form-error.visible { display: flex; }
+    .form-error i { margin-top: 0.15rem; flex-shrink: 0; }
+    .form-hint  { font-size: 0.73rem; color: var(--muted); }
+    .char-count { font-size: 0.7rem; color: var(--muted); text-align: right; margin-top: 0.2rem; }
+    .char-count.warn { color: #e06c6c; }
+
+    .form-divider { height: 1px; background: var(--border); }
+    .offer-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .form-footer { padding: 1.25rem 1.6rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .btn-back { display: inline-flex; align-items: center; gap: 0.45rem; background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.62rem 1.2rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.85rem; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .btn-back:hover { border-color: var(--accent-dim); color: var(--accent); }
+    .btn-submit { display: inline-flex; align-items: center; gap: 0.45rem; background: var(--accent); color: #1a0a10; border: none; padding: 0.62rem 1.6rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: background 0.2s, transform 0.15s; }
+    .btn-submit:hover { background: var(--accent-dim); transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    @media (max-width: 600px) {
+      .admin-content { padding: 1.1rem; }
+      .offer-row { grid-template-columns: 1fr; }
+      .form-footer { flex-direction: column-reverse; align-items: stretch; }
+      .btn-back, .btn-submit { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="admin-wrapper">
+  <%- include('../partials/admin/adminSidebar') %>
+  <div class="admin-main">
+    <div class="admin-content">
+
+      <div class="page-header">
+        <div class="breadcrumb">
+          <a href="/admin/dashboard">Dashboard</a>
+          <span class="breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+          <a href="/admin/category">Categories</a>
+          <span class="breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+          <span>Edit</span>
+        </div>
+        <h1 class="page-title">Edit <span>Category</span></h1>
+        <div class="editing-chip">
+          <i class="fas fa-pen"></i> Editing: <%= category.name %>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-card-icon"><i class="fas fa-folder-open"></i></div>
+          <div>
+            <div class="form-card-title">Category Information</div>
+            <div class="form-card-sub">Update the details below and save your changes.</div>
+          </div>
+        </div>
+
+        <form id="editCategoryForm" novalidate>
+          <div class="form-body">
+
+            <!-- Name -->
+            <div class="form-group">
+              <label class="form-label" for="name">
+                Category Name <span class="required">*</span>
+              </label>
+              <input
+                type="text" class="form-control"
+                id="name" name="name"
+                value="<%= category.name %>"
+                placeholder="e.g. Matte, Satin, Glossy"
+                autocomplete="off" maxlength="50"
+              />
+              <div class="char-count" id="nameCount"><%= category.name.length %> / 50</div>
+              <span class="form-error" id="errName">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errNameText">Name is required.</span>
+              </span>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+              <label class="form-label" for="description">
+                Description <span class="required">*</span>
+              </label>
+              <textarea
+                class="form-control"
+                id="description" name="description"
+                placeholder="Describe this category briefly… (min 10 characters)"
+                rows="4" maxlength="300"
+              ><%= category.description %></textarea>
+              <div class="char-count" id="descCount"><%= category.description.length %> / 300</div>
+              <span class="form-error" id="errDesc">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errDescText">Description is required.</span>
+              </span>
+            </div>
+
+            <div class="form-divider"></div>
+
+            <!-- Offer -->
+            <div class="offer-row">
+              <div class="form-group">
+                <label class="form-label" for="offer">
+                  Offer % <span class="optional">(optional)</span>
+                </label>
+                <input
+                  type="number" class="form-control"
+                  id="offer" name="offer"
+                  value="<%= category.offer > 0 ? category.offer : '' %>"
+                  placeholder="0" min="0" max="100" step="1"
+                />
+                <span class="form-hint">Whole number between 0–100. Leave blank for no discount.</span>
+                <span class="form-error" id="errOffer">
+                  <i class="fas fa-exclamation-circle"></i>
+                  <span id="errOfferText">Offer must be between 0 and 100.</span>
+                </span>
+              </div>
+            </div>
+
+          </div><!-- /.form-body -->
+
+          <div class="form-footer">
+            <a href="/admin/category" class="btn-back">
+              <i class="fas fa-arrow-left"></i> Back to Categories
+            </a>
+            <button type="submit" class="btn-submit" id="btnSubmit">
+              <i class="fas fa-save"></i> Update Category
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+    <%- include('../partials/admin/adminFooter') %>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script>
+  var CATEGORY_ID = '<%= category._id %>';
+
+  /* ══════════════════════════════════════════════
+     VALIDATION RULES  (same as addCategory)
+  ══════════════════════════════════════════════ */
+  function validateCategoryForm(name, description, offer) {
+    var errors = { name: null, description: null, offer: null };
+
+    /* NAME */
+    if (!name || !name.trim()) {
+      errors.name = 'Category name is required.';
+    } else if (/^\d+$/.test(name.trim())) {
+      errors.name = 'Category name cannot be only numbers — use a name like "Matte" or "Glossy".';
+    } else if (/^[^a-zA-Z]+$/.test(name.trim())) {
+      errors.name = 'Category name must contain at least one letter.';
+    } else if (name.trim().length < 3) {
+      errors.name = 'Category name must be at least 3 characters.';
+    } else if (name.trim().length > 50) {
+      errors.name = 'Category name cannot exceed 50 characters.';
+    }
+
+    /* DESCRIPTION */
+    if (!description || !description.trim()) {
+      errors.description = 'Description is required.';
+    } else if (/^\d+$/.test(description.trim())) {
+      errors.description = 'Description cannot be only numbers — please describe the category.';
+    } else if (/^[^a-zA-Z]+$/.test(description.trim())) {
+      errors.description = 'Description must contain at least one letter.';
+    } else if (description.trim().length < 10) {
+      errors.description = 'Description must be at least 10 characters.';
+    } else if (description.trim().length > 300) {
+      errors.description = 'Description cannot exceed 300 characters.';
+    }
+
+    /* OFFER */
+    if (offer !== '' && offer !== null && offer !== undefined && String(offer).trim() !== '') {
+      var offerNum = Number(offer);
+      if (isNaN(offerNum) || !Number.isInteger(offerNum)) {
+        errors.offer = 'Offer must be a whole number (e.g. 10, 20).';
+      } else if (offerNum < 0 || offerNum > 100) {
+        errors.offer = 'Offer must be between 0 and 100.';
+      }
+    }
+
+    return errors;
+  }
+
+  function showFieldError(inputId, errId, errTextId, message) {
+    var el  = document.getElementById(inputId);
+    var err = document.getElementById(errId);
+    var txt = document.getElementById(errTextId);
+    el.classList.add('is-invalid');
+    el.classList.remove('is-valid');
+    txt.textContent = message;
+    err.classList.add('visible');
+  }
+
+  function clearFieldError(inputId, errId) {
+    document.getElementById(inputId).classList.remove('is-invalid');
+    document.getElementById(errId).classList.remove('visible');
+  }
+
+  /* ── CHAR COUNTERS ── */
+  function updateCounter(inputId, counterId, max) {
+    var el    = document.getElementById(inputId);
+    var count = document.getElementById(counterId);
+    el.addEventListener('input', function() {
+      var len = this.value.length;
+      count.textContent = len + ' / ' + max;
+      count.classList.toggle('warn', len > max * 0.9);
+    });
+  }
+  updateCounter('name',        'nameCount', 50);
+  updateCounter('description', 'descCount', 300);
+
+  /* ── LIVE CLEAR ON FIX ── */
+  document.getElementById('name').addEventListener('input',        function() { clearFieldError('name',        'errName'); });
+  document.getElementById('description').addEventListener('input', function() { clearFieldError('description', 'errDesc'); });
+  document.getElementById('offer').addEventListener('input',       function() { clearFieldError('offer',       'errOffer'); });
+
+  /* ── TOAST ── */
+  function showToast(message, type) {
+    Swal.fire({
+      toast: true, position: 'top-end', icon: type, title: message,
+      showConfirmButton: false, timer: 3500, timerProgressBar: true,
+      background: '#130a0d', color: '#fdf0f3',
+      iconColor: type === 'success' ? '#f4a7bc' : '#e06c6c'
+    });
+  }
+
+  function setLoading(loading) {
+    var btn = document.getElementById('btnSubmit');
+    btn.disabled = loading;
+    btn.innerHTML = loading
+      ? '<i class="fas fa-spinner fa-spin"></i> Saving…'
+      : '<i class="fas fa-save"></i> Update Category';
+  }
+
+  /* ── SUBMIT ── */
+  document.getElementById('editCategoryForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    var name        = document.getElementById('name').value;
+    var description = document.getElementById('description').value;
+    var offer       = document.getElementById('offer').value;
+
+    var errors = validateCategoryForm(name, description, offer);
+    var hasErrors = errors.name || errors.description || errors.offer;
+
+    clearFieldError('name',        'errName');
+    clearFieldError('description', 'errDesc');
+    clearFieldError('offer',       'errOffer');
+
+    if (errors.name)        showFieldError('name',        'errName',  'errNameText',  errors.name);
+    if (errors.description) showFieldError('description', 'errDesc',  'errDescText',  errors.description);
+    if (errors.offer)       showFieldError('offer',       'errOffer', 'errOfferText', errors.offer);
+
+    if (hasErrors) return;
+
+    setLoading(true);
+
+    try {
+      var res  = await fetch('/admin/editCategory/' + CATEGORY_ID, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name:        name.trim(),
+          description: description.trim(),
+          offer:       offer || 0
+        })
+      });
+      var data = await res.json();
+
+      if (data.success) {
+        sessionStorage.setItem('cat_toast_msg',  data.message);
+        sessionStorage.setItem('cat_toast_type', 'success');
+        window.location.href = '/admin/category';
+      } else {
+        showToast(data.message, 'error');
+        setLoading(false);
+      }
+    } catch(err) {
+      console.error(err);
+      showToast('Something went wrong. Please try again.', 'error');
+      setLoading(false);
+    }
+  });
+
+</script>
+</body>
+</html>
