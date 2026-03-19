@@ -68,6 +68,8 @@ const adminLogout = async (req, res) => {
     }
 };
 
+
+
 module.exports = {
     loadAdminLogin,
     loadDashboard,

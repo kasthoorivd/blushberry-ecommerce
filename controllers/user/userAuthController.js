@@ -1,11 +1,11 @@
 const User = require('../../models/user/userModel');
 const Otp = require('../../models/user/otpModel');
+const Product = require('../../models/user/productModel')
 const bcrypt = require('bcrypt');
 const generateOtp = require('../../utils/generateOtp');
 const sendEmail = require("../../utils/sendEmail");
 const passport = require('../../config/passport');
 const { isBlocked } = require('../../middleware/authMiddleware');
-
 
 
 
@@ -20,10 +20,26 @@ const loadHomePage = async (req, res) => {
       console.log('profilePhoto:', user?.profilePhoto);
     }
 
-    res.render('user/homePage', { user });
+    // ── fetch 8 newest products for the bestsellers grid ──
+    const products = await Product.find({ isDeleted: false, isListed: true })
+      .populate('categoryId', 'name')
+      .sort({ createdAt: -1 })
+      .limit(8)
+      .lean()
+
+    products.forEach(p => {
+      const prices     = p.variants.map(v => v.salePrice > 0 ? v.salePrice : v.varientPrice)
+      p.displayPrice   = Math.min(...prices)
+      const origPrices = p.variants.map(v => v.varientPrice)
+      p.originalPrice  = Math.min(...origPrices)
+      p.displayOffer   = p.offer || 0
+      p.inStock        = p.variants.some(v => v.stock > 0)
+    })
+
+    res.render('user/homePage', { user, products });  
   } catch (error) {
     console.log(error.message);
-    res.render('user/homePage', { user: null });
+    res.render('user/homePage', { user: null, products: [] }); 
   }
 };
 
@@ -139,7 +155,9 @@ const verifyOtp = async (req, res) => {
           req.session.user = {
             _id: newUser._id,
             email: newUser.email,
-            isBlocked: newUser.isBlocked
+            isBlocked: newUser.isBlocked,
+              fullName: newUser.fullName,  
+               profilePhoto: newUser.profilePhoto
           };
 
           return res.json({ success: true, redirectUrl: '/' });
@@ -262,7 +280,9 @@ const login = async (req, res) => {
     req.session.user = {
       _id: user._id,
       email: user.email,
-      isBlocked: user.isBlocked
+      isBlocked: user.isBlocked,
+      fullName: user.fullName,
+       profilePhoto: user.profilePhoto
     };
 
     return res.json({ success: true, message: "Login successful" });

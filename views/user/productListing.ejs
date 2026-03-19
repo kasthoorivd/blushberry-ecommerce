@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blush Berry – Shop All Lipsticks</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Poppins',sans-serif;background:#fff;color:#333;overflow-x:hidden;}
+    a{text-decoration:none;color:inherit;}
+
+    /* ── Layout ── */
+    .page-wrapper{display:flex;gap:0;min-height:80vh;}
+    .sidebar{width:260px;min-width:260px;background:#fffafb;border-right:1px solid #f0e6e8;padding:32px 24px;position:sticky;top:0;height:100vh;overflow-y:auto;}
+    .main-content{flex:1;padding:32px 36px;}
+
+    /* ── Sidebar ── */
+    .sidebar-section{margin-bottom:28px;}
+    .sidebar-section h3{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#c0415a;font-weight:600;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #f0e6e8;}
+    .filter-label{display:flex;align-items:center;gap:8px;font-size:13px;color:#555;margin-bottom:8px;cursor:pointer;}
+    .filter-label input{accent-color:#c0415a;width:14px;height:14px;cursor:pointer;}
+    .filter-label:hover{color:#c0415a;}
+
+    /* price range */
+    .price-inputs{display:flex;align-items:center;gap:8px;margin-top:8px;}
+    .price-inputs input{width:80px;padding:6px 8px;border:1px solid #e8d8dc;border-radius:4px;font-size:12px;font-family:'Poppins',sans-serif;color:#333;}
+    .price-inputs input:focus{outline:none;border-color:#c0415a;}
+    .price-sep{font-size:12px;color:#aaa;}
+
+    /* ── Shade dots ── */
+    .shade-dot-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+    .shade-dot{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:border-color .2s,transform .2s;background:none;}
+    .shade-dot:hover,.shade-dot.active{border-color:#c0415a;transform:scale(1.15);}
+
+    /* ── Buttons ── */
+    .btn-apply{width:100%;padding:10px;background:#c0415a;color:#fff;border:none;border-radius:4px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:background .2s;margin-top:8px;}
+    .btn-apply:hover{background:#a33049;}
+    .btn-clear{display:block;text-align:center;padding:9px;background:transparent;color:#c0415a;border:1px solid #c0415a;border-radius:4px;font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;margin-top:6px;}
+    .btn-clear:hover{background:#c0415a;color:#fff;}
+
+    /* ── Top bar ── */
+    .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px;}
+    .result-count{font-size:13px;color:#999;}
+    .result-count span{color:#1a1a2e;font-weight:600;}
+    .sort-select{padding:9px 14px;border:1px solid #e8d8dc;border-radius:4px;font-size:13px;font-family:'Poppins',sans-serif;color:#333;background:#fff;cursor:pointer;}
+    .sort-select:focus{outline:none;border-color:#c0415a;}
+
+    /* ── Search bar ── */
+    .search-bar-wrap{position:relative;margin-bottom:28px;}
+    .search-bar-wrap input{width:100%;padding:11px 16px 11px 40px;border:1px solid #e8d8dc;border-radius:6px;font-size:13px;font-family:'Poppins',sans-serif;color:#333;}
+    .search-bar-wrap input:focus{outline:none;border-color:#c0415a;}
+    .search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;color:#bbb;pointer-events:none;}
+    .search-bar-wrap button{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#c0415a;color:#fff;border:none;padding:5px 12px;border-radius:3px;font-size:11px;font-weight:600;cursor:pointer;letter-spacing:.5px;}
+
+    /* ── Product grid ── */
+    .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+
+    /* ── Product card ── */
+    .product-card{border:1px solid #f0e6e6;border-radius:10px;overflow:hidden;background:#fff;transition:all .3s ease;cursor:pointer;position:relative;}
+    .product-card:hover{box-shadow:0 12px 36px rgba(0,0,0,0.1);transform:translateY(-4px);}
+    .card-img{height:200px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:linear-gradient(135deg,#fff5f7,#fce8ed);}
+    .card-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease;}
+    .product-card:hover .card-img img{transform:scale(1.06);}
+    .badge{position:absolute;top:10px;right:10px;font-size:9px;padding:3px 9px;border-radius:20px;font-weight:600;letter-spacing:.5px;color:#fff;text-transform:uppercase;}
+    .badge-new{background:#c0415a;}
+    .badge-sale{background:#22b573;}
+    .badge-out{background:#999;}
+    .wish-btn{position:absolute;top:10px;left:10px;background:#fff;border:1px solid #f0e6e6;border-radius:50%;width:30px;height:30px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;z-index:2;}
+    .wish-btn:hover{border-color:#c0415a;}
+    .wish-btn.active{color:#c0415a;}
+    .card-body{padding:16px;}
+    .card-brand{font-size:9px;color:#bbb;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+    .card-name{font-size:13px;font-weight:500;color:#1a1a2e;margin-bottom:4px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .card-category{font-size:11px;color:#c0415a;margin-bottom:8px;}
+    .card-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+    .card-price{font-weight:700;color:#c0415a;font-size:15px;}
+    .card-orig{color:#ccc;font-size:12px;text-decoration:line-through;margin-left:5px;}
+    .card-offer{background:#fce8ed;color:#c0415a;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;margin-left:5px;}
+    .btn-cart{background:#1a1a2e;color:#fff;border:none;padding:8px 14px;font-size:10px;cursor:pointer;border-radius:4px;font-weight:500;letter-spacing:.5px;transition:background .2s;white-space:nowrap;}
+    .btn-cart:hover{background:#c0415a;}
+    .btn-cart:disabled{background:#ccc;cursor:not-allowed;}
+
+    /* ── Shade swatches on card ── */
+    .card-shades{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;}
+    .card-shade{width:14px;height:14px;border-radius:50%;border:1px solid #eee;cursor:pointer;transition:transform .2s;display:block;}
+    .card-shade:hover{transform:scale(1.3);border-color:#c0415a;}
+
+    /* ── Pagination ── */
+    .pagination{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:40px;flex-wrap:wrap;}
+    .page-btn{padding:8px 13px;border:1px solid #e8d8dc;border-radius:4px;font-size:13px;color:#555;background:#fff;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;min-width:36px;}
+    .page-btn:hover{border-color:#c0415a;color:#c0415a;}
+    .page-btn.active{background:#c0415a;color:#fff;border-color:#c0415a;font-weight:600;}
+    .page-btn.disabled{color:#ccc;cursor:default;pointer-events:none;}
+    .page-btn.ellipsis{border:none;cursor:default;color:#aaa;}
+
+    /* ── Empty state ── */
+    .empty-state{grid-column:1/-1;text-align:center;padding:80px 20px;}
+    .empty-state .empty-icon{font-size:56px;margin-bottom:16px;}
+    .empty-state h3{font-family:'Playfair Display',serif;font-size:22px;color:#1a1a2e;margin-bottom:8px;}
+    .empty-state p{font-size:13px;color:#aaa;margin-bottom:24px;}
+    .empty-state a{display:inline-block;padding:11px 28px;background:#c0415a;color:#fff;border-radius:4px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+
+    /* ── Active filter chips ── */
+    .active-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+    .filter-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#fce8ed;color:#c0415a;border-radius:20px;font-size:11px;font-weight:500;}
+    .filter-chip a{color:#c0415a;font-size:13px;line-height:1;text-decoration:none;font-weight:700;}
+    .filter-chip a:hover{color:#a33049;}
+
+    /* ── Mobile filter toggle ── */
+    .filter-toggle-btn{display:none;align-items:center;gap:6px;padding:9px 16px;border:1px solid #e8d8dc;border-radius:4px;background:#fff;font-size:12px;font-weight:500;color:#333;cursor:pointer;}
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;}
+    .overlay.open{display:block;}
+
+    /* ── Responsive ── */
+    @media(max-width:900px){
+      .product-grid{grid-template-columns:repeat(2,1fr);}
+      .sidebar{display:none;position:fixed;left:0;top:0;height:100vh;z-index:101;transition:transform .3s;transform:translateX(-100%);}
+      .sidebar.open{display:block;transform:translateX(0);}
+      .filter-toggle-btn{display:flex;}
+      .main-content{padding:24px 20px;}
+    }
+    @media(max-width:520px){
+      .product-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/user/header') %>
+
+  <!-- ── Page header ── -->
+  <div style="background:linear-gradient(110deg,#fff8f9 55%,#fce8ed 100%);padding:36px 48px 28px;">
+    <p style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#c0415a;margin-bottom:6px;">Blush Berry Collection</p>
+    <h1 style="font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:#1a1a2e;">Shop All Lipsticks</h1>
+    <p style="font-size:12px;color:#aaa;margin-top:8px;">
+      <a href="/" style="color:#c0415a;">Home</a> &nbsp;/&nbsp; Shop
+      <% if(searchQuery){ %> &nbsp;/&nbsp; "<%= searchQuery %>" <% } %>
+    </p>
+  </div>
+
+  <div class="page-wrapper">
+
+    <!-- ══════════════════════════════
+         SIDEBAR FILTERS
+    ══════════════════════════════ -->
+    <aside class="sidebar" id="sidebar">
+      <form id="filterForm" method="GET" action="/products">
+        <% if(searchQuery){ %><input type="hidden" name="search" value="<%= searchQuery %>"><% } %>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+          <h2 style="font-family:'Playfair Display',serif;font-size:18px;color:#1a1a2e;">Filters</h2>
+          <button type="button" id="closeSidebar" style="background:none;border:none;font-size:20px;cursor:pointer;color:#aaa;display:none;">✕</button>
+        </div>
+
+        <!-- Category -->
+        <div class="sidebar-section">
+          <h3>Category</h3>
+          <label class="filter-label">
+            <input type="radio" name="category" value="" <%= !categoryId ? 'checked' : '' %>> All
+          </label>
+          <% categories.forEach(cat => { %>
+          <label class="filter-label">
+            <input type="radio" name="category" value="<%= cat._id %>" <%= categoryId == cat._id ? 'checked' : '' %>>
+            <%= cat.name %>
+          </label>
+          <% }) %>
+        </div>
+
+        <!-- Shade -->
+        <div class="sidebar-section">
+          <h3>Shade Family</h3>
+          <% const shadeOptions = [
+            { label:'Red',   value:'red',   color:'#c0415a' },
+            { label:'Pink',  value:'pink',  color:'#f4a0b0' },
+            { label:'Nude',  value:'nude',  color:'#c8956c' },
+            { label:'Berry', value:'berry', color:'#982a58' },
+            { label:'Coral', value:'coral', color:'#e07050' },
+            { label:'Brown', value:'brown', color:'#7a4030' },
+          ] %>
+          <div class="shade-dot-wrap">
+            <% shadeOptions.forEach(s => { %>
+            <button type="button"
+              class="shade-dot <%= shade === s.value ? 'active' : '' %>"
+              style="background:<%= s.color %>;"
+              title="<%= s.label %>"
+              onclick="setShade('<%= s.value %>', this)">
+            </button>
+            <% }) %>
+          </div>
+          <input type="hidden" name="shade" id="shadeInput" value="<%= shade %>">
+          <p style="margin-top:8px;font-size:11px;color:#aaa;" id="shadeName">
+            <% if(shade){ %><%= shade.charAt(0).toUpperCase()+shade.slice(1) %> selected<% } else { %>Any shade<% } %>
+          </p>
+        </div>
+
+        <!-- Price range -->
+        <div class="sidebar-section">
+          <h3>Price Range</h3>
+          <div class="price-inputs">
+            <input type="number" name="minPrice" placeholder="Min ₹" value="<%= minPrice %>" min="0" step="0.01">
+            <span class="price-sep">–</span>
+            <input type="number" name="maxPrice" placeholder="Max ₹" value="<%= maxPrice %>" min="0" step="0.01">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-apply">Apply Filters</button>
+        <a href="/products" class="btn-clear">Clear All</a>
+      </form>
+    </aside>
+
+    <!-- ══════════════════════════════
+         MAIN CONTENT
+    ══════════════════════════════ -->
+    <div class="main-content">
+
+      <!-- Search bar -->
+      <form method="GET" action="/products" id="searchForm">
+        <% if(categoryId){ %><input type="hidden" name="category" value="<%= categoryId %>"><% } %>
+        <% if(shade){      %><input type="hidden" name="shade"    value="<%= shade %>"><% } %>
+        <% if(sortBy !== 'newest'){ %><input type="hidden" name="sort" value="<%= sortBy %>"><% } %>
+        <div class="search-bar-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" name="search" placeholder="Search lipsticks…" value="<%= searchQuery %>">
+          <button type="submit">Search</button>
+        </div>
+      </form>
+
+      <!-- Active filter chips -->
+      <% const hasFilters = searchQuery || categoryId || shade || minPrice || maxPrice %>
+      <% if(hasFilters){ %>
+      <div class="active-filters">
+        <% if(searchQuery){ %>
+        <span class="filter-chip">
+          "<%- searchQuery %>"
+          <a href="/products?<%= new URLSearchParams({...queryParams, search:'', page:1}).toString() %>">×</a>
+        </span>
+        <% } %>
+        <% if(categoryId){ %>
+        <% const activeCat = categories.find(c => String(c._id) === String(categoryId)) %>
+        <span class="filter-chip">
+          <%= activeCat ? activeCat.name : 'Category' %>
+          <a href="/products?<%= new URLSearchParams({...queryParams, category:'', page:1}).toString() %>">×</a>
+        </span>
+        <% } %>
+        <% if(shade){ %>
+        <span class="filter-chip">
+          Shade: <%= shade %>
+          <a href="/products?<%= new URLSearchParams({...queryParams, shade:'', page:1}).toString() %>">×</a>
+        </span>
+        <% } %>
+        <% if(minPrice || maxPrice){ %>
+        <span class="filter-chip">
+          ₹<%= minPrice||0 %> – ₹<%= maxPrice||'any' %>
+          <a href="/products?<%= new URLSearchParams({...queryParams, minPrice:'', maxPrice:'', page:1}).toString() %>">×</a>
+        </span>
+        <% } %>
+      </div>
+      <% } %>
+
+      <!-- Top bar -->
+      <div class="top-bar">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="filter-toggle-btn" type="button" onclick="openSidebar()">⚙ Filters</button>
+          <p class="result-count">
+            Showing <span><%= products.length %></span> of <span><%= totalProducts %></span> products
+          </p>
+        </div>
+        <form method="GET" action="/products" id="sortForm">
+          <% if(searchQuery){ %><input type="hidden" name="search"   value="<%= searchQuery %>"><% } %>
+          <% if(categoryId){  %><input type="hidden" name="category" value="<%= categoryId %>"><% } %>
+          <% if(shade){       %><input type="hidden" name="shade"    value="<%= shade %>"><% } %>
+          <% if(minPrice){    %><input type="hidden" name="minPrice" value="<%= minPrice %>"><% } %>
+          <% if(maxPrice){    %><input type="hidden" name="maxPrice" value="<%= maxPrice %>"><% } %>
+          <select name="sort" class="sort-select" onchange="this.form.submit()">
+            <option value="newest"    <%= sortBy==='newest'    ? 'selected':'' %>>Newest First</option>
+            <option value="priceAsc"  <%= sortBy==='priceAsc'  ? 'selected':'' %>>Price: Low to High</option>
+            <option value="priceDesc" <%= sortBy==='priceDesc' ? 'selected':'' %>>Price: High to Low</option>
+            <option value="nameAsc"   <%= sortBy==='nameAsc'   ? 'selected':'' %>>Name: A–Z</option>
+            <option value="nameDesc"  <%= sortBy==='nameDesc'  ? 'selected':'' %>>Name: Z–A</option>
+          </select>
+        </form>
+      </div>
+
+      <!-- ── Product grid ── -->
+      <div class="product-grid">
+
+        <% if(products.length === 0){ %>
+        <div class="empty-state">
+          <div class="empty-icon">💄</div>
+          <h3>No products found</h3>
+          <p>Try adjusting your filters or search term.</p>
+          <a href="/products">Browse All</a>
+        </div>
+
+        <% } else { %>
+        <% products.forEach(product => { %>
+
+        <div class="product-card" onclick="window.location='/products/<%= product._id %>'">
+
+          <!-- Image -->
+          <div class="card-img">
+            <% if(product.images && product.images[0]){ %>
+              <img src="<%= product.images[0] %>" alt="<%= product.name %>">
+            <% } else { %>
+              <span style="font-size:40px;">💄</span>
+            <% } %>
+
+            <!-- Badge -->
+            <% if(!product.inStock){ %>
+              <span class="badge badge-out">Sold Out</span>
+            <% } else if(product.displayOffer >= 10){ %>
+              <span class="badge badge-sale"><%= product.displayOffer %>% Off</span>
+            <% } else if((Date.now() - new Date(product.createdAt)) < 7*24*60*60*1000){ %>
+              <span class="badge badge-new">New</span>
+            <% } %>
+
+            <!-- Wishlist -->
+            <button class="wish-btn" onclick="toggleWishlist(event,'<%= product._id %>')" title="Wishlist">♡</button>
+          </div>
+
+          <!-- Body -->
+          <div class="card-body">
+            <p class="card-brand">Blush Berry</p>
+            <h4 class="card-name" title="<%= product.name %>"><%= product.name %></h4>
+            <% if(product.categoryId){ %>
+            <p class="card-category"><%= product.categoryId.name %></p>
+            <% } %>
+
+            <!-- Shade swatches -->
+            <% if(product.variants && product.variants.length){ %>
+            <div class="card-shades">
+              <% product.variants.slice(0,4).forEach(v => { %>
+                <% if(v.image){ %>
+                  <img src="<%= v.image %>" class="card-shade" title="<%= v.shade %>" onclick="event.stopPropagation()">
+                <% } else { %>
+                  <div class="card-shade" title="<%= v.shade %>" style="background:#e8b0c0;"></div>
+                <% } %>
+              <% }) %>
+              <% if(product.variants.length > 4){ %>
+              <div class="card-shade" style="background:#f0e6e8;font-size:9px;color:#c0415a;display:flex;align-items:center;justify-content:center;font-weight:600;">
+                +<%= product.variants.length - 4 %>
+              </div>
+              <% } %>
+            </div>
+            <% } %>
+
+            <!-- Price + cart -->
+            <div class="card-footer">
+              <div>
+                <span class="card-price">₹<%= product.displayPrice.toFixed(2) %></span>
+                <% if(product.displayOffer > 0){ %>
+                  <span class="card-orig">₹<%= product.originalPrice.toFixed(2) %></span>
+                  <span class="card-offer"><%= product.displayOffer %>% off</span>
+                <% } %>
+              </div>
+              <% if(product.inStock){ %>
+              <button class="btn-cart" onclick="addToCart(event,'<%= product._id %>')">ADD TO CART</button>
+              <% } else { %>
+              <button class="btn-cart" disabled>OUT OF STOCK</button>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <% }) %>
+        <% } %>
+      </div><!-- /product-grid -->
+
+      <!-- ── Pagination ── -->
+      <% if(totalPages > 1){ %>
+      <div class="pagination">
+        <% if(currentPage > 1){ %>
+        <a class="page-btn" href="/products?<%= new URLSearchParams({...queryParams, page: currentPage-1}).toString() %>">‹</a>
+        <% } else { %>
+        <span class="page-btn disabled">‹</span>
+        <% } %>
+
+        <% paginationPages.forEach(p => { %>
+          <% if(p === '...'){ %>
+          <span class="page-btn ellipsis">…</span>
+          <% } else { %>
+          <a class="page-btn <%= p === currentPage ? 'active' : '' %>"
+             href="/products?<%= new URLSearchParams({...queryParams, page: p}).toString() %>">
+            <%= p %>
+          </a>
+          <% } %>
+        <% }) %>
+
+        <% if(currentPage < totalPages){ %>
+        <a class="page-btn" href="/products?<%= new URLSearchParams({...queryParams, page: currentPage+1}).toString() %>">›</a>
+        <% } else { %>
+        <span class="page-btn disabled">›</span>
+        <% } %>
+      </div>
+      <% } %>
+
+    </div><!-- /main-content -->
+  </div><!-- /page-wrapper -->
+
+  <!-- Mobile overlay -->
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <%- include('../partials/user/footer') %>
+
+  <script>
+    // ── Shade dot picker ──
+    function setShade(val, el) {
+      const input  = document.getElementById('shadeInput')
+      const nameEl = document.getElementById('shadeName')
+      const allDots = document.querySelectorAll('.shade-dot')
+
+      if (input.value === val) {
+        input.value = ''
+        nameEl.textContent = 'Any shade'
+        allDots.forEach(d => d.classList.remove('active'))
+      } else {
+        input.value = val
+        nameEl.textContent = val.charAt(0).toUpperCase() + val.slice(1) + ' selected'
+        allDots.forEach(d => d.classList.remove('active'))
+        el.classList.add('active')
+      }
+    }
+
+    // ── Mobile sidebar ──
+    function openSidebar() {
+      document.getElementById('sidebar').classList.add('open')
+      document.getElementById('overlay').classList.add('open')
+      document.getElementById('closeSidebar').style.display = 'block'
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open')
+      document.getElementById('overlay').classList.remove('open')
+    }
+    document.getElementById('closeSidebar').addEventListener('click', closeSidebar)
+
+    // ── Wishlist toggle ──
+    function toggleWishlist(e, productId) {
+      e.stopPropagation()
+      const btn = e.currentTarget
+      btn.classList.toggle('active')
+      btn.textContent = btn.classList.contains('active') ? '♥' : '♡'
+
+      fetch('/wishlist/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (!data.success) {
+          btn.classList.toggle('active')
+          btn.textContent = btn.classList.contains('active') ? '♥' : '♡'
+          if (data.redirect) window.location.href = data.redirect
+        }
+      })
+      .catch(() => {})
+    }
+
+    // ── Add to cart ──
+    function addToCart(e, productId) {
+      e.stopPropagation()
+      const btn = e.currentTarget
+      btn.textContent = 'Adding…'
+      btn.disabled    = true
+
+      fetch('/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, quantity: 1 })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          btn.textContent      = '✓ Added'
+          btn.style.background = '#22b573'
+          const badge = document.getElementById('cartCount')
+          if (badge && data.cartCount) badge.textContent = data.cartCount
+          setTimeout(() => {
+            btn.textContent      = 'ADD TO CART'
+            btn.style.background = ''
+            btn.disabled         = false
+          }, 1800)
+        } else {
+          btn.textContent = 'ADD TO CART'
+          btn.disabled    = false
+          if (data.redirect) window.location.href = data.redirect
+        }
+      })
+      .catch(() => {
+        btn.textContent = 'ADD TO CART'
+        btn.disabled    = false
+      })
+    }
+  </script>
+</body>
+</html>

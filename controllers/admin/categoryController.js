@@ -21,9 +21,9 @@ const loadCategory = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit)
-            .lean()  // 👈 add .lean() so we can attach extra fields
+            .lean()  
 
-        // Get product count for each category in one query
+  
         const categoryIds = categories.map(c => c._id)
 
         const productCounts = await Product.aggregate([
@@ -31,13 +31,12 @@ const loadCategory = async (req, res) => {
             { $group: { _id: '$categoryId', count: { $sum: 1 } } }
         ])
 
-        // Build a lookup map: categoryId -> count
         const countMap = {}
         productCounts.forEach(item => {
             countMap[item._id.toString()] = item.count
         })
 
-        // Attach productCount to each category
+        
         categories.forEach(cat => {
             cat.productCount = countMap[cat._id.toString()] || 0
         })
@@ -201,12 +200,10 @@ const toggleCategoryListing = async (req, res) => {
             })
         }
 
-        // flip the listing status
         const newListingStatus = !category.isListed
         category.isListed = newListingStatus
         await category.save()
 
-        // also hide/show all products under this category
         await Product.updateMany(
             { categoryId: categoryId },
             { isListed: newListingStatus }
@@ -214,7 +211,7 @@ const toggleCategoryListing = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: newListingStatus ? 'Category unlisted successfully' : 'Category listed successfully'
+            message: newListingStatus ? 'Category listed successfully' : 'Category unlisted successfully'
         })
 
     } catch (error) {

@@ -283,12 +283,50 @@
     font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 600;
     cursor: pointer; box-shadow: 0 4px 14px rgba(200,48,96,0.3);
   }
+  
+  .pagination {
+  max-width: 860px;
+  margin: 32px auto 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-family: 'Jost', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e8527a;
+  background: #fff;
+  border: 1.5px solid #f0d0dc;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.page-btn:hover {
+  background: #fde8f0;
+  border-color: #e8527a;
+}
+
+.page-btn.active {
+  background: linear-gradient(135deg, #e8527a, #c93060);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(200,48,96,0.3);
+}
 
   @media (max-width: 600px) {
     .modal-box { padding: 32px 24px 40px; }
     .form-row.cols-2, .form-row.cols-3 { grid-template-columns: 1fr; }
     .addr-grid { grid-template-columns: 1fr; }
   }
+
+
 </style>
 
 <div class="addr-page">
@@ -357,7 +395,32 @@
       <p>No addresses saved yet. Add one to get started!</p>
     </div>
   <% } %>
+
+   
+
+    <!-- Pagination -->
+  <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+    <div class="pagination">
+      <% if (currentPage > 1) { %>
+        <a href="/addresses?page=<%= currentPage - 1 %>" class="page-btn">« Prev</a>
+      <% } %>
+
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <a href="/addresses?page=<%= i %>"
+           class="page-btn <%= i === currentPage ? 'active' : '' %>">
+          <%= i %>
+        </a>
+      <% } %>
+
+      <% if (currentPage < totalPages) { %>
+        <a href="/addresses?page=<%= currentPage + 1 %>" class="page-btn">Next »</a>
+      <% } %>
+    </div>
+  <% } %>
+
 </div>
+
+
 
 <!-- ADD Modal — uses normal POST form (creating new resource) -->
 <div class="modal-overlay" id="addModal">

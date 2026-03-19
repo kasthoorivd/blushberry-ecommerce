@@ -5,8 +5,16 @@ const loadAddresses = async (req, res) => {
   try {
     const user = req.session.user
     const userId = user._id
-    const addresses = await Address.find({ user: userId }).sort({ createdAt: -1 })
-    return res.render('user/addresses', { user, addresses, successMsg: null, errorMsg: null })
+    const page = parseInt(req.query.page) || 1
+    const limit = 2
+    const skip = (page - 1) * limit
+    const totalAddresses = await Address.countDocuments({user:userId})
+    const totalPages = Math.ceil(totalAddresses/limit)
+    const addresses = await Address.find({ user: userId })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    return res.render('user/addresses', { user, addresses, successMsg: null, errorMsg: null ,currentPage : page,totalAddresses,totalPages})
   } catch (error) {
     console.error('loadAddresses error:', error)
     return res.redirect('/profile')
@@ -90,9 +98,14 @@ const loadEditAddress = async (req, res) => {
   try {
     const userId = req.session.user._id
     const addressId = req.params.id
+    const page = parseInt(req.query.page) || 1
+    const limit = 2
+    const skip = (page - 1) * limit
+    const totalAddresses = await Address.countDocuments({user:userId})
+    const totalPages = Math.ceil(totalAddresses/limit)
     const address = await Address.findOne({ _id: addressId, user: userId })
     if (!address) return res.redirect('/addresses')
-    return res.render('user/addresses', { user: req.session.user, address, errorMsg: null })
+    return res.render('user/addresses', { user: req.session.user, address, errorMsg: null,currentPage:page,totalAddresses,totalPages })
   } catch (error) {
     console.error('loadEditAddress error:', error)
     return res.redirect('/addresses')

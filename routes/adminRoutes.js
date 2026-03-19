@@ -4,6 +4,7 @@ const adminController    = require('../controllers/admin/adminController')
 const customerController = require('../controllers/admin/customerController')
 const categoryController = require('../controllers/admin/categoryController')
 const productController = require('../controllers/admin/productController')
+const couponController = require('../controllers/admin/couponController')
 const adminAuth          = require('../middleware/adminAuth')
 const { uploadProductImages } = require('../config/cloudinary');
 
@@ -38,6 +39,12 @@ adminRouter.get('/editProduct/:id',adminAuth,productController.loadEditProduct)
 adminRouter.put('/editProduct/:id',adminAuth,productController.editProduct)
 adminRouter.post('/toggleProductListing/:id',adminAuth,productController.toggleProductListing)
 adminRouter.delete('/deleteProduct/:id',adminAuth,productController.deleteProduct)
+
+
+adminRouter.get('/coupons',couponController.loadCoupons)
+adminRouter.post('/coupons/create',couponController.createCoupon)
+adminRouter.patch('/coupons/:id/toggle',couponController.toggleCoupon)
+adminRouter.delete('/coupons/:id',couponController.deleteCoupon)
 
 adminRouter.get('/logout',adminAuth,adminController.adminLogout)
 

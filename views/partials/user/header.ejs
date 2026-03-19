@@ -6,11 +6,42 @@
   </a>
 
   <!-- Nav Links -->
-  <ul style="list-style:none;display:flex;gap:36px;align-items:center;">
-    <li><a href="/" class="nav-link" style="font-size:13px;font-weight:500;color:#c0415a;">Home</a></li>
-    <li><a href="#shop" class="nav-link" style="font-size:13px;font-weight:400;color:#555;">Shop</a></li>
-    <li><a href="/order" class="nav-link" style="font-size:13px;font-weight:400;color:#555;">Order</a></li>
-    <li><a href="/contact" class="nav-link" style="font-size:13px;font-weight:400;color:#555;">Contact</a></li>
+   <!-- Nav Links -->
+<ul style="list-style:none;display:flex;gap:36px;align-items:center;">
+    <li><a href="/" class="nav-link" style="font-size:13px;font-weight:500;color:<%= currentPath === '/' ? '#c0415a' : '#555' %>;">Home</a></li>
+    <li><a href="/products" class="nav-link" style="font-size:13px;font-weight:400;color:<%= currentPath === '/products' ? '#c0415a' : '#555' %>;">Shop</a></li>
+    <li><a href="/order" class="nav-link" style="font-size:13px;font-weight:400;color:<%= currentPath === '/order' ? '#c0415a' : '#555' %>;">Order</a></li>
+    <li><a href="/contact" class="nav-link" style="font-size:13px;font-weight:400;color:<%= currentPath === '/contact' ? '#c0415a' : '#555' %>;">Contact</a></li>
+    <li>
+      <a href="/wishlist" style="position:relative;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#fff5f7;border:1px solid #f2e6e9;text-decoration:none;transition:background 0.2s;" title="Wishlist"
+        onmouseover="this.style.background='#fde8ed'" onmouseout="this.style.background='#fff5f7'">
+        <svg width="16" height="16" fill="none" stroke="#c0415a" stroke-width="2" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+        <% if (typeof wishlistCount !== 'undefined' && wishlistCount > 0) { %>
+          <span style="position:absolute;top:-4px;right:-4px;background:#c0415a;color:#fff;font-size:9px;font-weight:700;font-family:'Poppins',sans-serif;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1;">
+            <%= wishlistCount %>
+          </span>
+        <% } %>
+      </a>
+    </li>
+
+    <!-- Cart Icon -->
+    <li>
+      <a href="/cart" style="position:relative;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#fff5f7;border:1px solid #f2e6e9;text-decoration:none;transition:background 0.2s;" title="Cart"
+        onmouseover="this.style.background='#fde8ed'" onmouseout="this.style.background='#fff5f7'">
+        <svg width="16" height="16" fill="none" stroke="#c0415a" stroke-width="2" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <% if (typeof cartCount !== 'undefined' && cartCount > 0) { %>
+          <span style="position:absolute;top:-4px;right:-4px;background:#c0415a;color:#fff;font-size:9px;font-weight:700;font-family:'Poppins',sans-serif;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1;">
+            <%= cartCount %>
+          </span>
+        <% } %>
+      </a>
+    </li>
 
     <% if (!user) { %>
 
@@ -36,7 +67,6 @@
             <img
               src="<%= user.profilePhoto.replace('s96-c', 's200-c') %>"
               alt="Profile"
-             
               style="width:34px;height:34px;min-width:34px;min-height:34px;border-radius:50%;object-fit:cover;object-position:center;border:2px solid #e8c8d0;flex-shrink:0;display:block;"
             >
           <% } else { %>
@@ -71,6 +101,18 @@
               My Orders
             </a>
           </li>
+          <li>
+            <a href="/wishlist" style="display:flex;align-items:center;gap:8px;padding:9px 16px;font-size:13px;color:#555;font-family:'Poppins',sans-serif;text-decoration:none;">
+              <svg width="14" height="14" fill="none" stroke="#888" stroke-width="2" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              My Wishlist
+            </a>
+          </li>
+          <li>
+            <a href="/cart" style="display:flex;align-items:center;gap:8px;padding:9px 16px;font-size:13px;color:#555;font-family:'Poppins',sans-serif;text-decoration:none;">
+              <svg width="14" height="14" fill="none" stroke="#888" stroke-width="2" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+              My Cart
+            </a>
+          </li>
           <li style="border-top:1px solid #f5e8ec;margin-top:4px;padding-top:4px;">
             <a href="/logout" style="display:flex;align-items:center;gap:8px;padding:9px 16px;font-size:13px;color:#c0415a;font-weight:600;font-family:'Poppins',sans-serif;text-decoration:none;">
               <svg width="14" height="14" fill="none" stroke="#c0415a" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
@@ -83,15 +125,15 @@
     <% } %>
   </ul>
 </nav>
+
 <script>
-    var profileBtn = document.getElementById('profileBtn');
+  var profileBtn = document.getElementById('profileBtn');
   var profileDropdown = document.getElementById('profileDropdown');
 
   if (profileBtn && profileDropdown) {
-
     profileBtn.addEventListener('click', function (e) {
       e.stopPropagation();
-      if (profileDropdown.style.display === 'block') { 
+      if (profileDropdown.style.display === 'block') {
         profileDropdown.style.display = 'none';
       } else {
         profileDropdown.style.display = 'block';
@@ -103,6 +145,5 @@
         profileDropdown.style.display = 'none';
       }
     });
-
   }
 </script>

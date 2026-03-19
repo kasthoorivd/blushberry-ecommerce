@@ -5,7 +5,8 @@ const variantSchema = new mongoose.Schema({
     varientPrice: { type: Number, required: true, min: 0 },
     salePrice:    { type: Number, default: 0,     min: 0 },
     stock:        { type: Number, required: true, default: 0, min: 0 },
-    image:        { type: String, default: '' }    // cloudinary URL — shade swatch
+    image:        { type: String, default: "" },
+    // cloudinary URL — shade swatch
 })
 
 const productSchema = new mongoose.Schema(

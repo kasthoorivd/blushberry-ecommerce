@@ -64,7 +64,7 @@
     .form-control { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 0.65rem 0.9rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.86rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; resize: vertical; width: 100%; }
     .form-control::placeholder { color: var(--muted); opacity: 0.7; }
     .form-control:focus { border-color: rgba(244,167,188,0.5); box-shadow: 0 0 0 3px rgba(244,167,188,0.06); }
-    .form-control.is-invalid { border-color: #e06c6c; }
+    .form-control.is-invalid { border-color: #e06c6c; box-shadow: 0 0 0 3px rgba(224,108,108,0.08); }
     .form-error { font-size: 0.72rem; color: #e06c6c; display: none; align-items: center; gap: 0.3rem; margin-top: 0.2rem; }
     .form-error.visible { display: flex; }
     .form-hint { font-size: 0.72rem; color: var(--muted); }
@@ -121,6 +121,11 @@
     .shade-img-input { display: none; }
     .btn-shade-img { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.38rem 0.75rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.76rem; cursor: pointer; transition: all 0.18s; white-space: nowrap; }
     .btn-shade-img:hover { border-color: var(--accent-dim); color: var(--accent); }
+
+    /* inline field error below variant inputs */
+    .field-error { font-size: 0.68rem; color: #e06c6c; margin-top: 0.22rem; display: none; }
+    .field-error.visible { display: block; }
+
     .btn-add-variant { display: inline-flex; align-items: center; gap: 0.45rem; background: transparent; border: 1px dashed var(--border); color: var(--muted); padding: 0.65rem 1.2rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.84rem; cursor: pointer; transition: all 0.2s; width: 100%; justify-content: center; margin-top: 0.5rem; }
     .btn-add-variant:hover { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
 
@@ -160,7 +165,7 @@
 
       <form id="editProductForm" novalidate>
 
-        <!-- ── BASIC INFO ── -->
+        <!-- BASIC INFO -->
         <div class="section-card">
           <div class="section-header">
             <div class="section-icon"><i class="fas fa-info-circle"></i></div>
@@ -201,7 +206,7 @@
           </div>
         </div>
 
-        <!-- ── PRODUCT IMAGES ── -->
+        <!-- PRODUCT IMAGES -->
         <div class="section-card">
           <div class="section-header">
             <div class="section-icon"><i class="fas fa-images"></i></div>
@@ -209,7 +214,6 @@
           </div>
           <div class="section-body">
 
-            <!-- existing images from DB -->
             <% if (product.images && product.images.length > 0) { %>
               <p style="font-size:0.72rem;color:var(--muted);margin-bottom:0.6rem;">Current images — click × to remove</p>
               <div class="existing-images" id="existingImages">
@@ -223,7 +227,6 @@
               </div>
             <% } %>
 
-            <!-- add more images -->
             <div class="image-upload-area" style="margin-top:0.75rem;">
               <input type="file" id="imageFileInput" accept="image/*" multiple />
               <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
@@ -235,7 +238,7 @@
           </div>
         </div>
 
-        <!-- ── SHADE VARIANTS ── -->
+        <!-- SHADE VARIANTS -->
         <div class="section-card">
           <div class="section-header">
             <div class="section-icon"><i class="fas fa-palette"></i></div>
@@ -286,15 +289,15 @@
 <script>
   var PRODUCT_ID = '<%= product._id %>';
 
-  /* existing images from DB — track which ones to keep */
-  var existingImages = <%- JSON.stringify(product.images || []) %>;
+  /* existing images from DB */
+  var existingImages  = <%- JSON.stringify(product.images || []) %>;
   var removedExisting = [];
 
   /* new images added via cropper */
   var newCroppedImages = [];
 
-  var variantCount    = 0;
-  var cropperInstance = null;
+  var variantCount        = 0;
+  var cropperInstance     = null;
   var currentCropCallback = null;
 
   /* ── TOAST ── */
@@ -418,20 +421,24 @@
         <div class="form-group">
           <label class="form-label">Shade Name <span class="required">*</span></label>
           <input type="text" class="form-control variant-shade" placeholder="e.g. Ruby Red" value="${d.shade || ''}" />
+          <span class="field-error err-shade">Shade name is required.</span>
         </div>
         <div class="form-group">
           <label class="form-label">Original Price <span class="required">*</span></label>
-          <input type="number" class="form-control variant-price" placeholder="599" min="0" value="${d.varientPrice || ''}" />
+          <input type="number" class="form-control variant-price" placeholder="e.g. 599" min="0" max="999" value="${d.varientPrice || ''}" />
+          <span class="field-error err-price">Required &amp; must be less than ₹1000.</span>
         </div>
         <div class="form-group">
-          <label class="form-label">Sale Price</label>
+          <label class="form-label">Sale Price <span class="optional">(optional)</span></label>
           <input type="number" class="form-control variant-sale" placeholder="auto-calculated" min="0" value="${d.salePrice || ''}" />
+          <span class="field-error err-sale">Must be less than the original price.</span>
         </div>
       </div>
       <div class="form-grid-2">
         <div class="form-group">
           <label class="form-label">Stock <span class="required">*</span></label>
-          <input type="number" class="form-control variant-stock" placeholder="0" min="0" value="${d.stock || ''}" />
+          <input type="number" class="form-control variant-stock" placeholder="0" min="0" max="20" value="${d.stock || ''}" />
+          <span class="field-error err-stock">Required &amp; cannot exceed 20 units.</span>
         </div>
         <div class="form-group">
           <label class="form-label">Shade Image <span class="optional">(optional)</span></label>
@@ -449,6 +456,9 @@
       </div>
     `;
     list.appendChild(card);
+
+    /* live validation listeners */
+    attachVariantListeners(card);
   }
 
   function removeVariant(id) {
@@ -478,6 +488,43 @@
     reader.readAsDataURL(input.files[0]);
   }
 
+  /* live-clear errors as user types inside a variant card */
+  function attachVariantListeners(card) {
+    card.querySelector('.variant-shade').addEventListener('input', function() {
+      clearFieldErr(this, card.querySelector('.err-shade'));
+    });
+    card.querySelector('.variant-price').addEventListener('input', function() {
+      clearFieldErr(this, card.querySelector('.err-price'));
+      var saleInput = card.querySelector('.variant-sale');
+      if (saleInput.value !== '') validateSaleVsPrice(card);
+    });
+    card.querySelector('.variant-sale').addEventListener('input', function() {
+      validateSaleVsPrice(card);
+    });
+    card.querySelector('.variant-stock').addEventListener('input', function() {
+      clearFieldErr(this, card.querySelector('.err-stock'));
+    });
+  }
+
+  function clearFieldErr(input, errEl) {
+    input.classList.remove('is-invalid');
+    if (errEl) errEl.classList.remove('visible');
+  }
+
+  function validateSaleVsPrice(card) {
+    var priceVal  = card.querySelector('.variant-price').value;
+    var saleVal   = card.querySelector('.variant-sale').value;
+    var saleInput = card.querySelector('.variant-sale');
+    var errSale   = card.querySelector('.err-sale');
+    if (saleVal !== '' && priceVal !== '' && Number(saleVal) >= Number(priceVal)) {
+      saleInput.classList.add('is-invalid');
+      errSale.classList.add('visible');
+    } else {
+      saleInput.classList.remove('is-invalid');
+      errSale.classList.remove('visible');
+    }
+  }
+
   /* load existing variants */
   <% if (product.variants && product.variants.length > 0) { %>
     <% product.variants.forEach(function(v) { %>
@@ -493,7 +540,7 @@
     addVariant();
   <% } %>
 
-  /* ── VALIDATION ── */
+  /* ── TOP-LEVEL FIELD VALIDATION ── */
   function clearErr(inputId, errId) {
     var el = document.getElementById(inputId);
     if (el) el.classList.remove('is-invalid');
@@ -508,24 +555,39 @@
     if (errTextId) { var txt = document.getElementById(errTextId); if (txt) txt.textContent = msg; }
   }
 
+  ['name','categoryId','description','offer'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', function() {
+      this.classList.remove('is-invalid');
+      var errMap = { name:'errName', categoryId:'errCategory', description:'errDesc', offer:'errOffer' };
+      var err = document.getElementById(errMap[id]);
+      if (err) err.classList.remove('visible');
+    });
+  });
+
+  /* ── VALIDATE ── */
   function validate() {
     var ok = true;
 
+    /* name */
     var name = document.getElementById('name').value.trim();
     clearErr('name','errName');
     if (!name) { showErr('name','errName','errNameText','Product name is required.'); ok = false; }
     else if (/^\d+$/.test(name)) { showErr('name','errName','errNameText','Name cannot be only numbers.'); ok = false; }
     else if (name.length < 3) { showErr('name','errName','errNameText','Name must be at least 3 characters.'); ok = false; }
 
+    /* category */
     var cat = document.getElementById('categoryId').value;
     clearErr('categoryId','errCategory');
     if (!cat) { showErr('categoryId','errCategory',null,''); ok = false; }
 
+    /* description */
     var desc = document.getElementById('description').value.trim();
     clearErr('description','errDesc');
     if (!desc) { showErr('description','errDesc','errDescText','Description is required.'); ok = false; }
     else if (desc.length < 10) { showErr('description','errDesc','errDescText','Must be at least 10 characters.'); ok = false; }
 
+    /* offer */
     var offer = document.getElementById('offer').value;
     clearErr('offer','errOffer');
     if (offer !== '') {
@@ -533,23 +595,94 @@
       if (isNaN(on) || on < 0 || on > 100) { showErr('offer','errOffer','errOfferText','Offer must be 0–100.'); ok = false; }
     }
 
+    /* images */
     if (getTotalImageCount() < 3) {
       document.getElementById('imgCountNote').className = 'img-count-note error';
       showToast('Please keep at least 3 product images.', 'error');
       ok = false;
     }
 
+    /* variants */
     var cards = document.querySelectorAll('.variant-card');
     var errV  = document.getElementById('errVariants');
-    if (cards.length === 0) { errV.classList.add('visible'); ok = false; }
-    else {
+    if (cards.length === 0) {
+      errV.classList.add('visible'); ok = false;
+    } else {
       errV.classList.remove('visible');
+
       cards.forEach(function(card) {
-        if (!card.querySelector('.variant-shade').value.trim() ||
-            !card.querySelector('.variant-price').value ||
-            card.querySelector('.variant-stock').value === '') {
-          showToast('Please fill all required fields for each shade.', 'error');
+        var shadeInput = card.querySelector('.variant-shade');
+        var priceInput = card.querySelector('.variant-price');
+        var saleInput  = card.querySelector('.variant-sale');
+        var stockInput = card.querySelector('.variant-stock');
+        var errShade   = card.querySelector('.err-shade');
+        var errPrice   = card.querySelector('.err-price');
+        var errSale    = card.querySelector('.err-sale');
+        var errStock   = card.querySelector('.err-stock');
+
+        var shade    = shadeInput.value.trim();
+        var priceVal = priceInput.value;
+        var saleVal  = saleInput.value;
+        var stockVal = stockInput.value;
+        var price    = Number(priceVal);
+        var sale     = Number(saleVal);
+        var stock    = Number(stockVal);
+
+        /* shade name */
+        if (!shade) {
+          shadeInput.classList.add('is-invalid');
+          errShade.classList.add('visible');
           ok = false;
+        } else {
+          shadeInput.classList.remove('is-invalid');
+          errShade.classList.remove('visible');
+        }
+
+        /* original price — required + must be < 1000 */
+        if (!priceVal || isNaN(price) || price <= 0) {
+          priceInput.classList.add('is-invalid');
+          errPrice.textContent = 'Original price is required.';
+          errPrice.classList.add('visible');
+          ok = false;
+        } else if (price >= 1000) {
+          priceInput.classList.add('is-invalid');
+          errPrice.textContent = 'Original price must be less than ₹1000.';
+          errPrice.classList.add('visible');
+          ok = false;
+        } else {
+          priceInput.classList.remove('is-invalid');
+          errPrice.classList.remove('visible');
+        }
+
+        /* sale price — optional but must be < original price */
+        if (saleVal !== '' && !isNaN(sale)) {
+          if (sale >= price) {
+            saleInput.classList.add('is-invalid');
+            errSale.classList.add('visible');
+            ok = false;
+          } else {
+            saleInput.classList.remove('is-invalid');
+            errSale.classList.remove('visible');
+          }
+        } else {
+          saleInput.classList.remove('is-invalid');
+          errSale.classList.remove('visible');
+        }
+
+        /* stock — required + max 20 */
+        if (stockVal === '' || isNaN(stock) || stock < 0) {
+          stockInput.classList.add('is-invalid');
+          errStock.textContent = 'Stock is required.';
+          errStock.classList.add('visible');
+          ok = false;
+        } else if (stock > 20) {
+          stockInput.classList.add('is-invalid');
+          errStock.textContent = 'Stock cannot exceed 20 units.';
+          errStock.classList.add('visible');
+          ok = false;
+        } else {
+          stockInput.classList.remove('is-invalid');
+          errStock.classList.remove('visible');
         }
       });
     }
@@ -557,6 +690,7 @@
     return ok;
   }
 
+  /* ── COLLECT VARIANTS ── */
   function collectVariants() {
     var variants = [];
     document.querySelectorAll('.variant-card').forEach(function(card) {

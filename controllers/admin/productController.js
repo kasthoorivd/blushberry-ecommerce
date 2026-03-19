@@ -2,7 +2,7 @@ const Product = require('../../models/user/productModel')
 const Category = require('../../models/user/categoryModel')
 const {cloudinary} = require('../../config/cloudinary')
 
-const LIMIT = 10
+const LIMIT = 5
 
 const loadProducts = async (req,res) => {
     try {
@@ -49,69 +49,50 @@ const loadAddProduct = async(req,res) =>{
   }
 }
 
-const addProduct = async (req,res) =>{
-   try {
-    const { name, description, categoryId, offer, images, variants } = req.body;
+const addProduct = async (req, res) => {
+  try {
+    const { name, description, categoryId, offer, images, variants } = req.body
 
-    // images is an array of base64 data URLs — upload each to Cloudinary
-    if (!images || images.length < 3) {
-      return res.status(400).json({ success: false, message: 'At least 3 product images are required.' });
+    // upload product gallery images to cloudinary
+    const uploadedImages = await Promise.all(
+      images.map(base64 => cloudinary.uploader.upload(base64, { folder: 'blushberry/products' }))
+    )
+    const imageUrls = uploadedImages.map(r => r.secure_url)
+
+    const processedVariants = await Promise.all(
+  variants.map(async (v) => {
+    let imageUrl = ''
+    if (v.image && v.image.startsWith('data:')) {
+      const uploaded = await cloudinary.uploader.upload(v.image, { folder: 'blushberry/shades' })
+      imageUrl = uploaded.secure_url
     }
-
-    if (!variants || !variants.length) {
-      return res.status(400).json({ success: false, message: 'At least one variant is required.' });
+    return {
+      shade:        v.shade,
+      varientPrice: v.varientPrice,
+      salePrice:    v.salePrice || 0,
+      stock:        v.stock,
+      image:        imageUrl
     }
-
-    // Upload all product images to Cloudinary
-    const imageUrls = await Promise.all(
-      images.map(base64 =>
-        cloudinary.uploader.upload(base64, {
-          folder: 'blushberry/products',
-          transformation: [{ width: 800, height: 800, crop: 'limit', quality: 'auto' }]
-        }).then(r => r.secure_url)
-      )
-    );
-
-    // Upload shade swatch images (if any)
-    const uploadedVariants = await Promise.all(
-      variants.map(async v => {
-        let swatchUrl = '';
-        if (v.image && v.image.startsWith('data:')) {
-          const result = await cloudinary.uploader.upload(v.image, {
-            folder: 'blushberry/swatches',
-            transformation: [{ width: 200, height: 200, crop: 'fill', quality: 'auto' }]
-          });
-          swatchUrl = result.secure_url;
-        }
-        return {
-          shade:        v.shade,
-          varientPrice: Number(v.varientPrice),
-          salePrice:    Number(v.salePrice) || 0,
-          stock:        Number(v.stock),
-          image:        swatchUrl
-        };
-      })
-    );
-
+  })
+)
+   
     const product = new Product({
       name,
       description,
       categoryId,
-      offer:    Number(offer) || 0,
+      offer:    offer || 0,
       images:   imageUrls,
-      variants: uploadedVariants,
-    });
+      variants: processedVariants
+    })
 
-    await product.save();
+    await product.save()
+    return res.json({ success: true, message: 'Product added successfully' })
 
-    res.json({ success: true, message: `"${product.name}" added successfully!` });
-
-  } catch (err) {
-    console.error('postAddProduct error:', err);
-    res.status(500).json({ success: false, message: err.message || 'Could not add product.' });
+  } catch (error) {
+    console.error('addProduct error:', error)
+    return res.json({ success: false, message: 'Failed to add product' })
   }
-    }
-
+}
 
     const loadEditProduct = async (req,res) => {
       try {
@@ -121,82 +102,62 @@ const addProduct = async (req,res) =>{
           const categories = await Category.find({isDeleted: false}).lean();
           res.render('admin/editProduct',{product,categories})
       } catch (error) {
-        console.error('loadEditProduct error:',err)
+        console.error('loadEditProduct error:',error)
         res.status(500).render('error',{message:'Could not load product'})
       }
     }
   
 
-    const editProduct = async (req,res) => {
-      try {
-    const { name, description, categoryId, offer, existingImages, newImages, variants } = req.body;
+   const editProduct = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { name, description, categoryId, offer, existingImages, newImages, variants } = req.body
 
-    const product = await Product.findOne({ _id: req.params.id, isDeleted: false });
-    if (!product) return res.status(404).json({ success: false, message: 'Product not found.' });
-
-    // Delete removed images from Cloudinary
-    const removedImages = product.images.filter(url => !(existingImages || []).includes(url));
-    await Promise.all(
-      removedImages.map(url => {
-        const parts    = url.split('/');
-        const file     = parts[parts.length - 1].split('.')[0];
-        const folder   = parts[parts.length - 2];
-        const publicId = `${folder}/${file}`;
-        return cloudinary.uploader.destroy(publicId).catch(() => {});
-      })
-    );
-
-    // Upload new base64 images to Cloudinary
-    const uploadedNewImages = await Promise.all(
+    // upload new product gallery images
+    const uploadedNew = await Promise.all(
       (newImages || []).map(base64 =>
-        cloudinary.uploader.upload(base64, {
-          folder: 'blushberry/products',
-          transformation: [{ width: 800, height: 800, crop: 'limit', quality: 'auto' }]
-        }).then(r => r.secure_url)
+        cloudinary.uploader.upload(base64, { folder: 'blushberry/products' })
       )
-    );
+    )
+    const finalImages = [
+      ...existingImages,
+      ...uploadedNew.map(r => r.secure_url)
+    ]
 
-    const finalImages = [...(existingImages || []), ...uploadedNewImages];
-    if (finalImages.length < 3) {
-      return res.status(400).json({ success: false, message: 'At least 3 product images are required.' });
+    // upload shade images for each variant
+   const processedVariants = await Promise.all(
+  variants.map(async (v) => {
+    let imageUrl = v.image || ''
+    // if it's a new base64 upload, push to cloudinary
+    if (imageUrl.startsWith('data:')) {
+      const uploaded = await cloudinary.uploader.upload(imageUrl, { folder: 'blushberry/shades' })
+      imageUrl = uploaded.secure_url
     }
+    // if it's already a cloudinary URL, keep it as-is
+    return {
+      shade:        v.shade,
+      varientPrice: v.varientPrice,
+      salePrice:    v.salePrice || 0,
+      stock:        v.stock,
+      image:        imageUrl
+    }
+  })
+)
 
-    // Upload new swatch images for variants
-    const uploadedVariants = await Promise.all(
-      (variants || []).map(async v => {
-        let swatchUrl = v.image || '';
-        // If it's a new base64 upload (not an existing cloudinary URL)
-        if (swatchUrl.startsWith('data:')) {
-          const result = await cloudinary.uploader.upload(swatchUrl, {
-            folder: 'blushberry/swatches',
-            transformation: [{ width: 200, height: 200, crop: 'fill', quality: 'auto' }]
-          });
-          swatchUrl = result.secure_url;
-        }
-        return {
-          shade:        v.shade,
-          varientPrice: Number(v.varientPrice),
-          salePrice:    Number(v.salePrice)    || 0,
-          stock:        Number(v.stock),
-          image:        swatchUrl
-        };
-      })
-    );
+    await Product.findByIdAndUpdate(id, {
+      name,
+      description,
+      categoryId,
+      offer:    offer || 0,
+      images:   finalImages,
+      variants: processedVariants
+    })
 
-    product.name        = name;
-    product.description = description;
-    product.categoryId  = categoryId;
-    product.offer       = Number(offer) || 0;
-    product.images      = finalImages;
-    product.variants    = uploadedVariants;
+    return res.json({ success: true, message: 'Product updated successfully' })
 
-    await product.save();
-
-    res.json({ success: true, message: `"${product.name}" updated successfully!` });
-
-  } catch (err) {
-    console.error('postEditProduct error:', err);
-    res.status(500).json({ success: false, message: err.message || 'Could not update product.' });
+  } catch (error) {
+    console.error('editProduct error:', error)
+    return res.json({ success: false, message: 'Failed to update product' })
   }
 }
 

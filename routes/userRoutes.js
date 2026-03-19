@@ -7,6 +7,9 @@ const userRouter = express.Router()
 const userController = require('../controllers/user/userAuthController')
 const profileController = require('../controllers/user/profileController')
 const addressController = require('../controllers/user/addressController')
+const productController = require('../controllers/user/productController')
+const productDetailController = require('../controllers/user/productDetailController')
+const cartController = require('../controllers/user/cartController')
 const {isLoggedIn, isLoggedOut} = require('../middleware/authMiddleware')
 
 
@@ -83,7 +86,26 @@ userRouter.delete('/addresses/delete/:id', addressController.deleteAddress)
 userRouter.patch('/addresses/default/:id', addressController.setDefaultAddress)
 
 
+//products
+userRouter.get('/products',productController.loadProductListing)
 
+//productdetail
+userRouter.get('/products/:id',productDetailController.loadProductDetail)
+userRouter.post('/products/:id/review',productDetailController.submitReview)
+userRouter.delete('/products/:id/review',productDetailController.deleteReview)
+
+//cart 
+userRouter.get('/cart',cartController.loadCart)
+userRouter.post('/cart/add',cartController.addToCart)
+userRouter.post('/cart/update',cartController.updateCartItem)
+userRouter.delete('/cart/remove/:itemId',cartController.removeFromCart)
+userRouter.post('/wishlist/toggle', cartController.toggleWishlist)
+
+userRouter.get('/wishlist',cartController.loadWishlist)
+
+
+userRouter.post('/cart/apply-coupon',cartController.applyCoupon)
+userRouter.delete('/cart/remove-coupon',cartController.removeCoupon)
 // logout
 userRouter.get('/logout', isLoggedIn, userController.logout)
 
