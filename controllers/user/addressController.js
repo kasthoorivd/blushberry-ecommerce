@@ -38,7 +38,7 @@ const addAddress = async (req, res) => {
       mobile, email, alternateNumber,
     } = req.body
 
-    // Re-fetch addresses so the page can re-render properly on error
+   
     const addresses = await Address.find({ user: userId }).sort({ createdAt: -1 })
 
     if (!name || !country || !state || !address || !pincode || !mobile || !email) {

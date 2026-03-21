@@ -111,14 +111,49 @@
     .btn-crop-confirm { background: var(--accent); color: #1a0a10; border: none; padding: 0.55rem 1.4rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.84rem; font-weight: 500; cursor: pointer; transition: background 0.2s; }
     .btn-crop-confirm:hover { background: var(--accent-dim); }
 
-    /* VARIANTS */
-    .variant-list { display: flex; flex-direction: column; gap: 1rem; }
-    .variant-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem; position: relative; }
-    .variant-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-    .variant-label { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+    /* ── VARIANT CARDS ── */
+    .variant-list { display: flex; flex-direction: column; gap: 0; }
+
+    .variant-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 0.85rem;
+      transition: box-shadow 0.2s;
+    }
+    .variant-card:hover { box-shadow: 0 2px 16px rgba(244,167,188,0.06); }
+
+    /* collapsible header */
+    .variant-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.85rem 1.1rem; cursor: pointer; user-select: none;
+      border-bottom: 1px solid transparent; transition: border-color 0.2s, background 0.2s;
+    }
+    .variant-card-header:hover { background: rgba(244,167,188,0.03); }
+    .variant-card.open .variant-card-header { border-bottom-color: var(--border); }
+
+    .variant-header-left { display: flex; align-items: center; gap: 0.65rem; }
+    .variant-num-badge {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(244,167,188,0.12); border: 1px solid rgba(244,167,188,0.25);
+      color: var(--accent); font-size: 0.65rem; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .variant-header-label { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+    .variant-shade-preview { font-size: 0.8rem; color: var(--muted); font-style: italic; }
+
+    .variant-header-right { display: flex; align-items: center; gap: 0.5rem; }
     .btn-remove-variant { background: transparent; border: 1px solid rgba(192,57,43,0.3); color: #e06c6c; width: 26px; height: 26px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.72rem; transition: all 0.18s; }
     .btn-remove-variant:hover { background: var(--danger-dim); border-color: rgba(192,57,43,0.5); }
+    .variant-chevron { color: var(--muted); font-size: 0.72rem; transition: transform 0.25s; }
+    .variant-card.open .variant-chevron { transform: rotate(180deg); }
 
+    /* collapsible body */
+    .variant-card-body { display: none; padding: 1.1rem; }
+    .variant-card.open .variant-card-body { display: block; }
+
+    /* shade image (swatch) */
     .shade-img-wrap { display: flex; align-items: center; gap: 0.75rem; }
     .shade-img-preview { width: 48px; height: 48px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); overflow: hidden; flex-shrink: 0; position: relative; cursor: pointer; }
     .shade-img-preview img { width: 100%; height: 100%; object-fit: cover; display: none; }
@@ -127,11 +162,51 @@
     .btn-shade-img { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.38rem 0.75rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.76rem; cursor: pointer; transition: all 0.18s; white-space: nowrap; }
     .btn-shade-img:hover { border-color: var(--accent-dim); color: var(--accent); }
 
-    /* inline field error below variant inputs */
+    /* ── SHADE GALLERY ── */
+    .shade-gallery-section {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+    .shade-gallery-label {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); font-weight: 500; margin-bottom: 0.75rem;
+    }
+    .shade-gallery-label i { color: var(--accent); font-size: 0.65rem; }
+
+    .shade-gallery-upload {
+      border: 2px dashed var(--border); border-radius: var(--radius);
+      padding: 1rem; text-align: center; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s; position: relative;
+    }
+    .shade-gallery-upload:hover { border-color: var(--accent-dim); background: var(--accent-glow); }
+    .shade-gallery-upload input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .shade-gallery-upload-text { font-size: 0.78rem; color: var(--muted); }
+    .shade-gallery-upload-text strong { color: var(--accent); }
+
+    .shade-gallery-previews { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 0.6rem; margin-top: 0.75rem; }
+    .shade-gallery-item { position: relative; aspect-ratio: 1; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); background: var(--surface); }
+    .shade-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .shade-gallery-remove { position: absolute; top: 3px; right: 3px; background: rgba(0,0,0,0.65); color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.6rem; transition: background 0.2s; }
+    .shade-gallery-remove:hover { background: #c0392b; }
+    .shade-gallery-badge { position: absolute; bottom: 3px; left: 3px; background: rgba(244,167,188,0.85); color: #1a0a10; font-size: 0.58rem; font-weight: 600; padding: 0.12rem 0.35rem; border-radius: 999px; }
+    .shade-gallery-count { font-size: 0.7rem; color: var(--muted); margin-top: 0.5rem; }
+
+    /* info banner */
+    .info-banner {
+      display: flex; align-items: flex-start; gap: 0.6rem;
+      background: rgba(244,167,188,0.05); border: 1px solid rgba(244,167,188,0.12);
+      border-radius: var(--radius); padding: 0.75rem 0.9rem;
+      font-size: 0.75rem; color: var(--muted); margin-bottom: 1rem;
+    }
+    .info-banner i { color: var(--accent); margin-top: 0.1rem; flex-shrink: 0; }
+
+    /* inline field error */
     .field-error { font-size: 0.68rem; color: #e06c6c; margin-top: 0.22rem; display: none; }
     .field-error.visible { display: block; }
 
-    .btn-add-variant { display: inline-flex; align-items: center; gap: 0.45rem; background: transparent; border: 1px dashed var(--border); color: var(--muted); padding: 0.65rem 1.2rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.84rem; cursor: pointer; transition: all 0.2s; width: 100%; justify-content: center; margin-top: 0.5rem; }
+    .btn-add-variant { display: inline-flex; align-items: center; gap: 0.45rem; background: transparent; border: 1px dashed var(--border); color: var(--muted); padding: 0.65rem 1.2rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.84rem; cursor: pointer; transition: all 0.2s; width: 100%; justify-content: center; margin-top: 0.25rem; }
     .btn-add-variant:hover { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
 
     /* form footer */
@@ -215,7 +290,7 @@
         <div class="section-card">
           <div class="section-header">
             <div class="section-icon"><i class="fas fa-images"></i></div>
-            <span class="section-title">Product Images <span style="color:var(--muted);font-size:0.75rem;font-family:var(--body);font-weight:300;">(min 3)</span></span>
+            <span class="section-title">Product Images <span style="color:var(--muted);font-size:0.75rem;font-family:var(--body);font-weight:300;">(min 3, shown when no shade is selected)</span></span>
           </div>
           <div class="section-body">
             <div class="image-upload-area" id="imageUploadArea">
@@ -236,6 +311,12 @@
             <span class="section-title">Shade Variants</span>
           </div>
           <div class="section-body">
+
+            <div class="info-banner">
+              <i class="fas fa-info-circle"></i>
+              <span>Each shade has a <strong style="color:var(--accent)">swatch</strong> (small circle in the selector) and an optional <strong style="color:var(--accent)">shade gallery</strong> (images shown when that shade is clicked on the product page). If no gallery is uploaded for a shade, the default product images above will be shown.</span>
+            </div>
+
             <div class="variant-list" id="variantList"></div>
             <button type="button" class="btn-add-variant" onclick="addVariant()">
               <i class="fas fa-plus"></i> Add Shade
@@ -262,7 +343,7 @@
 <div class="cropper-modal-overlay" id="cropperModal">
   <div class="cropper-modal">
     <div class="cropper-modal-header">
-      <span class="cropper-modal-title">Crop Image</span>
+      <span class="cropper-modal-title" id="cropperTitle">Crop Image</span>
       <button class="cropper-modal-close" onclick="closeCropper()"><i class="fas fa-times"></i></button>
     </div>
     <div class="cropper-container-wrap">
@@ -280,10 +361,12 @@
 <script>
 
   /* ── STATE ── */
-  var croppedImages       = [];
+  var croppedImages       = [];   // product-level gallery
+  var variantImages       = {};   // variantId → [base64 dataUrls]  (shade galleries)
   var variantCount        = 0;
   var cropperInstance     = null;
   var currentCropCallback = null;
+  var currentCropAspect   = 1;
 
   /* ── TOAST ── */
   function showToast(message, type) {
@@ -296,14 +379,16 @@
   }
 
   /* ── CROPPER ── */
-  function openCropper(src, onConfirm) {
+  function openCropper(src, onConfirm, title, aspectRatio) {
     currentCropCallback = onConfirm;
+    currentCropAspect   = aspectRatio || 1;
+    document.getElementById('cropperTitle').textContent = title || 'Crop Image';
     var img = document.getElementById('cropperImage');
     img.src = src;
     document.getElementById('cropperModal').classList.add('open');
     if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
     cropperInstance = new Cropper(img, {
-      aspectRatio: 1, viewMode: 2, dragMode: 'move',
+      aspectRatio: currentCropAspect, viewMode: 2, dragMode: 'move',
       autoCropArea: 0.9, responsive: true, background: false
     });
   }
@@ -339,7 +424,7 @@
         croppedImages.push(croppedDataUrl);
         renderImagePreviews();
         processNextFile(files, index + 1);
-      });
+      }, 'Crop Product Image', 1);
     };
     reader.readAsDataURL(file);
   }
@@ -377,63 +462,105 @@
     var id   = 'variant-' + variantCount;
     var d    = data || {};
     var list = document.getElementById('variantList');
+
+    // init gallery state for this variant
+    variantImages[id] = [];
+
     var card = document.createElement('div');
-    card.className = 'variant-card';
+    card.className = 'variant-card open';
     card.id = id;
     card.innerHTML = `
-      <div class="variant-header">
-        <span class="variant-label">Shade ${variantCount}</span>
-        <button type="button" class="btn-remove-variant" onclick="removeVariant('${id}')" title="Remove shade">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="form-grid-3" style="margin-bottom:1rem;">
-        <div class="form-group">
-          <label class="form-label">Shade Name <span class="required">*</span></label>
-          <input type="text" class="form-control variant-shade" placeholder="e.g. Ruby Red" value="${d.shade || ''}" />
-          <span class="field-error err-shade">Shade name is required.</span>
+      <div class="variant-card-header" onclick="toggleVariantCard('${id}')">
+        <div class="variant-header-left">
+          <span class="variant-num-badge">${variantCount}</span>
+          <span class="variant-header-label">Shade ${variantCount}</span>
+          <span class="variant-shade-preview" id="shadePreview-${id}">${d.shade ? '— ' + d.shade : ''}</span>
         </div>
-        <div class="form-group">
-          <label class="form-label">Original Price <span class="required">*</span></label>
-          <input type="number" class="form-control variant-price" placeholder="e.g. 599" min="0" max="999" value="${d.varientPrice || ''}" />
-          <span class="field-error err-price">Required &amp; must be less than ₹1000.</span>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Sale Price <span class="optional">(optional)</span></label>
-          <input type="number" class="form-control variant-sale" placeholder="auto-calculated" min="0" value="${d.salePrice || ''}" />
-          <span class="field-error err-sale">Must be less than the original price.</span>
+        <div class="variant-header-right">
+          <button type="button" class="btn-remove-variant" onclick="event.stopPropagation();removeVariant('${id}')" title="Remove shade">
+            <i class="fas fa-times"></i>
+          </button>
+          <i class="fas fa-chevron-down variant-chevron"></i>
         </div>
       </div>
-      <div class="form-grid-2">
-        <div class="form-group">
-          <label class="form-label">Stock <span class="required">*</span></label>
-          <input type="number" class="form-control variant-stock" placeholder="0" min="0" max="20" value="${d.stock || ''}" />
-          <span class="field-error err-stock">Required &amp; cannot exceed 20 units.</span>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Shade Image <span class="optional">(optional)</span></label>
-          <div class="shade-img-wrap">
-            <div class="shade-img-preview" onclick="triggerShadeImg('${id}')">
-              <div class="shade-img-placeholder"><i class="fas fa-image"></i></div>
-              <img class="shade-img-thumb" src="${d.image || ''}" style="${d.image ? 'display:block' : ''}" />
-            </div>
-            <button type="button" class="btn-shade-img" onclick="triggerShadeImg('${id}')">
-              <i class="fas fa-upload"></i> Upload swatch
-            </button>
-            <input type="file" class="shade-img-input" id="shadeFile-${id}" accept="image/*" onchange="handleShadeImg('${id}', this)" />
+
+      <div class="variant-card-body">
+        <div class="form-grid-3" style="margin-bottom:1rem;">
+          <div class="form-group">
+            <label class="form-label">Shade Name <span class="required">*</span></label>
+            <input type="text" class="form-control variant-shade" placeholder="e.g. Ruby Red" value="${d.shade || ''}" oninput="updateShadePreview('${id}', this.value)" />
+            <span class="field-error err-shade">Shade name is required.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Original Price <span class="required">*</span></label>
+            <input type="number" class="form-control variant-price" placeholder="e.g. 599" min="0" max="999" value="${d.varientPrice || ''}" />
+            <span class="field-error err-price">Required &amp; must be less than ₹1000.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sale Price <span class="optional">(optional)</span></label>
+            <input type="number" class="form-control variant-sale" placeholder="auto-calculated" min="0" value="${d.salePrice || ''}" />
+            <span class="field-error err-sale">Must be less than the original price.</span>
           </div>
         </div>
+
+        <div class="form-grid-2" style="margin-bottom:1rem;">
+          <div class="form-group">
+            <label class="form-label">Stock <span class="required">*</span></label>
+            <input type="number" class="form-control variant-stock" placeholder="0" min="0" max="20" value="${d.stock || ''}" />
+            <span class="field-error err-stock">Required &amp; cannot exceed 20 units.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Shade Swatch <span class="optional">(selector thumbnail)</span></label>
+            <div class="shade-img-wrap">
+              <div class="shade-img-preview" onclick="triggerShadeImg('${id}')">
+                <div class="shade-img-placeholder"><i class="fas fa-palette"></i></div>
+                <img class="shade-img-thumb" src="" style="display:none" />
+              </div>
+              <button type="button" class="btn-shade-img" onclick="triggerShadeImg('${id}')">
+                <i class="fas fa-upload"></i> Upload swatch
+              </button>
+              <input type="file" class="shade-img-input" id="shadeFile-${id}" accept="image/*" onchange="handleShadeImg('${id}', this)" />
+            </div>
+          </div>
+        </div>
+
+        <!-- SHADE GALLERY -->
+        <div class="shade-gallery-section">
+          <div class="shade-gallery-label">
+            <i class="fas fa-images"></i>
+            Shade Gallery <span style="text-transform:none;letter-spacing:0;font-size:0.68rem;font-weight:300;">(images shown when shopper picks this shade)</span>
+          </div>
+          <div class="shade-gallery-upload" onclick="document.getElementById('shadeGalleryFile-${id}').click()">
+            <input type="file" id="shadeGalleryFile-${id}" accept="image/*" multiple style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" onchange="handleShadeGallery('${id}', this)" />
+            <div class="shade-gallery-upload-text">
+              <i class="fas fa-cloud-upload-alt" style="font-size:1.3rem;color:var(--muted);display:block;margin-bottom:0.4rem;"></i>
+              Drop shade images or <strong>click to browse</strong>
+            </div>
+          </div>
+          <div class="shade-gallery-previews" id="shadeGalleryPreviews-${id}"></div>
+          <p class="shade-gallery-count" id="shadeGalleryCount-${id}">No shade gallery images — default product images will be used</p>
+        </div>
+
       </div>
     `;
     list.appendChild(card);
-
-    /* live validation listeners for this card */
     attachVariantListeners(card);
+  }
+
+  function toggleVariantCard(id) {
+    var card = document.getElementById(id);
+    card.classList.toggle('open');
+  }
+
+  function updateShadePreview(variantId, value) {
+    var el = document.getElementById('shadePreview-' + variantId);
+    if (el) el.textContent = value ? '— ' + value : '';
   }
 
   function removeVariant(id) {
     var card = document.getElementById(id);
     if (card) card.remove();
+    delete variantImages[id];
   }
 
   function triggerShadeImg(variantId) {
@@ -453,23 +580,72 @@
         thumb.style.display = 'block';
         ph.style.display    = 'none';
         preview.dataset.image = croppedDataUrl;
-      });
+      }, 'Crop Shade Swatch', 1);
     };
     reader.readAsDataURL(input.files[0]);
+    input.value = '';
   }
 
-  /* live-clear errors as user types inside a variant card */
+  /* ── SHADE GALLERY IMAGES ── */
+  function handleShadeGallery(variantId, input) {
+    var files = Array.from(input.files);
+    if (!files.length) return;
+    input.value = '';
+    processShadeGalleryFiles(variantId, files, 0);
+  }
+
+  function processShadeGalleryFiles(variantId, files, index) {
+    if (index >= files.length) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      openCropper(e.target.result, function(croppedDataUrl) {
+        if (!variantImages[variantId]) variantImages[variantId] = [];
+        variantImages[variantId].push(croppedDataUrl);
+        renderShadeGalleryPreviews(variantId);
+        processShadeGalleryFiles(variantId, files, index + 1);
+      }, 'Crop Shade Gallery Image', 1);
+    };
+    reader.readAsDataURL(files[index]);
+  }
+
+  function renderShadeGalleryPreviews(variantId) {
+    var container = document.getElementById('shadeGalleryPreviews-' + variantId);
+    var countEl   = document.getElementById('shadeGalleryCount-' + variantId);
+    if (!container) return;
+    var imgs = variantImages[variantId] || [];
+    container.innerHTML = '';
+    imgs.forEach(function(src, i) {
+      var item = document.createElement('div');
+      item.className = 'shade-gallery-item';
+      item.innerHTML =
+        '<img src="' + src + '" />' +
+        (i === 0 ? '<span class="shade-gallery-badge">Main</span>' : '') +
+        '<button type="button" class="shade-gallery-remove" onclick="removeShadeGalleryImg(\'' + variantId + '\',' + i + ')"><i class="fas fa-times"></i></button>';
+      container.appendChild(item);
+    });
+    if (countEl) {
+      countEl.textContent = imgs.length > 0
+        ? imgs.length + ' shade image' + (imgs.length !== 1 ? 's' : '') + ' added ✓'
+        : 'No shade gallery images — default product images will be used';
+    }
+  }
+
+  function removeShadeGalleryImg(variantId, index) {
+    if (variantImages[variantId]) {
+      variantImages[variantId].splice(index, 1);
+      renderShadeGalleryPreviews(variantId);
+    }
+  }
+
+  /* live-clear errors */
   function attachVariantListeners(card) {
     card.querySelector('.variant-shade').addEventListener('input', function() {
       clearFieldErr(this, card.querySelector('.err-shade'));
     });
     card.querySelector('.variant-price').addEventListener('input', function() {
       clearFieldErr(this, card.querySelector('.err-price'));
-      /* also re-check sale if already filled */
       var saleInput = card.querySelector('.variant-sale');
-      if (saleInput.value !== '') {
-        validateSaleVsPrice(card);
-      }
+      if (saleInput.value !== '') validateSaleVsPrice(card);
     });
     card.querySelector('.variant-sale').addEventListener('input', function() {
       validateSaleVsPrice(card);
@@ -602,61 +778,44 @@
         var sale     = Number(saleVal);
         var stock    = Number(stockVal);
 
-        /* shade name */
         if (!shade) {
-          shadeInput.classList.add('is-invalid');
-          errShade.classList.add('visible');
-          ok = false;
+          shadeInput.classList.add('is-invalid'); errShade.classList.add('visible'); ok = false;
         } else {
-          shadeInput.classList.remove('is-invalid');
-          errShade.classList.remove('visible');
+          shadeInput.classList.remove('is-invalid'); errShade.classList.remove('visible');
         }
 
-        /* original price — required + must be < 1000 */
         if (!priceVal || isNaN(price) || price <= 0) {
           priceInput.classList.add('is-invalid');
           errPrice.textContent = 'Original price is required.';
-          errPrice.classList.add('visible');
-          ok = false;
+          errPrice.classList.add('visible'); ok = false;
         } else if (price >= 1000) {
           priceInput.classList.add('is-invalid');
           errPrice.textContent = 'Original price must be less than ₹1000.';
-          errPrice.classList.add('visible');
-          ok = false;
+          errPrice.classList.add('visible'); ok = false;
         } else {
-          priceInput.classList.remove('is-invalid');
-          errPrice.classList.remove('visible');
+          priceInput.classList.remove('is-invalid'); errPrice.classList.remove('visible');
         }
 
-        /* sale price — optional but must be < original price */
         if (saleVal !== '' && !isNaN(sale)) {
           if (sale >= price) {
-            saleInput.classList.add('is-invalid');
-            errSale.classList.add('visible');
-            ok = false;
+            saleInput.classList.add('is-invalid'); errSale.classList.add('visible'); ok = false;
           } else {
-            saleInput.classList.remove('is-invalid');
-            errSale.classList.remove('visible');
+            saleInput.classList.remove('is-invalid'); errSale.classList.remove('visible');
           }
         } else {
-          saleInput.classList.remove('is-invalid');
-          errSale.classList.remove('visible');
+          saleInput.classList.remove('is-invalid'); errSale.classList.remove('visible');
         }
 
-        /* stock — required + max 20 */
         if (stockVal === '' || isNaN(stock) || stock < 0) {
           stockInput.classList.add('is-invalid');
           errStock.textContent = 'Stock is required.';
-          errStock.classList.add('visible');
-          ok = false;
+          errStock.classList.add('visible'); ok = false;
         } else if (stock > 20) {
           stockInput.classList.add('is-invalid');
           errStock.textContent = 'Stock cannot exceed 20 units.';
-          errStock.classList.add('visible');
-          ok = false;
+          errStock.classList.add('visible'); ok = false;
         } else {
-          stockInput.classList.remove('is-invalid');
-          errStock.classList.remove('visible');
+          stockInput.classList.remove('is-invalid'); errStock.classList.remove('visible');
         }
       });
     }
@@ -669,12 +828,14 @@
     var variants = [];
     document.querySelectorAll('.variant-card').forEach(function(card) {
       var preview = card.querySelector('.shade-img-preview');
+      var id = card.id;
       variants.push({
         shade:        card.querySelector('.variant-shade').value.trim(),
         varientPrice: Number(card.querySelector('.variant-price').value),
         salePrice:    Number(card.querySelector('.variant-sale').value) || 0,
         stock:        Number(card.querySelector('.variant-stock').value),
-        image:        preview.dataset.image || ''
+        image:        preview.dataset.image || '',
+        images:       variantImages[id] || []
       });
     });
     return variants;

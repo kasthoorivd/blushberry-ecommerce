@@ -6,8 +6,9 @@ const variantSchema = new mongoose.Schema({
     salePrice:    { type: Number, default: 0,     min: 0 },
     stock:        { type: Number, required: true, default: 0, min: 0 },
     image:        { type: String, default: "" },
-    // cloudinary URL — shade swatch
+    images: {type:[String],default: [] }   
 })
+
 
 const productSchema = new mongoose.Schema(
     {
@@ -27,7 +28,7 @@ const productSchema = new mongoose.Schema(
             required: true
         },
 
-        // main product gallery — minimum 3 images recommended
+       
         images: {
             type:     [String],    // cloudinary URLs
             validate: {
@@ -36,7 +37,7 @@ const productSchema = new mongoose.Schema(
             }
         },
 
-        // product level offer — category offer is handled separately
+       
         offer: {
             type:    Number,
             default: 0,
@@ -57,5 +58,6 @@ const productSchema = new mongoose.Schema(
     },
     { timestamps: true }
 )
+
 
 module.exports = mongoose.model('Product', productSchema)

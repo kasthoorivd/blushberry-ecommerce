@@ -1,21 +1,31 @@
 const Product = require('../../models/user/productModel')
 const Category = require('../../models/user/categoryModel')
-const {cloudinary} = require('../../config/cloudinary')
+const { cloudinary } = require('../../config/cloudinary')
 
 const LIMIT = 5
 
-const loadProducts = async (req,res) => {
-    try {
-    const page        = Math.max(1, parseInt(req.query.page)  || 1);
+
+async function uploadIfBase64(value, folder) {
+  if (!value) return ''
+  if (value.startsWith('data:')) {
+    const result = await cloudinary.uploader.upload(value, { folder })
+    return result.secure_url
+  }
+  return value   
+}
+
+const loadProducts = async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
     const searchQuery = (req.query.search || '').trim();
-    const filter      = { isDeleted: false };
+    const filter = { isDeleted: false };
 
     if (searchQuery) {
       filter.name = { $regex: searchQuery, $options: 'i' };
     }
 
     const totalProducts = await Product.countDocuments(filter);
-    const totalPages    = Math.ceil(totalProducts / LIMIT);
+    const totalPages = Math.ceil(totalProducts / LIMIT);
 
     const products = await Product.find(filter)
       .populate('categoryId', 'name')
@@ -26,12 +36,12 @@ const loadProducts = async (req,res) => {
 
     res.render('admin/products', {
       products,
-      currentPage:   page,
+      currentPage: page,
       totalPages,
       totalProducts,
-      limit:         LIMIT,
+      limit: LIMIT,
       searchQuery,
-      user:req.session.admin || null
+      user: req.session.admin || null
     });
   } catch (err) {
     console.error('getProducts error:', err);
@@ -39,8 +49,8 @@ const loadProducts = async (req,res) => {
   }
 }
 
-const loadAddProduct = async(req,res) =>{
-   try {
+const loadAddProduct = async (req, res) => {
+  try {
     const categories = await Category.find({ isDeleted: false }).lean();
     res.render('admin/addProduct', { categories });
   } catch (err) {
@@ -53,35 +63,38 @@ const addProduct = async (req, res) => {
   try {
     const { name, description, categoryId, offer, images, variants } = req.body
 
-    // upload product gallery images to cloudinary
     const uploadedImages = await Promise.all(
       images.map(base64 => cloudinary.uploader.upload(base64, { folder: 'blushberry/products' }))
     )
     const imageUrls = uploadedImages.map(r => r.secure_url)
 
-    const processedVariants = await Promise.all(
-  variants.map(async (v) => {
-    let imageUrl = ''
-    if (v.image && v.image.startsWith('data:')) {
-      const uploaded = await cloudinary.uploader.upload(v.image, { folder: 'blushberry/shades' })
-      imageUrl = uploaded.secure_url
-    }
-    return {
-      shade:        v.shade,
-      varientPrice: v.varientPrice,
-      salePrice:    v.salePrice || 0,
-      stock:        v.stock,
-      image:        imageUrl
-    }
-  })
-)
    
+    const processedVariants = await Promise.all(
+      variants.map(async (v) => {
+       
+        const swatchUrl = await uploadIfBase64(v.image, 'blushberry/shades')
+
+        const shadeGalleryUrls = await Promise.all(
+          (v.images || []).map(img => uploadIfBase64(img, 'blushberry/shades'))
+        )
+
+        return {
+          shade:        v.shade,
+          varientPrice: v.varientPrice,
+          salePrice:    v.salePrice || 0,
+          stock:        v.stock,
+          image:        swatchUrl,
+          images:       shadeGalleryUrls
+        }
+      })
+    )
+
     const product = new Product({
       name,
       description,
       categoryId,
-      offer:    offer || 0,
-      images:   imageUrls,
+      offer: offer || 0,
+      images: imageUrls,
       variants: processedVariants
     })
 
@@ -94,62 +107,65 @@ const addProduct = async (req, res) => {
   }
 }
 
-    const loadEditProduct = async (req,res) => {
-      try {
-        const product = await Product.findOne({_id:req.params.id , isDeleted: false})
-        if(!product) return res.status(400).render('error',{message:'Product not found'})
+const loadEditProduct = async (req, res) => {
+  try {
+    const product = await Product.findOne({ _id: req.params.id, isDeleted: false })
+    if (!product) return res.status(400).render('error', { message: 'Product not found' })
 
-          const categories = await Category.find({isDeleted: false}).lean();
-          res.render('admin/editProduct',{product,categories})
-      } catch (error) {
-        console.error('loadEditProduct error:',error)
-        res.status(500).render('error',{message:'Could not load product'})
-      }
-    }
-  
+    const categories = await Category.find({ isDeleted: false }).lean();
+    res.render('admin/editProduct', { product, categories })
+  } catch (error) {
+    console.error('loadEditProduct error:', error)
+    res.status(500).render('error', { message: 'Could not load product' })
+  }
+}
 
-   const editProduct = async (req, res) => {
+const editProduct = async (req, res) => {
   try {
     const { id } = req.params
     const { name, description, categoryId, offer, existingImages, newImages, variants } = req.body
 
-    // upload new product gallery images
+  
     const uploadedNew = await Promise.all(
       (newImages || []).map(base64 =>
         cloudinary.uploader.upload(base64, { folder: 'blushberry/products' })
       )
     )
     const finalImages = [
-      ...existingImages,
+      ...(existingImages || []),
       ...uploadedNew.map(r => r.secure_url)
     ]
 
-    // upload shade images for each variant
-   const processedVariants = await Promise.all(
-  variants.map(async (v) => {
-    let imageUrl = v.image || ''
-    // if it's a new base64 upload, push to cloudinary
-    if (imageUrl.startsWith('data:')) {
-      const uploaded = await cloudinary.uploader.upload(imageUrl, { folder: 'blushberry/shades' })
-      imageUrl = uploaded.secure_url
-    }
-    // if it's already a cloudinary URL, keep it as-is
-    return {
-      shade:        v.shade,
-      varientPrice: v.varientPrice,
-      salePrice:    v.salePrice || 0,
-      stock:        v.stock,
-      image:        imageUrl
-    }
-  })
-)
+    
+    const processedVariants = await Promise.all(
+      variants.map(async (v) => {
+       
+        const swatchUrl = await uploadIfBase64(v.image, 'blushberry/shades')
+
+      
+        const kept = v.keptImages || []
+        const uploaded = await Promise.all(
+          (v.newImages || []).map(img => uploadIfBase64(img, 'blushberry/shades'))
+        )
+        const finalShadeGallery = [...kept, ...uploaded]
+
+        return {
+          shade:        v.shade,
+          varientPrice: v.varientPrice,
+          salePrice:    v.salePrice || 0,
+          stock:        v.stock,
+          image:        swatchUrl,
+          images:       finalShadeGallery
+        }
+      })
+    )
 
     await Product.findByIdAndUpdate(id, {
       name,
       description,
       categoryId,
-      offer:    offer || 0,
-      images:   finalImages,
+      offer: offer || 0,
+      images: finalImages,
       variants: processedVariants
     })
 
@@ -190,7 +206,7 @@ const deleteProduct = async (req, res) => {
     }
 
     product.isDeleted = true;
-    product.isListed  = false;
+    product.isListed = false;
     await product.save();
 
     res.json({ success: true, message: `"${product.name}" has been deleted.` });
@@ -201,11 +217,11 @@ const deleteProduct = async (req, res) => {
 };
 
 module.exports = {
-    loadProducts,
-    loadAddProduct,
-    addProduct,
-    loadEditProduct,
-    editProduct,
-    toggleProductListing,
-    deleteProduct
+  loadProducts,
+  loadAddProduct,
+  addProduct,
+  loadEditProduct,
+  editProduct,
+  toggleProductListing,
+  deleteProduct
 }

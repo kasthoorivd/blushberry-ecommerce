@@ -23,17 +23,30 @@
 
     /* ── Image gallery ── */
     .main-img-wrap{position:relative;width:100%;height:420px;border-radius:14px;overflow:hidden;background:#fce8ed;cursor:zoom-in;margin-bottom:14px;}
-    .main-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform 0.1s ease;}
+    .main-img-wrap img{width:100%;height:100%;object-fit:cover;transition:opacity 0.3s ease, transform 0.1s ease;}
     .main-img-wrap.zoomed img{transform:scale(2);cursor:zoom-out;}
     .main-img-wrap.zoomed{cursor:zoom-out;}
-    .thumb-row{display:flex;gap:10px;}
-    .thumb{width:76px;height:76px;border-radius:8px;overflow:hidden;border:2px solid transparent;cursor:pointer;transition:border-color .2s;background:#fce8ed;flex-shrink:0;}
+    .main-img-wrap.fading img{opacity:0;}
+    .thumb-row{display:flex;gap:10px;flex-wrap:wrap;}
+    .thumb{width:76px;height:76px;border-radius:8px;overflow:hidden;border:2px solid transparent;cursor:pointer;transition:border-color .2s, opacity .2s;background:#fce8ed;flex-shrink:0;}
     .thumb img{width:100%;height:100%;object-fit:cover;}
     .thumb.active{border-color:#c0415a;}
     .thumb:hover{border-color:#e8a0b0;}
 
     /* zoom hint */
     .zoom-hint{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.35);color:#fff;font-size:10px;padding:4px 9px;border-radius:20px;pointer-events:none;transition:opacity .3s;}
+
+    /* shade gallery indicator pill */
+    .shade-gallery-indicator {
+      display: none;
+      align-items: center; gap: 5px;
+      background: rgba(192,65,90,0.1); border: 1px solid rgba(192,65,90,0.25);
+      color: #c0415a; font-size: 10px; font-weight: 500;
+      padding: 4px 10px; border-radius: 999px;
+      margin-bottom: 10px; width: fit-content;
+    }
+    .shade-gallery-indicator.visible { display: flex; }
+    .shade-gallery-indicator i { font-size: 9px; }
 
     /* ── Info column ── */
     .prod-brand{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#c0415a;margin-bottom:8px;}
@@ -186,7 +199,6 @@
     <span style="color:#555;"><%= product.name %></span>
   </nav>
 
-  <!-- ── SOLD OUT / UNLISTED BANNER (extra safety — controller redirects but keep for edge cases) ── -->
   <% if(!product.inStock){ %>
   <div class="sold-out-banner" style="margin:0 48px 0;">
     <span style="font-size:18px;">⚠️</span>
@@ -197,16 +209,20 @@
   </div>
   <% } %>
 
-  <!-- ══════════════════════════════════════════
-       MAIN DETAIL SECTION
-  ══════════════════════════════════════════ -->
   <div class="detail-wrap">
 
     <!-- LEFT — Image gallery -->
     <div class="col-images">
+
+      <!-- Shade gallery indicator pill -->
+      <div class="shade-gallery-indicator" id="shadeGalleryIndicator">
+        <i class="fas fa-palette"></i>
+        <span id="shadeGalleryIndicatorText">Showing images for this shade</span>
+      </div>
+
       <div class="main-img-wrap" id="mainImgWrap" onclick="toggleZoom(this)">
         <% if(product.images && product.images[0]){ %>
-          <img id="mainImg" src="<%= product.images[0] %>" alt="<%= product.name %>" id="mainImg">
+          <img id="mainImg" src="<%= product.images[0] %>" alt="<%= product.name %>">
         <% } else { %>
           <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:60px;">💄</div>
         <% } %>
@@ -214,15 +230,15 @@
       </div>
 
       <!-- Thumbnails -->
-      <% if(product.images && product.images.length > 1){ %>
-      <div class="thumb-row">
-        <% product.images.forEach((img, i) => { %>
-        <div class="thumb <%= i === 0 ? 'active' : '' %>" onclick="switchImage('<%= img %>', this)">
-          <img src="<%= img %>" alt="Image <%= i+1 %>">
-        </div>
-        <% }) %>
+      <div class="thumb-row" id="thumbRow">
+        <% if(product.images && product.images.length > 0){ %>
+          <% product.images.forEach((img, i) => { %>
+          <div class="thumb <%= i === 0 ? 'active' : '' %>" onclick="switchMainImage('<%= img %>', this)">
+            <img src="<%= img %>" alt="Image <%= i+1 %>">
+          </div>
+          <% }) %>
+        <% } %>
       </div>
-      <% } %>
     </div>
 
     <!-- RIGHT — Product info -->
@@ -256,7 +272,6 @@
         </div>
         <p class="price-per-shade">Price may vary by shade</p>
 
-        <!-- Stock status -->
         <% if(!product.inStock){ %>
           <span class="stock-status stock-out"><span class="stock-dot"></span> Out of Stock</span>
         <% } else { %>
@@ -278,7 +293,13 @@
         <div class="shade-selector">
           <% product.variants.forEach((v, i) => { %>
           <div class="shade-btn <%= i===0 ? 'active' : '' %> <%= v.stock===0 ? 'out-of-stock' : '' %>"
-               onclick="<%= v.stock > 0 ? `selectShade(this, '${v.shade}', ${v.salePrice > 0 ? v.salePrice : v.varientPrice}, ${v.varientPrice}, ${v.stock})` : '' %>"
+               onclick="<%= v.stock > 0 ? `selectShade(this)` : '' %>"
+               data-shade="<%= v.shade %>"
+               data-sale-price="<%= v.salePrice > 0 ? v.salePrice : v.varientPrice %>"
+               data-orig-price="<%= v.varientPrice %>"
+               data-stock="<%= v.stock %>"
+               data-has-gallery="<%= v.images && v.images.length > 0 ? 'true' : 'false' %>"
+               data-images='<%- JSON.stringify(v.images && v.images.length > 0 ? v.images : []) %>'
                title="<%= v.shade %><%= v.stock===0 ? ' (Out of stock)' : '' %>">
             <% if(v.image){ %>
               <img src="<%= v.image %>" class="shade-swatch" alt="<%= v.shade %>">
@@ -345,8 +366,8 @@
         <% } %>
       </div>
 
-    </div><!-- /col-info -->
-  </div><!-- /detail-wrap -->
+    </div>
+  </div>
 
 
   <!-- ══════════════════════════════════════════
@@ -355,7 +376,6 @@
   <div class="review-section" id="reviews">
     <h2 class="section-title">Customer Reviews</h2>
 
-    <!-- Summary + breakdown -->
     <div class="review-summary">
       <div class="avg-score">
         <div class="avg-num"><%= avgRating %></div>
@@ -368,7 +388,6 @@
         <div style="font-size:12px;color:#aaa;margin-top:4px;"><%= reviewCount %> review<%= reviewCount!==1?'s':'' %></div>
       </div>
 
-      <!-- Bar breakdown -->
       <div style="flex:1;max-width:300px;">
         <% [5,4,3,2,1].forEach(star => { %>
         <div class="breakdown-row">
@@ -382,13 +401,10 @@
       </div>
     </div>
 
-    <!-- Review form — only for logged-in users -->
     <% if(user){ %>
     <div class="review-form">
       <h4><%= userReview ? 'Update Your Review' : 'Write a Review' %></h4>
       <form id="reviewForm" onsubmit="submitReview(event)">
-
-        <!-- Star picker -->
         <p class="section-label">Your Rating</p>
         <div class="star-picker">
           <% for(let i=5;i>=1;i--){ %>
@@ -397,7 +413,6 @@
           <label for="star<%= i %>">★</label>
           <% } %>
         </div>
-
         <div class="form-group">
           <label>Review Title</label>
           <input type="text" name="title" placeholder="Sum it up in a few words…" maxlength="100"
@@ -425,7 +440,6 @@
     </div>
     <% } %>
 
-    <!-- Review cards -->
     <div class="review-list" id="reviewList">
       <% if(reviews.length === 0){ %>
         <div class="no-reviews">💄 No reviews yet — be the first to share your thoughts!</div>
@@ -491,15 +505,16 @@
   </div>
   <% } %>
 
-  <!-- Toast notification -->
   <div class="toast" id="toast"></div>
 
   <%- include('../partials/user/footer') %>
 
   <script>
-    const PRODUCT_ID = '<%= product._id %>'
+    const PRODUCT_ID   = '<%= product._id %>'
+    // Default product-level images (shown when no shade has its own gallery)
+    const DEFAULT_IMGS = <%- JSON.stringify(product.images || []) %>
 
-    // ── Toast helper ──
+    // ── Toast ──
     function showToast(msg, type='success') {
       const t = document.getElementById('toast')
       t.textContent = msg
@@ -514,7 +529,6 @@
         wrap.classList.contains('zoomed') ? '0' : '1'
     }
 
-    // move zoom lens with mouse
     document.getElementById('mainImgWrap').addEventListener('mousemove', function(e) {
       if (!this.classList.contains('zoomed')) return
       const rect = this.getBoundingClientRect()
@@ -523,27 +537,83 @@
       this.querySelector('img').style.transformOrigin = `${x}% ${y}%`
     })
 
-    // ── Thumbnail switch ──
-    function switchImage(src, thumb) {
-      document.getElementById('mainImg').src = src
-      document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'))
-      thumb.classList.add('active')
-      // reset zoom
+    // ── Switch main image (thumbnail click) ──
+    function switchMainImage(src, thumb) {
+      const mainImg = document.getElementById('mainImg')
+      if (!mainImg) return
       const wrap = document.getElementById('mainImgWrap')
-      wrap.classList.remove('zoomed')
+
+      // fade out
+      wrap.classList.add('fading')
+      setTimeout(() => {
+        mainImg.src = src
+        wrap.classList.remove('fading')
+        wrap.classList.remove('zoomed')
+      }, 150)
+
+      document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'))
+      if (thumb) thumb.classList.add('active')
+    }
+
+    // ── Switch the entire gallery (called when a shade is selected) ──
+    function switchGallery(images) {
+      if (!images || images.length === 0) return
+      const thumbRow = document.getElementById('thumbRow')
+      const mainImg  = document.getElementById('mainImg')
+      const wrap     = document.getElementById('mainImgWrap')
+      if (!mainImg || !thumbRow) return
+
+      // fade out main image
+      wrap.classList.add('fading')
+      setTimeout(() => {
+        mainImg.src = images[0]
+        wrap.classList.remove('fading')
+        wrap.classList.remove('zoomed')
+      }, 150)
+
+      // rebuild thumbnails
+      thumbRow.innerHTML = ''
+      images.forEach((src, i) => {
+        const div = document.createElement('div')
+        div.className = 'thumb' + (i === 0 ? ' active' : '')
+        div.onclick = () => switchMainImage(src, div)
+        const img = document.createElement('img')
+        img.src = src
+        img.alt = 'Shade image ' + (i + 1)
+        div.appendChild(img)
+        thumbRow.appendChild(div)
+      })
     }
 
     // ── Shade selector ──
-    function selectShade(el, name, salePrice, origPrice, stock) {
+    function selectShade(el) {
       document.querySelectorAll('.shade-btn').forEach(b => b.classList.remove('active'))
       el.classList.add('active')
-      document.getElementById('selectedShadeName').textContent = name
-      document.getElementById('displayPrice').textContent = '₹' + salePrice.toFixed(2)
 
+      const name      = el.dataset.shade
+      const salePrice = parseFloat(el.dataset.salePrice)
+      const origPrice = parseFloat(el.dataset.origPrice)
+      const stock     = parseInt(el.dataset.stock)
+      const hasGallery = el.dataset.hasGallery === 'true'
+      let shadeImgs = []
+      if (hasGallery) {
+        try {
+          shadeImgs = JSON.parse(el.dataset.images || '[]')
+        } catch(e) {
+          console.error('shade images parse error:', e, el.dataset.images)
+          shadeImgs = []
+        }
+      }
+
+      // update name
+      document.getElementById('selectedShadeName').textContent = name
+
+      // update price
+      document.getElementById('displayPrice').textContent = '₹' + salePrice.toFixed(2)
       const origEl = document.getElementById('origPrice')
       if (origEl) origEl.textContent = '₹' + origPrice.toFixed(2)
 
-      // stock note
+      // update stock note
       const note = document.getElementById('shadeStockNote')
       if (stock <= 5 && stock > 0) {
         note.textContent = `⚠ Only ${stock} left in this shade`
@@ -553,7 +623,22 @@
       }
 
       // update qty max
-      document.getElementById('qtyInput').max = stock
+      const qtyInput = document.getElementById('qtyInput')
+      if (qtyInput) qtyInput.max = stock
+
+      // switch gallery
+      const indicator     = document.getElementById('shadeGalleryIndicator')
+      const indicatorText = document.getElementById('shadeGalleryIndicatorText')
+      if (hasGallery && shadeImgs.length > 0) {
+        switchGallery(shadeImgs)
+        if (indicator) {
+          indicator.classList.add('visible')
+          indicatorText.textContent = 'Showing images for ' + name
+        }
+      } else {
+        switchGallery(DEFAULT_IMGS)
+        if (indicator) indicator.classList.remove('visible')
+      }
     }
 
     // ── Quantity ──
@@ -568,9 +653,9 @@
 
     // ── Add to cart ──
     function addToCart(productId) {
-      const btn      = document.getElementById('addCartBtn')
-      const qty      = parseInt(document.getElementById('qtyInput')?.value) || 1
-      const shade    = document.getElementById('selectedShadeName')?.textContent || ''
+      const btn   = document.getElementById('addCartBtn')
+      const qty   = parseInt(document.getElementById('qtyInput')?.value) || 1
+      const shade = document.getElementById('selectedShadeName')?.textContent || ''
       btn.textContent = 'Adding…'
       btn.disabled    = true
 
@@ -679,10 +764,14 @@
       .catch(() => showToast('Something went wrong', 'error'))
     }
 
-    // ── Show session toast (from redirect) ──
+    // ── Init: auto-select first available shade on load ──
     window.addEventListener('DOMContentLoaded', () => {
       const msg = '<%= typeof sessionToast !== "undefined" ? sessionToast : "" %>'
       if (msg) showToast(msg, 'error')
+
+      // trigger shade selection for first active shade button to init gallery + price
+      const firstActive = document.querySelector('.shade-btn.active')
+      if (firstActive) selectShade(firstActive)
     })
   </script>
 </body>
