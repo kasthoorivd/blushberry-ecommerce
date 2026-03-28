@@ -5,6 +5,8 @@ const customerController = require('../controllers/admin/customerController')
 const categoryController = require('../controllers/admin/categoryController')
 const productController = require('../controllers/admin/productController')
 const couponController = require('../controllers/admin/couponController')
+const orderController = require('../controllers/admin/orderController')
+const inventoryController = require('../controllers/admin/inventoryConrtoller')
 const adminAuth          = require('../middleware/adminAuth')
 const { uploadProductImages } = require('../config/cloudinary');
 
@@ -45,6 +47,20 @@ adminRouter.get('/coupons',couponController.loadCoupons)
 adminRouter.post('/coupons/create',couponController.createCoupon)
 adminRouter.patch('/coupons/:id/toggle',couponController.toggleCoupon)
 adminRouter.delete('/coupons/:id',couponController.deleteCoupon)
+
+
+// orders
+adminRouter.get('/orders',           adminAuth, orderController.loadOrders)
+adminRouter.get('/orders/:id',       adminAuth, orderController.loadOrderDetail)
+adminRouter.patch('/orders/:id/status', adminAuth, orderController.updateOrderStatus)
+adminRouter.patch('/orders/:id/return-status',adminAuth, orderController.updateReturnStatus)
+
+// inventory
+adminRouter.get('/inventory',        adminAuth, inventoryController.loadInventory)
+adminRouter.patch('/inventory/:productId/variant/:shade/stock', adminAuth, inventoryController.updateVariantStock)
+adminRouter.get('/inventory/:productId/history', adminAuth, inventoryController.getStockHistory)
+
+
 
 adminRouter.get('/logout',adminAuth,adminController.adminLogout)
 

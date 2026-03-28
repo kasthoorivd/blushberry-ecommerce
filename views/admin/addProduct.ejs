@@ -368,6 +368,11 @@
   var currentCropCallback = null;
   var currentCropAspect   = 1;
 
+  /* ── IMAGE TYPE GUARD ── */
+  function isImageFile(file) {
+    return file.type.startsWith('image/');
+  }
+
   /* ── TOAST ── */
   function showToast(message, type) {
     Swal.fire({
@@ -418,6 +423,11 @@
   function processNextFile(files, index) {
     if (index >= files.length) return;
     var file = files[index];
+    if (!isImageFile(file)) {
+      showToast('"' + file.name + '" is not an image and was skipped.', 'error');
+      processNextFile(files, index + 1);
+      return;
+    }
     var reader = new FileReader();
     reader.onload = function(e) {
       openCropper(e.target.result, function(croppedDataUrl) {
@@ -569,6 +579,11 @@
 
   function handleShadeImg(variantId, input) {
     if (!input.files[0]) return;
+    if (!isImageFile(input.files[0])) {
+      showToast('Please upload an image file for the swatch.', 'error');
+      input.value = '';
+      return;
+    }
     var reader = new FileReader();
     reader.onload = function(e) {
       openCropper(e.target.result, function(croppedDataUrl) {
@@ -596,6 +611,12 @@
 
   function processShadeGalleryFiles(variantId, files, index) {
     if (index >= files.length) return;
+    var file = files[index];
+    if (!isImageFile(file)) {
+      showToast('"' + file.name + '" is not an image and was skipped.', 'error');
+      processShadeGalleryFiles(variantId, files, index + 1);
+      return;
+    }
     var reader = new FileReader();
     reader.onload = function(e) {
       openCropper(e.target.result, function(croppedDataUrl) {
@@ -605,7 +626,7 @@
         processShadeGalleryFiles(variantId, files, index + 1);
       }, 'Crop Shade Gallery Image', 1);
     };
-    reader.readAsDataURL(files[index]);
+    reader.readAsDataURL(file);
   }
 
   function renderShadeGalleryPreviews(variantId) {

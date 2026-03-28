@@ -1,5 +1,19 @@
 <nav style="position:sticky;top:0;z-index:1000;background:#fff;border-bottom:1px solid #f2e6e9;padding:0 48px;height:60px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,0.04);">
+ <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Poppins', sans-serif; background: #fff; color: #cd7878; overflow-x: hidden; }
+    a { text-decoration: none; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    .fade-up { animation: fadeUp 0.7s ease both; }
+    .nav-link:hover { color: #c0415a !important; border-bottom: 2px solid #c0415a; padding-bottom: 2px; }
+    .shade-card:hover { box-shadow: 0 12px 40px rgba(192,65,90,0.15) !important; transform: translateY(-4px); transition: all 0.3s ease; }
+    .product-card:hover { box-shadow: 0 12px 36px rgba(0,0,0,0.12) !important; transform: translateY(-4px); transition: all 0.3s ease; }
+    .btn-cart:hover { background: #c0415a !important; }
+    .btn-shop:hover { background: #a33049 !important; }
 
+  
+  </style>
   <!-- Logo -->
   <a href="/" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#c0415a;letter-spacing:-0.5px;">
     Blush<span style="color:#1a1a2e;">Berry</span>
@@ -10,7 +24,7 @@
 <ul style="list-style:none;display:flex;gap:36px;align-items:center;">
     <li><a href="/" class="nav-link" style="font-size:13px;font-weight:500;color:<%= currentPath === '/' ? '#c0415a' : '#555' %>;">Home</a></li>
     <li><a href="/products" class="nav-link" style="font-size:13px;font-weight:400;color:<%= currentPath === '/products' ? '#c0415a' : '#555' %>;">Shop</a></li>
-    <li><a href="/order" class="nav-link" style="font-size:13px;font-weight:400;color:<%= currentPath === '/order' ? '#c0415a' : '#555' %>;">Order</a></li>
+    <li><a href="/orders" class="nav-link" style="font-size:13px;font-weight:400;color:<%= currentPath === '/orders' ? '#c0415a' : '#555' %>;">Order</a></li>
     <li><a href="/contact" class="nav-link" style="font-size:13px;font-weight:400;color:<%= currentPath === '/contact' ? '#c0415a' : '#555' %>;">Contact</a></li>
     <li>
       <a href="/wishlist" style="position:relative;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#fff5f7;border:1px solid #f2e6e9;text-decoration:none;transition:background 0.2s;" title="Wishlist"

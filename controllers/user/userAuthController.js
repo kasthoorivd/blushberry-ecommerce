@@ -234,13 +234,12 @@ const resendOtp = async (req, res) => {
 
 // Load login page
 const loadLogin = (req, res) => {
-  try {
-    res.render('user/loginPage.ejs');
-  } catch (error) {
-    console.log(`Error loading login page: ${error}`);
-  }
-};
+  const blockedMessage = req.query.blocked === 'true'
+    ? 'Your account has been blocked by the admin. Please contact support.'
+    : null
 
+  res.render('user/loginPage', { blockedMessage })
+}
 
 const login = async (req, res) => {
   try {

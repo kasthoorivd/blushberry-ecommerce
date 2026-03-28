@@ -384,6 +384,11 @@
   var cropperInstance     = null;
   var currentCropCallback = null;
 
+  /* ── IMAGE TYPE GUARD ── */
+  function isImageFile(file) {
+    return file.type.startsWith('image/');
+  }
+
   /* ── TOAST ── */
   function showToast(message, type) {
     Swal.fire({
@@ -444,6 +449,12 @@
 
   function processNextFile(files, index) {
     if (index >= files.length) return;
+    var file = files[index];
+    if (!isImageFile(file)) {
+      showToast('"' + file.name + '" is not an image and was skipped.', 'error');
+      processNextFile(files, index + 1);
+      return;
+    }
     var reader = new FileReader();
     reader.onload = function(e) {
       openCropper(e.target.result, function(croppedDataUrl) {
@@ -452,7 +463,7 @@
         processNextFile(files, index + 1);
       }, 'Crop Product Image');
     };
-    reader.readAsDataURL(files[index]);
+    reader.readAsDataURL(file);
   }
 
   function renderNewPreviews() {
@@ -618,6 +629,11 @@
 
   function handleShadeImg(variantId, input) {
     if (!input.files[0]) return;
+    if (!isImageFile(input.files[0])) {
+      showToast('Please upload an image file for the swatch.', 'error');
+      input.value = '';
+      return;
+    }
     var reader = new FileReader();
     reader.onload = function(e) {
       openCropper(e.target.result, function(croppedDataUrl) {
@@ -671,6 +687,12 @@
 
   function processShadeGalleryFiles(variantId, files, index) {
     if (index >= files.length) return;
+    var file = files[index];
+    if (!isImageFile(file)) {
+      showToast('"' + file.name + '" is not an image and was skipped.', 'error');
+      processShadeGalleryFiles(variantId, files, index + 1);
+      return;
+    }
     var reader = new FileReader();
     reader.onload = function(e) {
       openCropper(e.target.result, function(croppedDataUrl) {
@@ -682,7 +704,7 @@
         processShadeGalleryFiles(variantId, files, index + 1);
       }, 'Crop Shade Gallery Image');
     };
-    reader.readAsDataURL(files[index]);
+    reader.readAsDataURL(file);
   }
 
   function renderShadeGalleryNew(variantId) {
@@ -781,6 +803,7 @@
     var err = document.getElementById(errId);
     if (err) err.classList.remove('visible');
   }
+
   function showErr(inputId, errId, errTextId, msg) {
     var el = document.getElementById(inputId);
     if (el) el.classList.add('is-invalid');
@@ -847,13 +870,13 @@
         var errSale    = card.querySelector('.err-sale');
         var errStock   = card.querySelector('.err-stock');
 
-        var shade = shadeInput.value.trim();
+        var shade    = shadeInput.value.trim();
         var priceVal = priceInput.value;
         var saleVal  = saleInput.value;
         var stockVal = stockInput.value;
-        var price = Number(priceVal);
-        var sale  = Number(saleVal);
-        var stock = Number(stockVal);
+        var price    = Number(priceVal);
+        var sale     = Number(saleVal);
+        var stock    = Number(stockVal);
 
         if (!shade) { shadeInput.classList.add('is-invalid'); errShade.classList.add('visible'); ok = false; }
         else { shadeInput.classList.remove('is-invalid'); errShade.classList.remove('visible'); }

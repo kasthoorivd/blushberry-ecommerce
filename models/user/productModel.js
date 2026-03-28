@@ -52,7 +52,15 @@ const productSchema = new mongoose.Schema(
                 message:   'At least one shade variant is required'
             }
         },
-
+           
+        stockHistory: [{
+  shade:     { type: String },
+  oldStock:  { type: Number },
+  newStock:  { type: Number },
+  note:      { type: String, default: '' },
+  updatedBy: { type: String, default: 'admin' },
+  updatedAt: { type: Date,   default: Date.now },
+}],
         isListed:  { type: Boolean, default: true  },
         isDeleted: { type: Boolean, default: false }
     },

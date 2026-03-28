@@ -43,6 +43,9 @@ const loadProducts = async (req, res) => {
       searchQuery,
       user: req.session.admin || null
     });
+
+    const avg = totalProducts.price/totalProducts.length
+    console.log(avg)
   } catch (err) {
     console.error('getProducts error:', err);
     res.status(500).render('error', { message: 'Could not load products.' });

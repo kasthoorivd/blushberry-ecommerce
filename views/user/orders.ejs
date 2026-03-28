@@ -1,0 +1,352 @@
+<%- include('../partials/user/header') %>
+
+  <style>
+    :root {
+      --bg: #fdf6f8;
+      --surface: #ffffff;
+      --surface2: #fef0f4;
+      --border: #f0dde4;
+      --accent: #c2185b;
+      --text: #1a0a10;
+      --muted: #8a6d74;
+      --success: #22b573;
+      --radius: 10px;
+      --shadow: 0 2px 16px rgba(194, 24, 91, 0.07);
+      --display: 'Playfair Display', Georgia, serif;
+      --body: 'DM Sans', sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      background: var(--bg);
+      font-family: var(--body);
+      color: var(--text);
+      font-weight: 300;
+    }
+
+    .wrap {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* HEADER ROW */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .page-title {
+      font-family: var(--display);
+      font-size: 1.6rem;
+      font-weight: 600;
+    }
+
+    /* SEARCH */
+    .search-form {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .search-input {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.5rem 0.9rem;
+      font-family: var(--body);
+      font-size: 0.82rem;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      width: 220px;
+      transition: border 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    .search-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.5rem 0.9rem;
+      border-radius: var(--radius);
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: var(--body);
+    }
+
+    .search-clear {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .search-clear:hover {
+      color: var(--accent);
+    }
+
+    /* ORDER CARD */
+    .order-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+
+    .order-card:hover {
+      box-shadow: 0 4px 24px rgba(194, 24, 91, 0.1);
+    }
+
+    .order-card-header {
+      background: var(--surface2);
+      padding: 0.85rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .order-id {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.03em;
+    }
+
+    .order-date {
+      font-size: 0.73rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+
+    .order-card-body {
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .order-preview {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .order-preview-more {
+      font-size: 0.73rem;
+      color: var(--muted);
+    }
+
+    .order-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .order-amount {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    /* BADGES */
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 0.22rem 0.65rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .badge-Placed {
+      background: rgba(194, 24, 91, 0.1);
+      color: #c2185b;
+    }
+
+    .badge-Processing {
+      background: rgba(255, 165, 0, 0.1);
+      color: #e67e00;
+    }
+
+    .badge-Shipped {
+      background: rgba(33, 150, 243, 0.1);
+      color: #1565c0;
+    }
+
+    .badge-Delivered {
+      background: rgba(34, 181, 115, 0.1);
+      color: #22b573;
+    }
+
+    .badge-Cancelled {
+      background: rgba(150, 150, 150, 0.12);
+      color: #777;
+    }
+
+    .badge-Returned {
+      background: rgba(103, 58, 183, 0.1);
+      color: #6a1fc2;
+    }
+
+    .btn-view {
+      font-size: 0.78rem;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 0.35rem 0.9rem;
+      border-radius: var(--radius);
+      text-decoration: none;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-view:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* EMPTY */
+    .empty {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--muted);
+    }
+
+    .empty i {
+      font-size: 2.5rem;
+      display: block;
+      margin-bottom: 1rem;
+      color: var(--border);
+    }
+
+    .empty a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    /* RESULT COUNT */
+    .result-count {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .result-count strong {
+      color: var(--text);
+    }
+  </style>
+
+  <div class="wrap">
+    <div class="page-header">
+      <div class="page-title">My Orders</div>
+      <form class="search-form" method="GET" action="/orders">
+        <input class="search-input" type="text" name="search" placeholder="Search by ID, status, product…"
+          value="<%= search %>" />
+        <button class="search-btn" type="submit"><i class="fas fa-search"></i>search</button>
+        <% if (search) { %>
+          <a href="/orders" class="search-clear"><i class="fas fa-times"></i> Clear</a>
+          <% } %>
+      </form>
+    </div>
+
+    <% if (search) { %>
+      <div class="result-count">
+        Showing <strong>
+          <%= orders.length %>
+        </strong> result<%= orders.length !==1 ? 's' : '' %> for "<strong>
+            <%= search %>
+          </strong>"
+      </div>
+      <% } %>
+
+        <% if (orders && orders.length> 0) { %>
+          <% orders.forEach(function(order) { %>
+            <div class="order-card">
+              <div class="order-card-header">
+                <div>
+                  <div class="order-id">#<%= order.orderId %>
+                  </div>
+                  <div class="order-date">
+                    <i class="fas fa-calendar-alt" style="font-size:0.65rem;"></i>
+                    <%= new Date(order.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short',
+                      year:'numeric' }) %>
+                      &nbsp;·&nbsp; <%= order.items.length %> item<%= order.items.length !==1 ? 's' : '' %>
+                  </div>
+                </div>
+                <% const hasItemReturn=order.itemStatuses && order.itemStatuses.some(s=> s.status === 'Returned')
+                  const showReturn = (order.returnStatus && order.returnStatus !== 'None') || hasItemReturn
+                  const returnLabel = (order.returnStatus && order.returnStatus !== 'None')
+                  ? order.returnStatus : 'Requested'
+                  %>
+                  <% if (showReturn) { %>
+                    <span class="badge badge-Returned">
+                      <i class="fas fa-undo"></i>&nbsp;Return: <%= returnLabel %>
+                    </span>
+                    <% } else { %>
+                      <span class="badge badge-<%= order.orderStatus %>">
+                        <% if (order.orderStatus==='Delivered' ) { %><i class="fas fa-check-circle"></i>
+                          <% } else if (order.orderStatus==='Cancelled' ) { %><i class="fas fa-times-circle"></i>
+                            <% } else if (order.orderStatus==='Shipped' ) { %><i class="fas fa-truck"></i>
+                              <% } else { %><i class="fas fa-clock"></i>
+                                <% } %>
+                                  &nbsp;<%= order.orderStatus %>
+                      </span>
+                      <% } %>
+              </div>
+              <div class="order-card-body">
+                <div>
+                  <div class="order-preview">
+                    <%= order.items[0].productName %>
+                  </div>
+                  <% if (order.items.length> 1) { %>
+                    <div class="order-preview-more">+<%= order.items.length - 1 %> more item<%= order.items.length - 1
+                          !==1 ? 's' : '' %>
+                    </div>
+                    <% } %>
+                </div>
+                <div class="order-right">
+                  <div class="order-amount">₹<%= order.finalAmount.toLocaleString('en-IN') %>
+                  </div>
+                  <a href="/orders/<%= order._id %>" class="btn-view">View Details</a>
+                </div>
+              </div>
+            </div>
+            <% }) %>
+              <% } else { %>
+                <div class="empty">
+                  <i class="fas fa-box-open"></i>
+                  <% if (search) { %>
+                    No orders found for "<strong>
+                      <%= search %>
+                    </strong>".
+                    <br /><br /><a href="/orders">View all orders</a>
+                    <% } else { %>
+                      You haven't placed any orders yet.
+                      <br /><br /><a href="/products">Start Shopping →</a>
+                      <% } %>
+                </div>
+                <% } %>
+  </div>
+
+  <%- include('../partials/user/footer') %>

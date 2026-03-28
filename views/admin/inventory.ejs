@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory | Blushberry Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:          #0d0608;
+      --surface:     #130a0d;
+      --surface2:    #1c1014;
+      --border:      #2e1a20;
+      --accent:      #f4a7bc;
+      --accent-dim:  #d4839d;
+      --accent-glow: rgba(244,167,188,0.07);
+      --text:        #fdf0f3;
+      --muted:       #8a6d74;
+      --danger-dim:  rgba(192,57,43,0.14);
+      --success:     #4cd98a;
+      --radius:      8px;
+      --radius-lg:   12px;
+      --display:     'Playfair Display', Georgia, serif;
+      --body:        'DM Sans', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 60% at 90% 0%, rgba(244,167,188,0.06) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 40% at 5% 100%, rgba(244,167,188,0.04) 0%, transparent 50%);
+      color: var(--text); font-family: var(--body); font-weight: 300; line-height: 1.6; min-height: 100vh;
+    }
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    .admin-main    { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .admin-content { flex: 1; padding: 2.5rem; width: 100%; max-width: 1300px; margin: 0 auto; }
+
+    /* HEADER */
+    .page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1.4rem; border-bottom: 1px solid rgba(244,167,188,0.1); gap: 1rem; flex-wrap: wrap; }
+    .breadcrumb { display: flex; align-items: center; gap: 0.45rem; font-size: 0.7rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    .breadcrumb a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb-sep { opacity: 0.35; font-size: 0.58rem; }
+    .page-title { font-family: var(--display); font-size: 1.9rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.1; }
+    .page-title span { color: var(--accent); }
+    .page-meta { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }
+
+    /* LOW STOCK ALERT BANNER */
+    .alert-banner { display: flex; align-items: center; gap: 0.75rem; background: rgba(192,57,43,0.08); border: 1px solid rgba(192,57,43,0.2); border-radius: var(--radius); padding: 0.85rem 1.1rem; margin-bottom: 1.25rem; }
+    .alert-banner i { color: #e06c6c; font-size: 0.95rem; flex-shrink: 0; }
+    .alert-banner-text { font-size: 0.83rem; color: #e06c6c; }
+    .alert-banner-text strong { font-weight: 600; }
+
+    /* STAT PILLS */
+    .stat-row { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .stat-pill { display: flex; align-items: center; gap: 0.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.55rem 1rem; font-size: 0.8rem; cursor: pointer; text-decoration: none; transition: all 0.18s; }
+    .stat-pill:hover { border-color: var(--accent-dim); }
+    .stat-pill.active { border-color: var(--accent-dim); background: var(--accent-glow); }
+    .stat-pill .pill-count { font-weight: 600; font-size: 1rem; }
+    .stat-pill .pill-label { color: var(--muted); font-size: 0.75rem; }
+    .pill-all  .pill-count { color: var(--text); }
+    .pill-ok   .pill-count { color: var(--success); }
+    .pill-low  .pill-count { color: #ffb347; }
+    .pill-out  .pill-count { color: #e06c6c; }
+
+    /* TOOLBAR */
+    .toolbar { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .search-form { display: flex; align-items: center; flex: 1; min-width: 220px; max-width: 360px; }
+    .search-wrap { position: relative; flex: 1; }
+    .search-icon { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.75rem; pointer-events: none; }
+    .search-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-right: none; color: var(--text); padding: 0.58rem 2.2rem 0.58rem 2.1rem; border-radius: var(--radius) 0 0 var(--radius); font-family: var(--body); font-size: 0.84rem; outline: none; transition: border-color 0.2s; }
+    .search-input::placeholder { color: var(--muted); }
+    .search-input:focus { border-color: var(--accent-dim); }
+    .search-clear { position: absolute; right: 0.65rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.72rem; display: none; align-items: center; }
+    .search-clear.visible { display: flex; }
+    .btn-search { background: var(--accent); color: #1a0a10; border: 1px solid var(--accent); padding: 0.58rem 0.95rem; border-radius: 0 var(--radius) var(--radius) 0; font-family: var(--body); font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+    .btn-search:hover { background: var(--accent-dim); }
+    .filter-select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 0.58rem 0.85rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.82rem; outline: none; cursor: pointer; }
+    .filter-select option { background: var(--surface2); }
+    .btn-reset { display: inline-flex; align-items: center; gap: 0.4rem; background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.58rem 0.95rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.8rem; cursor: pointer; text-decoration: none; transition: border-color 0.2s, color 0.2s; white-space: nowrap; }
+    .btn-reset:hover { border-color: var(--accent-dim); color: var(--accent); }
+    .toolbar-right { margin-left: auto; }
+    .total-badge { font-size: 0.76rem; color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 0.38rem 0.8rem; border-radius: 999px; white-space: nowrap; }
+    .total-badge strong { color: var(--accent); font-weight: 500; }
+
+    /* TABLE */
+    .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1.5rem; }
+    .prod-table { width: 100%; border-collapse: collapse; }
+    .prod-table thead tr { background: var(--surface2); border-bottom: 1px solid var(--border); }
+    .prod-table th { padding: 0.8rem 1.1rem; font-size: 0.67rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; white-space: nowrap; }
+    .prod-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    .prod-table tbody tr:last-child { border-bottom: none; }
+    .prod-table tbody tr:hover { background: var(--accent-glow); }
+    .prod-table td { padding: 0; vertical-align: top; }
+
+    /* PRODUCT ROW */
+    .prod-main-row { padding: 1rem 1.1rem; display: flex; align-items: center; gap: 0.85rem; }
+    .prod-thumb { width: 46px; height: 46px; border-radius: var(--radius); object-fit: cover; border: 1px solid var(--border); background: var(--surface2); flex-shrink: 0; }
+    .prod-thumb-ph { width: 46px; height: 46px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1rem; flex-shrink: 0; }
+    .prod-name { font-family: var(--display); font-size: 0.9rem; font-weight: 600; color: var(--text); }
+    .prod-cat  { font-size: 0.72rem; color: var(--muted); margin-top: 0.1rem; }
+
+    /* STOCK PILLS */
+    .stock-pill { display: inline-block; font-size: 0.76rem; padding: 0.18rem 0.6rem; border-radius: 999px; min-width: 36px; text-align: center; }
+    .stock-ok  { background: rgba(46,204,113,0.1);  border: 1px solid rgba(46,204,113,0.2);  color: var(--success); }
+    .stock-low { background: rgba(255,165,0,0.1);   border: 1px solid rgba(255,165,0,0.22);  color: #ffb347; }
+    .stock-out { background: var(--danger-dim);     border: 1px solid rgba(192,57,43,0.25);  color: #e06c6c; }
+
+    /* VARIANTS SECTION */
+    .variants-wrap { padding: 0 1.1rem 1rem 1.1rem; }
+    .variants-table { width: 100%; border-collapse: collapse; }
+    .variants-table th { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 0.4rem 0.6rem; text-align: left; border-bottom: 1px solid var(--border); }
+    .variants-table td { padding: 0.55rem 0.6rem; font-size: 0.8rem; vertical-align: middle; border-bottom: 1px solid rgba(46,26,32,0.5); }
+    .variants-table tr:last-child td { border-bottom: none; }
+
+    .shade-dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--border); display: inline-block; margin-right: 0.4rem; vertical-align: middle; }
+    .stock-input { width: 80px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 0.3rem 0.5rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.8rem; outline: none; text-align: center; transition: border-color 0.2s; }
+    .stock-input:focus { border-color: var(--accent-dim); }
+    .btn-save-stock { display: inline-flex; align-items: center; gap: 0.3rem; background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.28rem 0.65rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.75rem; cursor: pointer; transition: all 0.18s; }
+    .btn-save-stock:hover { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
+    .btn-history { display: inline-flex; align-items: center; gap: 0.3rem; background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.28rem 0.65rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.75rem; cursor: pointer; transition: all 0.18s; }
+    .btn-history:hover { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
+
+    /* EXPAND TOGGLE */
+    .btn-expand { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: var(--radius); transition: color 0.18s; display: flex; align-items: center; gap: 0.3rem; }
+    .btn-expand:hover { color: var(--accent); }
+
+    /* ALERTS INDICATORS */
+    .alert-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-left: 0.4rem; vertical-align: middle; }
+    .alert-dot.low { background: #ffb347; }
+    .alert-dot.out { background: #e06c6c; }
+
+    /* EMPTY */
+    .empty-state { padding: 4rem 2rem; text-align: center; }
+    .empty-icon  { font-size: 2.2rem; color: var(--border); margin-bottom: 1rem; }
+    .empty-title { font-family: var(--display); font-size: 1.2rem; color: var(--text); margin-bottom: 0.35rem; }
+    .empty-sub   { font-size: 0.82rem; color: var(--muted); }
+    .empty-sub a { color: var(--accent); text-decoration: none; }
+
+    /* PAGINATION */
+    .pagination-wrap { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.1rem; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 0.7rem; }
+    .pagination-info { font-size: 0.76rem; color: var(--muted); }
+    .pagination-info strong { color: var(--text); font-weight: 500; }
+    .pagination { display: flex; align-items: center; gap: 0.28rem; list-style: none; }
+    .page-link { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 32px; padding: 0 0.45rem; border: 1px solid var(--border); border-radius: var(--radius); background: transparent; color: var(--muted); font-family: var(--body); font-size: 0.8rem; text-decoration: none; transition: all 0.18s; cursor: pointer; }
+    .page-link:hover { border-color: var(--accent-dim); color: var(--accent); }
+    .page-item.active   .page-link { background: rgba(244,167,188,0.12); border-color: var(--accent-dim); color: var(--accent); font-weight: 500; }
+    .page-item.disabled .page-link { opacity: 0.28; pointer-events: none; }
+    .page-item.ellipsis .page-link { border-color: transparent; pointer-events: none; }
+
+    /* HISTORY MODAL */
+    .history-list { list-style: none; max-height: 360px; overflow-y: auto; }
+    .history-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.7rem 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+    .history-item:last-child { border-bottom: none; }
+    .history-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 0.35rem; flex-shrink: 0; }
+    .history-info { flex: 1; color: var(--text); }
+    .history-meta { font-size: 0.72rem; color: var(--muted); margin-top: 0.1rem; }
+    .history-note { font-size: 0.72rem; color: var(--accent); font-style: italic; margin-top: 0.1rem; }
+
+    @media (max-width: 900px) {
+      .admin-content { padding: 1.1rem; }
+      .col-hide { display: none; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .search-form { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="admin-wrapper">
+  <%- include('../partials/admin/adminSidebar') %>
+  <div class="admin-main">
+    <div class="admin-content">
+
+      <!-- HEADER -->
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb">
+            <a href="/admin/dashboard">Dashboard</a>
+            <span class="breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+            <span>Inventory</span>
+          </div>
+          <h1 class="page-title">Inventory <span>Management</span></h1>
+          <p class="page-meta">Monitor and update stock levels across all product variants.</p>
+        </div>
+      </div>
+
+      <!-- LOW STOCK ALERT BANNER -->
+      <% if (lowStockCount > 0) { %>
+        <div class="alert-banner">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div class="alert-banner-text">
+            <strong><%= lowStockCount %> product<%= lowStockCount !== 1 ? 's' : '' %></strong>
+            have low or out-of-stock variants. Review and restock below.
+          </div>
+        </div>
+      <% } %>
+
+      <!-- STAT PILLS (quick filters) -->
+      <%
+        const allCount = total
+      %>
+      <div class="stat-row">
+        <a href="/admin/inventory?search=<%= search %>&category=<%= categoryId %>&stock=" class="stat-pill pill-all <%= !stockFilter ? 'active' : '' %>">
+          <span class="pill-count"><%= allCount %></span>
+          <span class="pill-label">All Products</span>
+        </a>
+        <a href="/admin/inventory?search=<%= search %>&category=<%= categoryId %>&stock=ok" class="stat-pill pill-ok <%= stockFilter === 'ok' ? 'active' : '' %>">
+          <i class="fas fa-check-circle" style="color:var(--success);font-size:0.75rem;"></i>
+          <span class="pill-count pill-ok" style="color:var(--success);"></span>
+          <span class="pill-label">In Stock</span>
+        </a>
+        <a href="/admin/inventory?search=<%= search %>&category=<%= categoryId %>&stock=low" class="stat-pill pill-low <%= stockFilter === 'low' ? 'active' : '' %>">
+          <i class="fas fa-exclamation-circle" style="color:#ffb347;font-size:0.75rem;"></i>
+          <span class="pill-label" style="color:#ffb347;">Low Stock</span>
+        </a>
+        <a href="/admin/inventory?search=<%= search %>&category=<%= categoryId %>&stock=out" class="stat-pill pill-out <%= stockFilter === 'out' ? 'active' : '' %>">
+          <i class="fas fa-times-circle" style="color:#e06c6c;font-size:0.75rem;"></i>
+          <span class="pill-label" style="color:#e06c6c;">Out of Stock</span>
+        </a>
+      </div>
+
+      <!-- TOOLBAR -->
+      <form id="filterForm" action="/admin/inventory" method="GET">
+        <input type="hidden" name="page" value="1" />
+        <div class="toolbar">
+          <div class="search-form">
+            <div class="search-wrap">
+              <i class="fas fa-search search-icon"></i>
+              <input
+                type="text" class="search-input" name="search" id="searchInput"
+                placeholder="Search products…"
+                value="<%= locals.search || '' %>" autocomplete="off"
+              />
+              <button type="button" class="search-clear <%= (locals.search && search.length > 0) ? 'visible' : '' %>" id="searchClear" onclick="clearSearch()">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <button type="submit" class="btn-search"><i class="fas fa-search"></i></button>
+          </div>
+
+          <select class="filter-select" name="category" onchange="document.getElementById('filterForm').submit()">
+            <option value="">All Categories</option>
+            <% categories.forEach(function(cat) { %>
+              <option value="<%= cat._id %>" <%= locals.categoryId === cat._id.toString() ? 'selected' : '' %>><%= cat.name %></option>
+            <% }) %>
+          </select>
+
+          <input type="hidden" name="stock" value="<%= locals.stockFilter || '' %>" />
+
+          <% if ((locals.search && search.length > 0) || (locals.categoryId && categoryId.length > 0) || (locals.stockFilter && stockFilter.length > 0)) { %>
+            <a href="/admin/inventory" class="btn-reset"><i class="fas fa-undo"></i> Clear</a>
+          <% } %>
+
+          <div class="toolbar-right">
+            <span class="total-badge">Total: <strong><%= total %></strong></span>
+          </div>
+        </div>
+      </form>
+
+      <!-- TABLE -->
+      <div class="table-card">
+        <% if (locals.products && products.length > 0) { %>
+          <table class="prod-table">
+            <thead>
+              <tr>
+                <th style="width:50px;">#</th>
+                <th style="width:60px;">Image</th>
+                <th>Product</th>
+                <th class="col-hide">Category</th>
+                <th>Total Stock</th>
+                <th>Alerts</th>
+                <th>Variants</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% products.forEach(function(product, index) { %>
+                <tr id="prod-row-<%= product._id %>">
+                  <td><div style="padding:1rem 1.1rem;color:var(--muted);font-size:0.76rem;"><%= (currentPage - 1) * 10 + index + 1 %></div></td>
+                  <td>
+                    <div style="padding:0.85rem 0 0.85rem 0.5rem;">
+                      <% if (product.images && product.images.length > 0) { %>
+                        <img src="<%= product.images[0] %>" alt="<%= product.name %>" class="prod-thumb" />
+                      <% } else { %>
+                        <div class="prod-thumb-ph"><i class="fas fa-image"></i></div>
+                      <% } %>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="prod-main-row" style="padding-left:0;">
+                      <div>
+                        <div class="prod-name"><%= product.name %></div>
+                        <div class="prod-cat"><%= product.categoryId ? product.categoryId.name : '—' %></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="col-hide">
+                    <div style="padding:1rem 1.1rem;color:var(--muted);font-size:0.82rem;">
+                      <%= product.categoryId ? product.categoryId.name : '—' %>
+                    </div>
+                  </td>
+                  <td>
+                    <div style="padding:1rem 1.1rem;">
+                      <span class="stock-pill <%= product.totalStock === 0 ? 'stock-out' : product.totalStock <= LOW_STOCK_THRESHOLD ? 'stock-low' : 'stock-ok' %>">
+                        <%= product.totalStock %>
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <div style="padding:1rem 1.1rem;font-size:0.76rem;">
+                      <% if (product.outVariants > 0) { %>
+                        <div style="color:#e06c6c;margin-bottom:0.2rem;">
+                          <i class="fas fa-times-circle"></i> <%= product.outVariants %> out of stock
+                        </div>
+                      <% } %>
+                      <% if (product.lowVariants > 0) { %>
+                        <div style="color:#ffb347;">
+                          <i class="fas fa-exclamation-circle"></i> <%= product.lowVariants %> low stock
+                        </div>
+                      <% } %>
+                      <% if (product.outVariants === 0 && product.lowVariants === 0) { %>
+                        <span style="color:var(--success);"><i class="fas fa-check-circle"></i> All good</span>
+                      <% } %>
+                    </div>
+                  </td>
+                  <td>
+                    <div style="padding:1rem 1.1rem;">
+                      <button class="btn-expand" onclick="toggleVariants('<%= product._id %>', this)">
+                        <i class="fas fa-chevron-down" id="icon-<%= product._id %>"></i>
+                        <%= product.variants.length %> variant<%= product.variants.length !== 1 ? 's' : '' %>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- VARIANTS ROW (hidden by default) -->
+                <tr id="variants-<%= product._id %>" style="display:none;">
+                  <td colspan="7" style="padding:0;background:var(--surface2);border-bottom:2px solid var(--border);">
+                    <div class="variants-wrap">
+                      <table class="variants-table">
+                        <thead>
+                          <tr>
+                            <th>Shade</th>
+                            <th>Price</th>
+                            <th>Sale Price</th>
+                            <th>Current Stock</th>
+                            <th>Set New Stock</th>
+                            <th>Note</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% product.variants.forEach(function(variant) { %>
+                            <tr>
+                              <td>
+                                <% if (variant.image) { %>
+                                  <img src="<%= variant.image %>" style="width:20px;height:20px;border-radius:50%;object-fit:cover;border:1px solid var(--border);vertical-align:middle;margin-right:0.4rem;" />
+                                <% } %>
+                                <span style="color:var(--text)"><%= variant.shade %></span>
+                              </td>
+                              <td style="color:var(--muted);">₹<%= variant.varientPrice %></td>
+                              <td style="color:var(--muted);">
+                                <% if (variant.salePrice && variant.salePrice > 0) { %>₹<%= variant.salePrice %><% } else { %>—<% } %>
+                              </td>
+                              <td>
+                                <span class="stock-pill <%= variant.stock === 0 ? 'stock-out' : variant.stock <= LOW_STOCK_THRESHOLD ? 'stock-low' : 'stock-ok' %>">
+                                  <%= variant.stock || 0 %>
+                                </span>
+                              </td>
+                              <td>
+                                <input
+                                  type="number" min="0"
+                                  class="stock-input"
+                                  id="stock-<%= product._id %>-<%= variant.shade.replace(/\s+/g,'_') %>"
+                                  value="<%= variant.stock || 0 %>"
+                                  placeholder="Stock"
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="text"
+                                  class="stock-input" style="width:140px;"
+                                  id="note-<%= product._id %>-<%= variant.shade.replace(/\s+/g,'_') %>"
+                                  placeholder="Optional note…"
+                                />
+                              </td>
+                              <td>
+                                <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+                                  <button
+                                    class="btn-save-stock"
+                                    onclick="saveStock('<%= product._id %>', '<%= variant.shade %>', '<%= product._id %>-<%= variant.shade.replace(/\s+/g,'_') %>')"
+                                  >
+                                    <i class="fas fa-save"></i> Save
+                                  </button>
+                                  <button
+                                    class="btn-history"
+                                    onclick="viewHistory('<%= product._id %>', '<%= product.name %>')"
+                                  >
+                                    <i class="fas fa-history"></i> Log
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          <% }) %>
+                        </tbody>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+
+              <% }) %>
+            </tbody>
+          </table>
+
+          <!-- PAGINATION -->
+          <% if (locals.totalPages && totalPages > 1) { %>
+            <%
+              const qs = `&search=${locals.search||''}&category=${locals.categoryId||''}&stock=${locals.stockFilter||''}`
+            %>
+            <div class="pagination-wrap">
+              <div class="pagination-info">
+                Showing
+                <strong><%= (currentPage - 1) * 10 + 1 %>–<%= Math.min(currentPage * 10, total) %></strong>
+                of <strong><%= total %></strong> products
+              </div>
+              <ul class="pagination">
+                <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                  <a class="page-link" href="/admin/inventory?page=<%= currentPage - 1 %><%= qs %>">
+                    <i class="fas fa-chevron-left" style="font-size:0.65rem"></i>
+                  </a>
+                </li>
+                <%
+                  let sp = Math.max(1, currentPage - 2)
+                  let ep = Math.min(totalPages, sp + 4)
+                  if (ep - sp < 4) sp = Math.max(1, ep - 4)
+                %>
+                <% if (sp > 1) { %>
+                  <li class="page-item"><a class="page-link" href="/admin/inventory?page=1<%= qs %>">1</a></li>
+                  <% if (sp > 2) { %><li class="page-item ellipsis"><span class="page-link">…</span></li><% } %>
+                <% } %>
+                <% for (let p = sp; p <= ep; p++) { %>
+                  <li class="page-item <%= p === currentPage ? 'active' : '' %>">
+                    <a class="page-link" href="/admin/inventory?page=<%= p %><%= qs %>"><%= p %></a>
+                  </li>
+                <% } %>
+                <% if (ep < totalPages) { %>
+                  <% if (ep < totalPages - 1) { %><li class="page-item ellipsis"><span class="page-link">…</span></li><% } %>
+                  <li class="page-item"><a class="page-link" href="/admin/inventory?page=<%= totalPages %><%= qs %>"><%= totalPages %></a></li>
+                <% } %>
+                <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                  <a class="page-link" href="/admin/inventory?page=<%= currentPage + 1 %><%= qs %>">
+                    <i class="fas fa-chevron-right" style="font-size:0.65rem"></i>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          <% } %>
+
+        <% } else { %>
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-boxes"></i></div>
+            <h3 class="empty-title">No products found</h3>
+            <p class="empty-sub">
+              Try different filters or <a href="/admin/inventory">clear all</a>.
+            </p>
+          </div>
+        <% } %>
+      </div>
+
+    </div>
+    <%- include('../partials/admin/adminFooter') %>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script>
+  function showToast(message, type) {
+    Swal.fire({
+      toast: true, position: 'top-end', icon: type, title: message,
+      showConfirmButton: false, timer: 3000, timerProgressBar: true,
+      background: '#130a0d', color: '#fdf0f3',
+      iconColor: type === 'success' ? '#f4a7bc' : '#e06c6c'
+    })
+  }
+
+  // ── TOGGLE VARIANTS ROW ──
+  function toggleVariants(productId, btn) {
+    const row  = document.getElementById('variants-' + productId)
+    const icon = document.getElementById('icon-' + productId)
+    const open = row.style.display === 'none' || row.style.display === ''
+    row.style.display = open ? 'table-row' : 'none'
+    icon.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)'
+    icon.style.transition = 'transform 0.2s'
+  }
+
+  // ── SAVE STOCK ──
+  async function saveStock(productId, shade, inputKey) {
+    const stockInput = document.getElementById('stock-' + inputKey)
+    const noteInput  = document.getElementById('note-' + inputKey)
+    const newStock   = parseInt(stockInput.value)
+
+    if (isNaN(newStock) || newStock < 0) {
+      showToast('Enter a valid stock number.', 'warning')
+      return
+    }
+
+    try {
+      const res  = await fetch(`/admin/inventory/${productId}/variant/${encodeURIComponent(shade)}/stock`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stock: newStock, note: noteInput ? noteInput.value.trim() : '' })
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        showToast(`Stock updated to ${data.newStock}.`, 'success')
+        if (noteInput) noteInput.value = ''
+        // brief highlight
+        stockInput.style.borderColor = '#4cd98a'
+        setTimeout(() => { stockInput.style.borderColor = ''; location.reload() }, 1500)
+      } else {
+        showToast(data.message || 'Update failed.', 'error')
+      }
+    } catch (err) {
+      showToast('Something went wrong.', 'error')
+    }
+  }
+
+  // ── VIEW HISTORY ──
+  async function viewHistory(productId, productName) {
+    try {
+      const res  = await fetch(`/admin/inventory/${productId}/history`)
+      const data = await res.json()
+
+      if (!data.success) { showToast('Could not load history.', 'error'); return }
+
+      const history = data.history
+      let html = ''
+
+      if (history.length === 0) {
+        html = '<p style="color:#8a6d74;font-size:0.84rem;text-align:center;padding:1rem 0;">No stock changes recorded yet.</p>'
+      } else {
+        html = '<ul class="history-list">'
+        history.forEach(function(h) {
+          const arrow = h.newStock > h.oldStock ? '↑' : h.newStock < h.oldStock ? '↓' : '='
+          const color = h.newStock > h.oldStock ? '#4cd98a' : h.newStock < h.oldStock ? '#e06c6c' : '#8a6d74'
+          const date  = new Date(h.updatedAt).toLocaleString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
+          html += `
+            <li class="history-item">
+              <div class="history-dot" style="background:${color};"></div>
+              <div class="history-info">
+                <span style="color:${color};font-weight:500;">${arrow} ${h.oldStock} → ${h.newStock}</span>
+                &nbsp;<span style="color:#8a6d74;font-size:0.75rem;">(${h.shade})</span>
+                <div class="history-meta">${date} · by ${h.updatedBy}</div>
+                ${h.note ? `<div class="history-note">"${h.note}"</div>` : ''}
+              </div>
+            </li>`
+        })
+        html += '</ul>'
+      }
+
+      Swal.fire({
+        title: `Stock History`,
+        html: `<div style="text-align:left;font-size:0.82rem;color:#8a6d74;margin-bottom:0.75rem;">${productName}</div>` + html,
+        background: '#130a0d', color: '#fdf0f3',
+        confirmButtonColor: '#f4a7bc',
+        confirmButtonText: 'Close',
+        width: 520,
+        customClass: { popup: 'swal-history-popup' }
+      })
+    } catch (err) {
+      showToast('Something went wrong.', 'error')
+    }
+  }
+
+  // ── SEARCH CLEAR ──
+  var searchInput = document.getElementById('searchInput')
+  var searchClear = document.getElementById('searchClear')
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      searchClear.classList.toggle('visible', this.value.length > 0)
+    })
+  }
+  function clearSearch() {
+    searchInput.value = ''
+    window.location.href = '/admin/inventory'
+  }
+</script>
+</body>
+</html>

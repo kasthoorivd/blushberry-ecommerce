@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Placed! | Blushberry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #fdf6f8;
+      --surface:   #ffffff;
+      --surface2:  #fef0f4;
+      --border:    #f0dde4;
+      --accent:    #c2185b;
+      --accent-dim:#e91e8c;
+      --text:      #1a0a10;
+      --muted:     #8a6d74;
+      --success:   #22b573;
+      --radius:    10px;
+      --radius-lg: 16px;
+      --display:   'Playfair Display', Georgia, serif;
+      --body:      'DM Sans', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--body); font-weight: 300; min-height: 100vh; display: flex; flex-direction: column; }
+
+    .nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 8px rgba(194,24,91,0.06); }
+    .nav-brand { font-family: var(--display); font-size: 1.5rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+
+    .page { flex: 1; display: flex; align-items: center; justify-content: center; padding: 3rem 1.5rem; }
+
+    .success-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); max-width: 600px; width: 100%; padding: 3rem 2.5rem; text-align: center; box-shadow: 0 4px 40px rgba(194,24,91,0.08); }
+
+    /* animated checkmark illustration */
+    .success-illustration { width: 100px; height: 100px; margin: 0 auto 1.5rem; position: relative; }
+    .success-circle { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, rgba(34,181,115,0.15), rgba(34,181,115,0.05)); border: 2px solid rgba(34,181,115,0.3); display: flex; align-items: center; justify-content: center; animation: popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
+    .success-circle i { font-size: 2.5rem; color: var(--success); animation: fadeIn 0.3s 0.3s both; }
+    .confetti { position: absolute; width: 8px; height: 8px; border-radius: 2px; animation: confettiFall 1s ease-out forwards; }
+
+    @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+    @keyframes confettiFall { 0% { transform: translate(0,0) rotate(0deg); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) rotate(360deg); opacity: 0; } }
+
+    .success-tag { display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(34,181,115,0.1); border: 1px solid rgba(34,181,115,0.25); color: var(--success); font-size: 0.75rem; font-weight: 500; padding: 0.3rem 0.8rem; border-radius: 999px; margin-bottom: 1rem; letter-spacing: 0.05em; text-transform: uppercase; }
+
+    .success-title { font-family: var(--display); font-size: 1.9rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; line-height: 1.2; }
+    .success-title span { color: var(--accent); }
+
+    .success-subtitle { font-size: 0.9rem; color: var(--muted); margin-bottom: 1.75rem; line-height: 1.6; }
+
+    /* order meta */
+    .order-meta { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.4rem; margin-bottom: 1.75rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; text-align: left; }
+    .meta-item { }
+    .meta-label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 0.2rem; }
+    .meta-value { font-size: 0.88rem; color: var(--text); font-weight: 500; }
+    .meta-value.accent { color: var(--accent); }
+
+    /* order items preview */
+    .items-preview { display: flex; align-items: center; justify-content: center; gap: -0.5rem; margin-bottom: 1.75rem; }
+    .item-thumb { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid var(--surface); margin-left: -8px; background: var(--surface2); }
+    .item-thumb:first-child { margin-left: 0; }
+    .items-count-bubble { width: 52px; height: 52px; border-radius: 50%; background: var(--accent-soft, rgba(194,24,91,0.08)); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 500; color: var(--accent); margin-left: -8px; }
+
+    /* CTA buttons */
+    .cta-buttons { display: flex; flex-direction: column; gap: 0.75rem; }
+    .btn-primary { display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: linear-gradient(135deg, var(--accent), var(--accent-dim)); color: #fff; border: none; padding: 0.85rem 1.5rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.9rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(194,24,91,0.3); }
+    .btn-secondary { display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: transparent; color: var(--accent); border: 1.5px solid var(--border); padding: 0.85rem 1.5rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.9rem; font-weight: 400; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .btn-secondary:hover { border-color: var(--accent); background: rgba(194,24,91,0.04); }
+
+    .divider { display: flex; align-items: center; gap: 0.75rem; margin: 0.25rem 0; color: var(--muted); font-size: 0.72rem; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* email note */
+    .email-note { font-size: 0.75rem; color: var(--muted); margin-top: 1.25rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+
+    @media (max-width: 480px) {
+      .success-card { padding: 2rem 1.25rem; }
+      .success-title { font-size: 1.5rem; }
+      .order-meta { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-brand">Blushberry</a>
+  <a href="/orders" style="font-size:0.82rem;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:0.35rem;">
+    <i class="fas fa-list"></i> My Orders
+  </a>
+</nav>
+
+<div class="page">
+  <div class="success-card" id="successCard">
+
+    <!-- illustration -->
+    <div class="success-illustration" id="illustration">
+      <div class="success-circle">
+        <i class="fas fa-check"></i>
+      </div>
+    </div>
+
+    <div class="success-tag"><i class="fas fa-check-circle"></i> Order Confirmed</div>
+
+    <h1 class="success-title">Thank you, <span><%= order.shippingAddress.name.split(' ')[0] %>!</span> 🌸</h1>
+    <p class="success-subtitle">
+      Your order has been placed successfully and is being processed.<br/>
+      We'll notify you once it's on its way.
+    </p>
+
+    <!-- order meta -->
+    <div class="order-meta">
+      <div class="meta-item">
+        <div class="meta-label">Order ID</div>
+        <div class="meta-value accent"><%= order.orderId %></div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Payment</div>
+        <div class="meta-value"><%= order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod %></div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Items</div>
+        <div class="meta-value"><%= order.items.length %> item<%= order.items.length !== 1 ? 's' : '' %></div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Order Total</div>
+        <div class="meta-value">₹<%= order.finalAmount.toLocaleString('en-IN') %></div>
+      </div>
+      <div class="meta-item" style="grid-column:1/-1;">
+        <div class="meta-label">Delivering to</div>
+        <div class="meta-value" style="font-weight:400;font-size:0.82rem;color:var(--muted);">
+          <%= order.shippingAddress.address %><% if (order.shippingAddress.city) { %>, <%= order.shippingAddress.city %><% } %>,
+          <%= order.shippingAddress.state %> — <%= order.shippingAddress.pincode %>
+        </div>
+      </div>
+    </div>
+
+    <!-- items thumbnail strip -->
+    <div class="items-preview">
+      <% order.items.slice(0, 4).forEach(function(item) { %>
+        <img class="item-thumb" src="<%= item.productImage || '/images/placeholder.png' %>" alt="<%= item.productName %>" onerror="this.src='/images/placeholder.png'" />
+      <% }) %>
+      <% if (order.items.length > 4) { %>
+        <div class="items-count-bubble">+<%= order.items.length - 4 %></div>
+      <% } %>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-buttons">
+      <a href="/orders/<%= order._id %>" class="btn-primary">
+        <i class="fas fa-receipt"></i> View Order Details
+      </a>
+      <div class="divider">or</div>
+      <a href="/products" class="btn-secondary">
+        <i class="fas fa-shopping-bag"></i> Continue Shopping
+      </a>
+    </div>
+
+    <div class="email-note">
+      <i class="fas fa-envelope"></i>
+      Order confirmation sent to <strong><%= order.shippingAddress.email %></strong>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // confetti burst on load
+  window.addEventListener('load', function() {
+    var card = document.getElementById('illustration')
+    var colors = ['#c2185b','#e91e8c','#f4a7bc','#22b573','#f9a825']
+    for (var i = 0; i < 12; i++) {
+      var dot = document.createElement('div')
+      dot.className = 'confetti'
+      var angle  = (i / 12) * 360
+      var dist   = 55 + Math.random() * 20
+      var tx     = Math.cos(angle * Math.PI / 180) * dist
+      var ty     = Math.sin(angle * Math.PI / 180) * dist
+      dot.style.cssText = [
+        'background:' + colors[i % colors.length],
+        'left:46px', 'top:46px',
+        '--tx:' + tx + 'px',
+        '--ty:' + ty + 'px',
+        'animation-delay:' + (i * 0.04) + 's'
+      ].join(';')
+      card.appendChild(dot)
+    }
+  })
+</script>
+</body>
+</html>

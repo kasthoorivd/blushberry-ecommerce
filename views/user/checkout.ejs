@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout | Blushberry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:          #fdf6f8;
+      --surface:     #ffffff;
+      --surface2:    #fef0f4;
+      --border:      #f0dde4;
+      --accent:      #c2185b;
+      --accent-dim:  #e91e8c;
+      --accent-soft: rgba(194,24,91,0.08);
+      --text:        #1a0a10;
+      --muted:       #8a6d74;
+      --success:     #22b573;
+      --radius:      10px;
+      --radius-lg:   16px;
+      --display:     'Playfair Display', Georgia, serif;
+      --body:        'DM Sans', sans-serif;
+      --shadow:      0 2px 16px rgba(194,24,91,0.07);
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--body); font-weight: 300; line-height: 1.6; min-height: 100vh; }
+
+    /* NAV */
+    .nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 8px rgba(194,24,91,0.06); }
+    .nav-brand { font-family: var(--display); font-size: 1.5rem; font-weight: 700; color: var(--accent); text-decoration: none; letter-spacing: -0.01em; }
+    .nav-steps { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--muted); }
+    .nav-step { display: flex; align-items: center; gap: 0.3rem; }
+    .nav-step.active { color: var(--accent); font-weight: 500; }
+    .nav-step.done { color: var(--success); }
+    .nav-step-dot { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; background: var(--border); color: var(--muted); }
+    .nav-step.active .nav-step-dot { background: var(--accent); color: #fff; }
+    .nav-step.done .nav-step-dot { background: var(--success); color: #fff; }
+    .nav-step-sep { color: var(--border); font-size: 0.7rem; }
+
+    /* LAYOUT */
+    .checkout-wrap { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; display: grid; grid-template-columns: 1fr 380px; gap: 1.5rem; align-items: start; }
+
+    /* SECTION CARD */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
+    .card-header { padding: 1rem 1.4rem; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: space-between; }
+    .card-header-left { display: flex; align-items: center; gap: 0.6rem; }
+    .card-icon { width: 32px; height: 32px; background: var(--accent-soft); border: 1px solid rgba(194,24,91,0.15); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 0.8rem; flex-shrink: 0; }
+    .card-title { font-family: var(--display); font-size: 1rem; font-weight: 600; color: var(--text); }
+    .card-body { padding: 1.4rem; }
+
+    /* ADDRESSES */
+    .address-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+    .address-card { border: 2px solid var(--border); border-radius: var(--radius); padding: 1rem; cursor: pointer; transition: all 0.2s; position: relative; }
+    .address-card:hover { border-color: rgba(194,24,91,0.3); background: var(--accent-soft); }
+    .address-card.selected { border-color: var(--accent); background: rgba(194,24,91,0.04); }
+    .address-card input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+    .address-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.5rem; }
+    .address-name { font-weight: 500; font-size: 0.88rem; color: var(--text); }
+    .address-type-badge { font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; background: var(--accent-soft); color: var(--accent); padding: 0.15rem 0.5rem; border-radius: 999px; font-weight: 500; }
+    .address-default-badge { font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(34,181,115,0.1); color: var(--success); padding: 0.15rem 0.5rem; border-radius: 999px; font-weight: 500; margin-left: 0.3rem; }
+    .address-line { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+    .address-mobile { font-size: 0.78rem; color: var(--muted); margin-top: 0.3rem; }
+    .address-select-indicator { position: absolute; top: 0.75rem; right: 0.75rem; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+    .address-card.selected .address-select-indicator { border-color: var(--accent); background: var(--accent); }
+    .address-card.selected .address-select-indicator::after { content: ''; width: 6px; height: 6px; background: #fff; border-radius: 50%; display: block; }
+    .address-actions { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.65rem; }
+    .btn-addr-edit { font-size: 0.72rem; color: var(--accent); background: none; border: none; cursor: pointer; padding: 0; text-decoration: underline; }
+    .no-address { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.88rem; }
+    .btn-add-address { display: inline-flex; align-items: center; gap: 0.4rem; background: transparent; border: 1px dashed rgba(194,24,91,0.4); color: var(--accent); padding: 0.55rem 1rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.82rem; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+    .btn-add-address:hover { background: var(--accent-soft); border-style: solid; }
+
+    /* OOS */
+    .oos-banner { display: flex; align-items: flex-start; gap: 0.6rem; background: rgba(224,108,108,0.08); border: 1px solid rgba(224,108,108,0.25); border-radius: var(--radius); padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.78rem; color: #c0392b; }
+    .oos-banner i { margin-top: 0.1rem; flex-shrink: 0; }
+
+    /* ORDER ITEMS */
+    .order-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .order-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .order-item:first-child { padding-top: 0; }
+    .item-img { width: 72px; height: 72px; border-radius: var(--radius); object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; background: var(--surface2); }
+    .item-info { flex: 1; min-width: 0; }
+    .item-name { font-size: 0.88rem; font-weight: 500; color: var(--text); margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-shade { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.3rem; }
+    .item-qty { font-size: 0.75rem; color: var(--muted); }
+    .item-pricing { text-align: right; flex-shrink: 0; }
+    .item-price-final { font-size: 0.92rem; font-weight: 500; color: var(--text); }
+    .item-price-original { font-size: 0.72rem; color: var(--muted); text-decoration: line-through; }
+    .item-discount-tag { font-size: 0.68rem; color: var(--success); font-weight: 500; }
+
+    /* SUMMARY */
+    .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); position: sticky; top: 90px; }
+    .summary-header { padding: 1rem 1.4rem; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .summary-title { font-family: var(--display); font-size: 1rem; font-weight: 600; color: var(--text); }
+    .summary-body { padding: 1.2rem 1.4rem; }
+    .summary-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.83rem; color: var(--muted); margin-bottom: 0.6rem; }
+    .summary-row.total { border-top: 1px solid var(--border); padding-top: 0.75rem; margin-top: 0.5rem; font-size: 1rem; font-weight: 600; color: var(--text); }
+    .summary-row .green { color: var(--success); font-weight: 500; }
+    .summary-savings { background: rgba(34,181,115,0.07); border: 1px solid rgba(34,181,115,0.2); border-radius: var(--radius); padding: 0.6rem 0.9rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--success); margin: 0.75rem 0; }
+    .free-shipping-bar { margin: 0.75rem 0; }
+    .free-shipping-text { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; }
+    .free-shipping-text strong { color: var(--accent); }
+    .progress-bar { height: 4px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-dim)); border-radius: 999px; }
+
+    /* PAYMENT */
+    .payment-options { display: flex; flex-direction: column; gap: 0.65rem; }
+    .payment-option { display: flex; align-items: center; gap: 0.75rem; border: 2px solid var(--border); border-radius: var(--radius); padding: 0.85rem 1rem; cursor: pointer; transition: all 0.2s; }
+    .payment-option:hover { border-color: rgba(194,24,91,0.3); }
+    .payment-option.selected { border-color: var(--accent); background: var(--accent-soft); }
+    .payment-option input[type="radio"] { accent-color: var(--accent); width: 16px; height: 16px; flex-shrink: 0; }
+    .payment-option-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; background: var(--surface2); flex-shrink: 0; }
+    .payment-option-info { flex: 1; }
+    .payment-option-label { font-size: 0.86rem; font-weight: 500; color: var(--text); }
+    .payment-option-sub { font-size: 0.72rem; color: var(--muted); }
+    .payment-coming-soon { font-size: 0.65rem; background: rgba(194,24,91,0.1); color: var(--accent); padding: 0.15rem 0.45rem; border-radius: 999px; margin-left: 0.4rem; }
+
+    /* PLACE ORDER */
+    .btn-place-order { width: 100%; background: linear-gradient(135deg, var(--accent), #e91e8c); color: #fff; border: none; padding: 0.9rem 1.5rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 1rem; }
+    .btn-place-order:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(194,24,91,0.3); }
+    .btn-place-order:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+    .secure-note { display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.72rem; color: var(--muted); margin-top: 0.6rem; }
+
+    /* BREADCRUMB */
+    .breadcrumb { display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: var(--muted); margin-bottom: 1.5rem; }
+    .breadcrumb a { color: var(--muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb-sep { font-size: 0.6rem; opacity: 0.4; }
+
+    /* ══════════════════════════════════
+       ADD ADDRESS MODAL
+    ══════════════════════════════════ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(26,10,16,0.55);
+      backdrop-filter: blur(3px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 18px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(194,24,91,0.18);
+      animation: modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.93) translateY(16px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      border-radius: 18px 18px 0 0;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .modal-head-title {
+      font-family: var(--display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .modal-close {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      border: none;
+      background: var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .modal-close:hover { background: #f0c0c8; color: var(--accent); }
+
+    .modal-body { padding: 1.5rem; }
+
+    /* form inside modal */
+    .modal-alert-error { background: #fce8e8; border: 1px solid #f0c0c0; color: #c03030; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none; align-items: center; gap: 8px; }
+    .modal-alert-error.show { display: flex; }
+
+    .modal-section-label { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent); font-weight: 600; margin: 20px 0 12px; display: flex; align-items: center; gap: 8px; }
+    .modal-section-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, var(--border), transparent); }
+
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .modal-group { display: flex; flex-direction: column; gap: 4px; }
+    .modal-group.full { grid-column: 1 / -1; }
+    .modal-group label { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
+    .modal-group label span { color: var(--accent); }
+
+    .modal-group input,
+    .modal-group select,
+    .modal-group textarea {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: var(--body);
+      color: var(--text);
+      background: #fffafb;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .modal-group input:focus,
+    .modal-group select:focus,
+    .modal-group textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(194,24,91,0.08);
+      background: #fff;
+    }
+    .modal-group input::placeholder,
+    .modal-group textarea::placeholder { color: #c8b0b5; font-size: 12px; }
+    .modal-group textarea { resize: vertical; min-height: 68px; }
+    .modal-group select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c2185b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 13px center;
+    }
+
+    /* type pills */
+    .type-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .type-pill input[type=radio] { display: none; }
+    .type-pill label {
+      display: inline-block;
+      padding: 7px 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: var(--body);
+    }
+    .type-pill input[type=radio]:checked + label {
+      border-color: var(--accent);
+      background: rgba(194,24,91,0.08);
+      color: var(--accent);
+    }
+
+    /* modal buttons */
+    .modal-btn-row { display: flex; gap: 10px; margin-top: 24px; }
+    .modal-btn-cancel {
+      padding: 12px 20px;
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: var(--body);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-btn-cancel:hover { border-color: var(--accent); color: var(--accent); }
+    .modal-btn-save {
+      flex: 1;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--accent), #e91e8c);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--body);
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-btn-save:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(194,24,91,0.25); }
+    .modal-btn-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    @media (max-width: 768px) {
+      .checkout-wrap { grid-template-columns: 1fr; padding: 1rem; }
+      .address-grid { grid-template-columns: 1fr; }
+      .summary-card { position: static; }
+      .modal-grid { grid-template-columns: 1fr; }
+      .modal-group.full { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="/" class="nav-brand">Blushberry</a>
+  <div class="nav-steps">
+    <div class="nav-step done">
+      <div class="nav-step-dot"><i class="fas fa-check"></i></div>
+      Cart
+    </div>
+    <span class="nav-step-sep"><i class="fas fa-chevron-right"></i></span>
+    <div class="nav-step active">
+      <div class="nav-step-dot">2</div>
+      Checkout
+    </div>
+    <span class="nav-step-sep"><i class="fas fa-chevron-right"></i></span>
+    <div class="nav-step">
+      <div class="nav-step-dot">3</div>
+      Confirmation
+    </div>
+  </div>
+</nav>
+
+<div class="checkout-wrap">
+
+  <!-- LEFT COLUMN -->
+  <div class="checkout-left">
+
+    <div class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+      <a href="/cart">Cart</a>
+      <span class="breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+      <span>Checkout</span>
+    </div>
+
+    <% if (outOfStock && outOfStock.length > 0) { %>
+      <div class="oos-banner">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+          <strong>Stock issue:</strong>
+          <% outOfStock.forEach(function(l) { %>
+            <div><%= l.productName %> (<%= l.shade %>) — only <%= l.stock %> left but <%= l.quantity %> in cart.</div>
+          <% }) %>
+          Please update your cart before placing the order.
+        </div>
+      </div>
+    <% } %>
+
+    <!-- DELIVERY ADDRESS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-left">
+          <div class="card-icon"><i class="fas fa-map-marker-alt"></i></div>
+          <span class="card-title">Delivery Address</span>
+        </div>
+        <!-- Changed from <a href> to button that opens modal -->
+        <button type="button" class="btn-add-address" onclick="openAddressModal()">
+          <i class="fas fa-plus"></i> Add New
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="address-grid" id="addressGrid">
+          <% if (addresses && addresses.length > 0) { %>
+            <% addresses.forEach(function(addr, i) { %>
+              <label class="address-card <%= i === 0 ? 'selected' : '' %>" id="addrCard-<%= addr._id %>" onclick="selectAddress('<%= addr._id %>', this)">
+                <input type="radio" name="addressId" value="<%= addr._id %>" <%= i === 0 ? 'checked' : '' %> />
+                <div class="address-select-indicator"></div>
+                <div class="address-top">
+                  <div class="address-name"><%= addr.name %></div>
+                  <div style="display:flex;gap:0.25rem;flex-wrap:wrap;justify-content:flex-end;">
+                    <span class="address-type-badge"><%= addr.addressType %></span>
+                    <% if (addr.isDefault) { %><span class="address-default-badge">Default</span><% } %>
+                  </div>
+                </div>
+                <div class="address-line">
+                  <%= addr.address %><% if (addr.city) { %>, <%= addr.city %><% } %>,<br/>
+                  <%= addr.state %>, <%= addr.country %> — <%= addr.pincode %>
+                  <% if (addr.landmark) { %><br/><span style="color:var(--muted);font-size:0.72rem;">Near: <%= addr.landmark %></span><% } %>
+                </div>
+                <div class="address-mobile"><i class="fas fa-phone" style="font-size:0.68rem;margin-right:0.3rem;"></i><%= addr.mobile %></div>
+                <div class="address-actions">
+                  <a href="/addresses/edit/<%= addr._id %>?from=checkout" class="btn-addr-edit" onclick="event.stopPropagation()">
+                    <i class="fas fa-pen"></i> Edit
+                  </a>
+                </div>
+              </label>
+            <% }) %>
+          <% } else { %>
+            <div class="no-address" id="noAddressMsg">
+              <i class="fas fa-map-marker-alt" style="font-size:2rem;color:var(--border);display:block;margin-bottom:0.75rem;"></i>
+              No addresses saved yet.<br/>
+              <button type="button" class="btn-add-address" style="margin-top:0.75rem;" onclick="openAddressModal()">
+                <i class="fas fa-plus"></i> Add Address
+              </button>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDER ITEMS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-left">
+          <div class="card-icon"><i class="fas fa-shopping-bag"></i></div>
+          <span class="card-title">Order Items (<%= lines.length %>)</span>
+        </div>
+        <a href="/cart" style="font-size:0.75rem;color:var(--accent);text-decoration:none;"><i class="fas fa-pen" style="font-size:0.65rem;"></i> Edit Cart</a>
+      </div>
+      <div class="card-body" style="padding-top:0.5rem;">
+        <% lines.forEach(function(line) { %>
+          <div class="order-item">
+            <img class="item-img" src="<%= line.image || '/images/placeholder.png' %>" alt="<%= line.productName %>" onerror="this.src='/images/placeholder.png'" />
+            <div class="item-info">
+              <div class="item-name"><%= line.productName %></div>
+              <% if (line.shade) { %>
+                <div class="item-shade"><i class="fas fa-circle" style="font-size:0.5rem;color:var(--accent);"></i> <%= line.shade %></div>
+              <% } %>
+              <div class="item-qty">Qty: <%= line.quantity %></div>
+            </div>
+            <div class="item-pricing">
+              <div class="item-price-final">₹<%= (line.finalUnitPrice * line.quantity).toLocaleString('en-IN') %></div>
+              <% if (line.itemDiscount > 0) { %>
+                <div class="item-price-original">₹<%= (line.originalPrice * line.quantity).toLocaleString('en-IN') %></div>
+                <div class="item-discount-tag">Save ₹<%= line.itemDiscount.toLocaleString('en-IN') %></div>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- PAYMENT METHOD -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-left">
+          <div class="card-icon"><i class="fas fa-credit-card"></i></div>
+          <span class="card-title">Payment Method</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="payment-options">
+          <label class="payment-option selected" id="pmCOD" onclick="selectPayment('COD', this)">
+            <input type="radio" name="paymentMethod" value="COD" checked />
+            <div class="payment-option-icon">💵</div>
+            <div class="payment-option-info">
+              <div class="payment-option-label">Cash on Delivery</div>
+              <div class="payment-option-sub">Pay when your order arrives</div>
+            </div>
+          </label>
+          <label class="payment-option" style="opacity:0.5;cursor:not-allowed;">
+            <input type="radio" name="paymentMethod" value="Online" disabled />
+            <div class="payment-option-icon">💳</div>
+            <div class="payment-option-info">
+              <div class="payment-option-label">Online Payment <span class="payment-coming-soon">Coming soon</span></div>
+              <div class="payment-option-sub">UPI, Cards, Net Banking</div>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN — SUMMARY -->
+  <div class="checkout-right">
+    <div class="summary-card">
+      <div class="summary-header">
+        <div class="summary-title">Order Summary</div>
+      </div>
+      <div class="summary-body">
+        <% if (totals.amountForFreeShipping > 0) { %>
+          <div class="free-shipping-bar">
+            <div class="free-shipping-text">Add <strong>₹<%= totals.amountForFreeShipping.toLocaleString('en-IN') %></strong> more for free shipping!</div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width:<%= Math.min(100, Math.round(((totals.subtotal - totals.itemDiscounts) / totals.freeShippingThreshold) * 100)) %>%"></div>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="summary-savings" style="margin-bottom:0.75rem;">
+            <i class="fas fa-truck"></i> You've unlocked <strong>Free Shipping!</strong>
+          </div>
+        <% } %>
+
+        <div class="summary-row"><span>Subtotal (<%= lines.length %> items)</span><span>₹<%= totals.subtotal.toLocaleString('en-IN') %></span></div>
+        <% if (totals.itemDiscounts > 0) { %>
+          <div class="summary-row"><span>Item Discounts</span><span class="green">−₹<%= totals.itemDiscounts.toLocaleString('en-IN') %></span></div>
+        <% } %>
+        <% if (totals.couponDiscount > 0) { %>
+          <div class="summary-row"><span>Coupon (<%= couponCode %>)</span><span class="green">−₹<%= totals.couponDiscount.toLocaleString('en-IN') %></span></div>
+        <% } %>
+        <div class="summary-row">
+          <span>Shipping</span>
+          <% if (totals.shippingCharge === 0) { %><span class="green">Free</span><% } else { %><span>₹<%= totals.shippingCharge %></span><% } %>
+        </div>
+        <div class="summary-row"><span>GST (5%)</span><span>₹<%= totals.tax.toLocaleString('en-IN') %></span></div>
+        <div class="summary-row total"><span>Total</span><span>₹<%= totals.finalAmount.toLocaleString('en-IN') %></span></div>
+        <% if (totals.totalDiscount > 0) { %>
+          <div class="summary-savings"><i class="fas fa-tag"></i> You're saving <strong>₹<%= totals.totalDiscount.toLocaleString('en-IN') %></strong> on this order!</div>
+        <% } %>
+
+        <button class="btn-place-order" id="btnPlaceOrder" onclick="placeOrder()" <%= (outOfStock && outOfStock.length > 0) || !addresses.length ? 'disabled' : '' %>>
+          <i class="fas fa-lock"></i>
+          Place Order · ₹<%= totals.finalAmount.toLocaleString('en-IN') %>
+        </button>
+        <div class="secure-note"><i class="fas fa-shield-alt"></i> Safe & secure checkout</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════
+     ADD ADDRESS MODAL
+══════════════════════════════════ -->
+<div class="modal-overlay" id="addressModal" onclick="handleOverlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="modal-head-title">📍 Add Delivery Address</span>
+      <button class="modal-close" onclick="closeAddressModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+
+      <div class="modal-alert-error" id="modalError">
+        <span>✗</span><span id="modalErrorMsg">Please fill all required fields.</span>
+      </div>
+
+      <form id="modalAddressForm">
+
+        <p class="modal-section-label">📋 Contact Info</p>
+        <div class="modal-grid">
+          <div class="modal-group">
+            <label>Full Name <span>*</span></label>
+            <input type="text" name="name" placeholder="e.g. Kasthoori V.D" required maxlength="60"/>
+          </div>
+          <div class="modal-group">
+            <label>Mobile Number <span>*</span></label>
+            <input type="tel" name="mobile" placeholder="10-digit number" required maxlength="10"/>
+          </div>
+          <div class="modal-group">
+            <label>Email <span>*</span></label>
+            <input type="email" name="email" placeholder="you@email.com" required maxlength="80"/>
+          </div>
+          <div class="modal-group">
+            <label>Alternate Number</label>
+            <input type="tel" name="alternateNumber" placeholder="Optional" maxlength="10"/>
+          </div>
+        </div>
+
+        <p class="modal-section-label">📍 Address Details</p>
+        <div class="modal-grid">
+          <div class="modal-group full">
+            <label>Address (House No, Street, Area) <span>*</span></label>
+            <textarea name="address" placeholder="e.g. Kulirma Lane, Niravath Rd, Kundannoor" required maxlength="200"></textarea>
+          </div>
+          <div class="modal-group">
+            <label>Landmark</label>
+            <input type="text" name="landmark" placeholder="Near school, temple, etc." maxlength="100"/>
+          </div>
+          <div class="modal-group">
+            <label>City / Town</label>
+            <input type="text" name="city" placeholder="e.g. Maradu" maxlength="60"/>
+          </div>
+          <div class="modal-group">
+            <label>State <span>*</span></label>
+            <select name="state" required>
+              <option value="" disabled selected>Select state</option>
+              <option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option>
+              <option>Bihar</option><option>Chhattisgarh</option><option>Goa</option>
+              <option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option>
+              <option>Jharkhand</option><option>Karnataka</option><option selected>Kerala</option>
+              <option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
+              <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option>
+              <option>Odisha</option><option>Punjab</option><option>Rajasthan</option>
+              <option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option>
+              <option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option>
+              <option>West Bengal</option><option>Delhi</option><option>Jammu &amp; Kashmir</option>
+              <option>Ladakh</option><option>Puducherry</option><option>Chandigarh</option>
+            </select>
+          </div>
+          <div class="modal-group">
+            <label>Pincode <span>*</span></label>
+            <input type="text" name="pincode" placeholder="6-digit pincode" required maxlength="6"/>
+          </div>
+          <div class="modal-group">
+            <label>Country <span>*</span></label>
+            <select name="country" required>
+              <option value="India" selected>India</option>
+            </select>
+          </div>
+        </div>
+
+        <p class="modal-section-label">🏷 Address Type</p>
+        <div class="type-group">
+          <div class="type-pill"><input type="radio" name="addressType" id="mTypeHome" value="Home" checked/><label for="mTypeHome">🏠 Home</label></div>
+          <div class="type-pill"><input type="radio" name="addressType" id="mTypeWork" value="Work"/><label for="mTypeWork">💼 Work</label></div>
+          <div class="type-pill"><input type="radio" name="addressType" id="mTypeOther" value="Other"/><label for="mTypeOther">📦 Other</label></div>
+        </div>
+
+        <div class="modal-btn-row">
+          <button type="button" class="modal-btn-cancel" onclick="closeAddressModal()">Cancel</button>
+          <button type="button" class="modal-btn-save" id="modalSaveBtn" onclick="submitModalAddress()">
+            <i class="fas fa-check"></i> Save Address
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script>
+  var selectedAddressId = '<%= addresses && addresses.length > 0 ? addresses[0]._id : "" %>';
+  var selectedPayment   = 'COD';
+
+  function selectAddress(id, el) {
+    selectedAddressId = id;
+    document.querySelectorAll('.address-card').forEach(function(c) { c.classList.remove('selected'); });
+    el.classList.add('selected');
+    el.querySelector('input[type="radio"]').checked = true;
+  }
+
+  function selectPayment(method, el) {
+    selectedPayment = method;
+    document.querySelectorAll('.payment-option').forEach(function(c) { c.classList.remove('selected'); });
+    el.classList.add('selected');
+    el.querySelector('input[type="radio"]').checked = true;
+  }
+
+  // ── Modal open / close ──
+  function openAddressModal() {
+    document.getElementById('addressModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('modalError').classList.remove('show');
+    document.getElementById('modalAddressForm').reset();
+  }
+
+  function closeAddressModal() {
+    document.getElementById('addressModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('addressModal')) closeAddressModal();
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeAddressModal();
+  });
+
+  // ── Submit address via AJAX ──
+  function submitModalAddress() {
+    var form = document.getElementById('modalAddressForm');
+    var data = {};
+    var inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(function(el) {
+      if (el.type === 'radio') {
+        if (el.checked) data[el.name] = el.value;
+      } else {
+        data[el.name] = el.value.trim();
+      }
+    });
+
+    // client validation
+    if (!data.name || !data.mobile || !data.email || !data.address || !data.state || !data.pincode) {
+      showModalError('Please fill in all required fields.');
+      return;
+    }
+    if (!/^\d{10}$/.test(data.mobile)) {
+      showModalError('Mobile number must be exactly 10 digits.');
+      return;
+    }
+    if (!/^\d{6}$/.test(data.pincode)) {
+      showModalError('Pincode must be exactly 6 digits.');
+      return;
+    }
+    if (data.alternateNumber && !/^\d{10}$/.test(data.alternateNumber)) {
+      showModalError('Alternate number must be exactly 10 digits.');
+      return;
+    }
+
+    var btn = document.getElementById('modalSaveBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+
+    fetch('/addresses/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    .then(function(r) {
+      // controller redirects on success — if we get a non-JSON response it means success
+      if (r.redirected || r.ok) {
+        return { success: true };
+      }
+      return r.json();
+    })
+    .then(function(result) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-check"></i> Save Address';
+      if (result.success) {
+        closeAddressModal();
+        // reload the page so new address appears in the list
+        window.location.reload();
+      } else {
+        showModalError(result.message || 'Something went wrong.');
+      }
+    })
+    .catch(function() {
+      // redirect responses from Express also land here — reload to show new address
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-check"></i> Save Address';
+      closeAddressModal();
+      window.location.reload();
+    });
+  }
+
+  function showModalError(msg) {
+    var el = document.getElementById('modalError');
+    document.getElementById('modalErrorMsg').textContent = msg;
+    el.classList.add('show');
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // ── Place order ──
+  async function placeOrder() {
+    if (!selectedAddressId) {
+      Swal.fire({ icon: 'warning', title: 'No address selected', text: 'Please select a delivery address.', confirmButtonColor: '#c2185b' });
+      return;
+    }
+    var btn = document.getElementById('btnPlaceOrder');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Placing Order…';
+    try {
+      var res  = await fetch('/checkout/place-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ addressId: selectedAddressId, paymentMethod: selectedPayment })
+      });
+      var data = await res.json();
+      if (data.success) {
+        window.location.href = '/order-success/' + data.dbId;
+      } else {
+        Swal.fire({ icon: 'error', title: 'Order Failed', text: data.message, confirmButtonColor: '#c2185b' });
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-lock"></i> Place Order · ₹<%= totals.finalAmount.toLocaleString("en-IN") %>';
+      }
+    } catch(err) {
+      Swal.fire({ icon: 'error', title: 'Something went wrong', text: 'Please try again.', confirmButtonColor: '#c2185b' });
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-lock"></i> Place Order · ₹<%= totals.finalAmount.toLocaleString("en-IN") %>';
+    }
+  }
+</script>
+</body>
+</html>
