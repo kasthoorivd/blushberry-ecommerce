@@ -106,7 +106,13 @@ const loadEditAddress = async (req, res) => {
     const totalPages = Math.ceil(totalAddresses/limit)
     const address = await Address.findOne({ _id: addressId, user: userId })
     if (!address) return res.redirect('/addresses')
-    return res.render('user/addresses', { user: req.session.user, address, errorMsg: null,currentPage:page,totalAddresses,totalPages })
+    return res.render('user/addresses', {
+   user: req.session.user, 
+   errorMsg: null,
+   currentPage:page,
+   totalAddresses,
+   totalPages
+   })
   } catch (error) {
     console.error('loadEditAddress error:', error)
     return res.redirect('/addresses')

@@ -473,8 +473,11 @@
         if (data.success) {
           btn.textContent      = '✓ Added'
           btn.style.background = '#22b573'
-          const badge = document.getElementById('cartCount')
-          if (badge && data.cartCount) badge.textContent = data.cartCount
+        const badge = document.getElementById('cartCount')
+if (badge && data.cartCount) {
+  badge.textContent = data.cartCount
+  badge.style.display = 'flex'
+
           setTimeout(() => {
             btn.textContent      = 'ADD TO CART'
             btn.style.background = ''

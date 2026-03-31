@@ -53,6 +53,8 @@ adminRouter.delete('/coupons/:id',couponController.deleteCoupon)
 adminRouter.get('/orders',           adminAuth, orderController.loadOrders)
 adminRouter.get('/orders/:id',       adminAuth, orderController.loadOrderDetail)
 adminRouter.patch('/orders/:id/status', adminAuth, orderController.updateOrderStatus)
+adminRouter.patch('/orders/:id/cancel',             adminAuth, orderController.cancelOrder)
+adminRouter.patch('/orders/:id/items/:itemId/cancel', adminAuth, orderController.cancelItem)
 adminRouter.patch('/orders/:id/return-status',adminAuth, orderController.updateReturnStatus)
 
 // inventory

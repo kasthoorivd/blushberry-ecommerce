@@ -33,7 +33,8 @@ const loadProducts = async (req, res) => {
       .skip((page - 1) * LIMIT)
       .limit(LIMIT)
       .lean();
-
+   
+    
     res.render('admin/products', {
       products,
       currentPage: page,
@@ -44,8 +45,7 @@ const loadProducts = async (req, res) => {
       user: req.session.admin || null
     });
 
-    const avg = totalProducts.price/totalProducts.length
-    console.log(avg)
+    
   } catch (err) {
     console.error('getProducts error:', err);
     res.status(500).render('error', { message: 'Could not load products.' });

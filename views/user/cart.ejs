@@ -93,6 +93,44 @@
     .coupon-applied-tag{display:none;align-items:center;justify-content:space-between;background:#f0faf4;border:1px dashed #5cb87a;border-radius:8px;padding:9px 14px;font-size:12px;color:#1a7a47;font-weight:600;font-family:'Poppins',sans-serif;}
     .coupon-applied-tag .remove-coupon{background:none;border:none;cursor:pointer;color:#c0415a;font-size:11px;font-family:'Poppins',sans-serif;text-decoration:underline;padding:0;}
     .coupon-divider{border:none;border-top:1px solid #f0e6e8;margin:16px 0;}
+     
+    .cart-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+#cartCount {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #c0415a;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
+  pointer-events: none;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.2s;
+}
+
+/* pop animation when count changes */
+#cartCount.pop {
+  transform: scale(1.4);
+}
+
+/* hide badge when count is 0 */
+#cartCount[data-count="0"] {
+  display: none;
+}
 
     @media(max-width:860px){
       .cart-wrap{flex-direction:column;padding:20px;}
@@ -103,6 +141,13 @@
 </head>
 <body>
   <%- include('../partials/user/header') %>
+  
+   <a href="/cart" class="cart-link">
+  <!-- your existing cart SVG/icon here -->
+  <span id="cartCount" data-count="<%= cartCount %>">
+    <%= cartCount %>
+  </span>
+</a>
 
   <div class="page-header">
     <p>Blush Berry</p>
@@ -410,7 +455,16 @@
       setTimeout(function() { el.style.display = 'none'; }, 4000);
     }
 
-  
+  function updateCartBadge(count) {
+  var badge = document.getElementById('cartCount');
+  if (!badge) return;
+  badge.textContent = count || 0;
+  badge.setAttribute('data-count', count || 0);
+  badge.classList.remove('pop');
+  void badge.offsetWidth; // reflow to restart animation
+  badge.classList.add('pop');
+  setTimeout(function () { badge.classList.remove('pop'); }, 300);
+}
     document.getElementById('couponCodeInput') && document.getElementById('couponCodeInput').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') applyCoupon();
     });

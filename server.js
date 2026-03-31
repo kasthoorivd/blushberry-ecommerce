@@ -19,6 +19,8 @@ app.use(morgan('dev'))
 
 const userRouter = require('./routes/userRoutes')
 const adminRouter = require('./routes/adminRoutes')
+const attachCartCount = require('./middleware/cartCountMiddleware');
+
 
 connectDb()
 
@@ -48,9 +50,10 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(nocache())
+app.use(attachCartCount);
 
 app.use((req, res, next) => {
-  res.locals.user = req.session.admin || null;
+  res.locals.user = req.session.user || null;
   next();
 });
 

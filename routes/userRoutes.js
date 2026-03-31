@@ -18,19 +18,25 @@ const {isLoggedIn, isLoggedOut,isBlocked} = require('../middleware/authMiddlewar
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'public/uploads/profiles/'),
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname)
-    cb(null, `profile-${req.session.user._id}-${Date.now()}${ext}`)
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, unique + path.extname(file.originalname));
   }
-})
+});
+
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files (JPG, PNG, WEBP, GIF) are allowed'), false);
+  }
+};
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const allowed = ['image/jpeg', 'image/png', 'image/webp']
-    allowed.includes(file.mimetype) ? cb(null, true) : cb(new Error('Only JPG/PNG allowed'))
-  }
-}) 
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 } 
+});
 
 // home
 userRouter.get('/',isBlocked, userController.loadHomePage)

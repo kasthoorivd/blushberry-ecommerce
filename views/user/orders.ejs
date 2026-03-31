@@ -295,9 +295,11 @@
                   </div>
                 </div>
                 <% const hasItemReturn=order.itemStatuses && order.itemStatuses.some(s=> s.status === 'Returned')
+                  const returnedItem = hasItemReturn ? order.itemStatuses.find(s => s.status === 'Returned') : null
+                  const itemReturnStatus = returnedItem ? (returnedItem.returnStatus || 'Requested') : 'Requested'
                   const showReturn = (order.returnStatus && order.returnStatus !== 'None') || hasItemReturn
-                  const returnLabel = (order.returnStatus && order.returnStatus !== 'None')
-                  ? order.returnStatus : 'Requested'
+                  const returnLabel = (order.returnStatus && order.returnStatus !== 'None') ? order.returnStatus :
+                  itemReturnStatus
                   %>
                   <% if (showReturn) { %>
                     <span class="badge badge-Returned">

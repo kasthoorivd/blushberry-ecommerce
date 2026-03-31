@@ -390,6 +390,7 @@ const removeCoupon = (req,res) =>{
   res.json({success: true})
 }
 
+
 module.exports={
     loadCart,
     addToCart,
@@ -398,5 +399,5 @@ module.exports={
     toggleWishlist,
     loadWishlist,
     applyCoupon,
-    removeCoupon
+    removeCoupon,
 }

@@ -129,4 +129,4 @@ module.exports = {
    loadInventory,
     updateVariantStock,
      getStockHistory 
-    }
+}

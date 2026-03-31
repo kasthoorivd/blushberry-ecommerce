@@ -32,7 +32,7 @@
     body {
       background: var(--bg);
       background-image:
-        radial-gradient(ellipse 80% 60% at 90% 0%, rgba(244,167,188,0.06) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 60% at 90% 0%, rgba(255, 176, 191, 0.06) 0%, transparent 55%),
         radial-gradient(ellipse 40% 40% at 5% 100%, rgba(244,167,188,0.04) 0%, transparent 50%);
       color: var(--text); font-family: var(--body); font-weight: 300; line-height: 1.6; min-height: 100vh;
     }
@@ -78,6 +78,12 @@
     .btn-update-status:hover { background: var(--accent-dim); transform: translateY(-1px); }
     .btn-update-status:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
+    /* CANCEL BUTTON */
+    .btn-cancel-order { display: inline-flex; align-items: center; gap: 0.4rem; background: var(--danger-dim); color: #e06c6c; border: 1px solid rgba(192,57,43,0.35); padding: 0.55rem 1.1rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.84rem; font-weight: 500; cursor: pointer; transition: background 0.2s, transform 0.15s; }
+    .btn-cancel-order:hover { background: rgba(192,57,43,0.22); transform: translateY(-1px); }
+    .btn-cancel-item { display: inline-flex; align-items: center; gap: 0.3rem; background: var(--danger-dim); color: #e06c6c; border: 1px solid rgba(192,57,43,0.3); padding: 0.22rem 0.6rem; border-radius: 999px; font-family: var(--body); font-size: 0.68rem; font-weight: 500; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
+    .btn-cancel-item:hover { background: rgba(192,57,43,0.22); }
+
     /* STATUS BADGES */
     .status-badge { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.72rem; font-weight: 500; padding: 0.22rem 0.65rem; border-radius: 999px; }
     .status-Placed     { background: rgba(244,167,188,0.12); color: var(--accent);  border: 1px solid rgba(244,167,188,0.25); }
@@ -114,15 +120,13 @@
     /* BACK BTN */
     .btn-back { display: inline-flex; align-items: center; gap: 0.4rem; background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.5rem 1rem; border-radius: var(--radius); font-family: var(--body); font-size: 0.8rem; text-decoration: none; transition: all 0.18s; }
     .btn-back:hover { border-color: var(--accent-dim); color: var(--accent); }
-    
 
     /* RETURN BADGES */
-.return-badge { display:inline-block; font-size:0.68rem; font-weight:500; padding:0.18rem 0.55rem; border-radius:999px; }
-.return-Requested { background:rgba(255,165,0,0.1);      color:#ffb347;        border:1px solid rgba(255,165,0,0.25); }
-.return-Approved  { background:rgba(46,204,113,0.1);     color:var(--success); border:1px solid rgba(46,204,113,0.25); }
-.return-Rejected  { background:var(--danger-dim);        color:#e06c6c;        border:1px solid rgba(192,57,43,0.25); }
-.return-Completed { background:rgba(244,167,188,0.12);   color:var(--accent);  border:1px solid rgba(244,167,188,0.25); }
-
+    .return-badge { display:inline-block; font-size:0.68rem; font-weight:500; padding:0.18rem 0.55rem; border-radius:999px; }
+    .return-Requested { background:rgba(255,165,0,0.1);      color:#ffb347;        border:1px solid rgba(255,165,0,0.25); }
+    .return-Approved  { background:rgba(46,204,113,0.1);     color:var(--success); border:1px solid rgba(46,204,113,0.25); }
+    .return-Rejected  { background:var(--danger-dim);        color:#e06c6c;        border:1px solid rgba(192,57,43,0.25); }
+    .return-Completed { background:rgba(244,167,188,0.12);   color:var(--accent);  border:1px solid rgba(244,167,188,0.25); }
 
     /* REASON NOTE */
     .reason-note { font-size: 0.74rem; color: var(--muted); font-style: italic; margin-top: 0.25rem; }
@@ -197,7 +201,7 @@
             </div>
           <% } %>
 
-          <!-- STATUS CHANGE -->
+          <!-- STATUS CHANGE + CANCEL ORDER -->
           <% if (order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Delivered') { %>
             <div style="margin-top:1.4rem;padding-top:1.2rem;border-top:1px solid var(--border);">
               <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.6rem;">Update Status</div>
@@ -207,11 +211,16 @@
                   <option value="Processing" <%= order.orderStatus === 'Processing' ? 'selected' : '' %>>Processing</option>
                   <option value="Shipped"    <%= order.orderStatus === 'Shipped'    ? 'selected' : '' %>>Shipped</option>
                   <option value="Delivered"  <%= order.orderStatus === 'Delivered'  ? 'selected' : '' %>>Delivered</option>
-                  <option value="Cancelled">Cancelled</option>
                 </select>
                 <button class="btn-update-status" id="btnUpdateStatus" onclick="updateStatus('<%= order._id %>')">
                   <i class="fas fa-save"></i> Update Status
                 </button>
+                <!-- CANCEL ENTIRE ORDER BUTTON -->
+                <% if (order.orderStatus !== 'Shipped') { %>
+                  <button class="btn-cancel-order" onclick="cancelOrder('<%= order._id %>')">
+                    <i class="fas fa-times-circle"></i> Cancel Order
+                  </button>
+                <% } %>
               </div>
             </div>
           <% } %>
@@ -235,6 +244,10 @@
                 <th>Unit Price</th>
                 <th>Total</th>
                 <th>Status</th>
+                <!-- Show Action column only if order is cancellable -->
+                <% if (order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Delivered' && order.orderStatus !== 'Shipped') { %>
+                  <th>Action</th>
+                <% } %>
               </tr>
             </thead>
             <tbody>
@@ -273,6 +286,18 @@
                       <span style="font-size:0.72rem;color:var(--success);">Active</span>
                     <% } %>
                   </td>
+                  <!-- Per-item cancel button -->
+                  <% if (order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Delivered' && order.orderStatus !== 'Shipped') { %>
+                    <td>
+                      <% if (!isCancelled && !isReturned) { %>
+                        <button class="btn-cancel-item" onclick="cancelItem('<%= order._id %>', '<%= item._id %>', '<%= item.productName %>')">
+                          <i class="fas fa-times"></i> Cancel
+                        </button>
+                      <% } else { %>
+                        <span style="color:var(--muted);font-size:0.72rem;">—</span>
+                      <% } %>
+                    </td>
+                  <% } %>
                 </tr>
               <% }) %>
             </tbody>
@@ -335,7 +360,12 @@
                 <span class="info-muted"> (−₹<%= order.couponDiscount.toLocaleString('en-IN') %>)</span>
               </div>
             <% } %>
-            <% if (order.returnStatus && order.returnStatus !== 'None') { %>
+            <%
+              var hasItemReturns = (order.itemStatuses || []).some(function(s){ return s.status === 'Returned' })
+              var hasOrderReturn = order.returnStatus && order.returnStatus !== 'None'
+              var showReturnSection = hasOrderReturn || hasItemReturns || order.orderStatus === 'Delivered'
+            %>
+            <% if (showReturnSection) { %>
               <div class="info-label" style="margin-top:0.85rem;">Return Status</div>
               <div class="info-value">
                 <span style="color:#b39ddb;"><%= order.returnStatus %></span>
@@ -374,103 +404,103 @@
       </div>
 
       <!-- RETURN MANAGEMENT -->
-<% if (order.returnStatus && order.returnStatus !== 'None') { %>
-  <div class="card">
-    <div class="card-header">
-      <span class="card-icon"><i class="fas fa-undo"></i></span>
-      <span class="card-title">Return Management</span>
-    </div>
-    <div class="card-body">
-
-      <!-- WHOLE ORDER RETURN -->
-      <% if (order.returnStatus !== 'None') { %>
-        <div style="margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);">
-          <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.5rem;">
-            Whole Order Return
+      <% if (showReturnSection) { %>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-icon"><i class="fas fa-undo"></i></span>
+            <span class="card-title">Return Management</span>
           </div>
-          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-            <div>
-              <span style="font-size:0.83rem;color:var(--text);">Current status:</span>
-              <span class="return-badge return-<%= order.returnStatus %>" style="margin-left:0.4rem;">
-                <%= order.returnStatus %>
-              </span>
-            </div>
-            <% if (order.returnReason) { %>
-              <div style="font-size:0.75rem;color:var(--muted);font-style:italic;">
-                Reason: <%= order.returnReason %>
-              </div>
-            <% } %>
-          </div>
-          <% if (!['Approved','Rejected','Completed'].includes(order.returnStatus)) { %>
-            <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.85rem;flex-wrap:wrap;">
-              <select class="status-select" id="wholeReturnSelect">
-                <option value="Requested"  <%= order.returnStatus==='Requested'  ? 'selected':'' %>>Requested</option>
-                <option value="Approved"   <%= order.returnStatus==='Approved'   ? 'selected':'' %>>Approved</option>
-                <option value="Rejected"   <%= order.returnStatus==='Rejected'   ? 'selected':'' %>>Rejected</option>
-                <option value="Completed"  <%= order.returnStatus==='Completed'  ? 'selected':'' %>>Completed</option>
-              </select>
-              <button class="btn-update-status" onclick="updateReturnStatus('<%= order._id %>', null, 'wholeReturnSelect')">
-                <i class="fas fa-save"></i> Update Return
-              </button>
-            </div>
-          <% } %>
-        </div>
-      <% } %>
+          <div class="card-body">
 
-      <!-- PER-ITEM RETURNS -->
-      <%
-        const returnedItems = order.itemStatuses.filter(s => s.status === 'Returned')
-      %>
-      <% if (returnedItems.length > 0) { %>
-        <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.75rem;">
-          Item Returns
-        </div>
-        <% returnedItems.forEach(function(is) {
-          const matchedItem = order.items.find(i => i._id.toString() === is.itemId?.toString())
-        %>
-          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:0.9rem;margin-bottom:0.75rem;">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
-              <div>
-                <div style="font-size:0.86rem;font-weight:500;color:var(--text);">
-                  <%= matchedItem ? matchedItem.productName : 'Unknown Item' %>
-                  <% if (matchedItem?.shade) { %>
-                    <span style="font-size:0.72rem;color:var(--muted);margin-left:0.3rem;"><%= matchedItem.shade %></span>
+            <!-- WHOLE ORDER RETURN -->
+            <% if (order.returnStatus !== 'None') { %>
+              <div style="margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);">
+                <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.5rem;">
+                  Whole Order Return
+                </div>
+                <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+                  <div>
+                    <span style="font-size:0.83rem;color:var(--text);">Current status:</span>
+                    <span class="return-badge return-<%= order.returnStatus %>" style="margin-left:0.4rem;">
+                      <%= order.returnStatus %>
+                    </span>
+                  </div>
+                  <% if (order.returnReason) { %>
+                    <div style="font-size:0.75rem;color:var(--muted);font-style:italic;">
+                      Reason: <%= order.returnReason %>
+                    </div>
                   <% } %>
                 </div>
-                <% if (is.returnReason) { %>
-                  <div style="font-size:0.74rem;color:var(--muted);font-style:italic;margin-top:0.2rem;">
-                    Reason: <%= is.returnReason %>
+                <% if (!['Approved','Rejected','Completed'].includes(order.returnStatus)) { %>
+                  <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.85rem;flex-wrap:wrap;">
+                    <select class="status-select" id="wholeReturnSelect">
+                      <option value="Requested"  <%= order.returnStatus==='Requested'  ? 'selected':'' %>>Requested</option>
+                      <option value="Approved"   <%= order.returnStatus==='Approved'   ? 'selected':'' %>>Approved</option>
+                      <option value="Rejected"   <%= order.returnStatus==='Rejected'   ? 'selected':'' %>>Rejected</option>
+                      <option value="Completed"  <%= order.returnStatus==='Completed'  ? 'selected':'' %>>Completed</option>
+                    </select>
+                    <button class="btn-update-status" onclick="updateReturnStatus('<%= order._id %>', null, 'wholeReturnSelect')">
+                      <i class="fas fa-save"></i> Update Return
+                    </button>
                   </div>
                 <% } %>
-                <div style="margin-top:0.4rem;">
-                  <span style="font-size:0.72rem;color:var(--muted);">Status:</span>
-                  <span class="return-badge return-<%= is.returnStatus %>" style="margin-left:0.3rem;">
-                    <%= is.returnStatus %>
-                  </span>
-                </div>
               </div>
-              <% if (!['Approved','Rejected','Completed'].includes(is.returnStatus)) { %>
-                <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
-                  <select class="status-select" id="itemReturnSelect-<%= is.itemId %>" style="max-width:180px;">
-                    <option value="Requested" <%= is.returnStatus==='Requested' ? 'selected':'' %>>Requested</option>
-                    <option value="Approved"  <%= is.returnStatus==='Approved'  ? 'selected':'' %>>Approved</option>
-                    <option value="Rejected"  <%= is.returnStatus==='Rejected'  ? 'selected':'' %>>Rejected</option>
-                    <option value="Completed" <%= is.returnStatus==='Completed' ? 'selected':'' %>>Completed</option>
-                  </select>
-                  <button class="btn-update-status"
-                    onclick="updateReturnStatus('<%= order._id %>', '<%= is.itemId %>', 'itemReturnSelect-<%= is.itemId %>')">
-                    <i class="fas fa-save"></i> Update
-                  </button>
-                </div>
-              <% } %>
-            </div>
-          </div>
-        <% }) %>
-      <% } %>
+            <% } %>
 
-    </div>
-  </div>
-<% } %>
+            <!-- PER-ITEM RETURNS -->
+            <%
+              var returnedItems = (order.itemStatuses || []).filter(function(s){ return s.status === 'Returned' })
+            %>
+            <% if (returnedItems.length > 0) { %>
+              <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.75rem;">
+                Item Returns
+              </div>
+              <% returnedItems.forEach(function(is) {
+                var matchedItem = order.items.find(function(i){ return is.itemId && i._id.toString() === is.itemId.toString() })
+              %>
+                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:0.9rem;margin-bottom:0.75rem;">
+                  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+                    <div>
+                      <div style="font-size:0.86rem;font-weight:500;color:var(--text);">
+                        <%= matchedItem ? matchedItem.productName : 'Unknown Item' %>
+                        <% if (matchedItem && matchedItem.shade) { %>
+                          <span style="font-size:0.72rem;color:var(--muted);margin-left:0.3rem;"><%= matchedItem.shade %></span>
+                        <% } %>
+                      </div>
+                      <% if (is.returnReason) { %>
+                        <div style="font-size:0.74rem;color:var(--muted);font-style:italic;margin-top:0.2rem;">
+                          Reason: <%= is.returnReason %>
+                        </div>
+                      <% } %>
+                      <div style="margin-top:0.4rem;">
+                        <span style="font-size:0.72rem;color:var(--muted);">Status:</span>
+                        <span class="return-badge return-<%= is.returnStatus %>" style="margin-left:0.3rem;">
+                          <%= is.returnStatus %>
+                        </span>
+                      </div>
+                    </div>
+                    <% if (!['Approved','Rejected','Completed'].includes(is.returnStatus)) { %>
+                      <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+                        <select class="status-select" id="itemReturnSelect-<%= is.itemId %>" style="max-width:180px;">
+                          <option value="Requested" <%= is.returnStatus==='Requested' ? 'selected':'' %>>Requested</option>
+                          <option value="Approved"  <%= is.returnStatus==='Approved'  ? 'selected':'' %>>Approved</option>
+                          <option value="Rejected"  <%= is.returnStatus==='Rejected'  ? 'selected':'' %>>Rejected</option>
+                          <option value="Completed" <%= is.returnStatus==='Completed' ? 'selected':'' %>>Completed</option>
+                        </select>
+                        <button class="btn-update-status"
+                          onclick="updateReturnStatus('<%= order._id %>', '<%= is.itemId %>', 'itemReturnSelect-<%= is.itemId %>')">
+                          <i class="fas fa-save"></i> Update
+                        </button>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              <% }) %>
+            <% } %>
+
+          </div>
+        </div>
+      <% } %>
 
     </div>
     <%- include('../partials/admin/adminFooter') %>
@@ -479,6 +509,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 <script>
+  /* ── shared toast ── */
   function showToast(message, type) {
     Swal.fire({
       toast: true, position: 'top-end', icon: type, title: message,
@@ -488,6 +519,96 @@
     })
   }
 
+  /* ── shared reason prompt ── */
+  async function askCancelReason(titleText) {
+    const { value: reason, isConfirmed } = await Swal.fire({
+      title: titleText,
+      html: `
+        <select id="swal-reason" style="
+          width:100%; padding:0.55rem 0.85rem; margin-bottom:0.75rem;
+          background:#1c1014; border:1px solid #2e1a20; border-radius:8px;
+          color:#fdf0f3; font-size:0.84rem; outline:none;">
+          <option value="">— Select a reason —</option>
+          <option value="Customer requested cancellation">Customer requested cancellation</option>
+          <option value="Item out of stock">Item out of stock</option>
+          <option value="Duplicate order">Duplicate order</option>
+          <option value="Payment issue">Payment issue</option>
+          <option value="Shipping address problem">Shipping address problem</option>
+          <option value="Other">Other</option>
+        </select>
+        <textarea id="swal-other" placeholder="Specify reason…" style="
+          display:none; width:100%; padding:0.55rem 0.85rem;
+          background:#1c1014; border:1px solid #2e1a20; border-radius:8px;
+          color:#fdf0f3; font-size:0.84rem; resize:none; outline:none;" rows="2"></textarea>`,
+      background: '#130a0d', color: '#fdf0f3',
+      showCancelButton: true,
+      confirmButtonText: 'Confirm Cancel',
+      cancelButtonText: 'Go Back',
+      confirmButtonColor: '#c0392b',
+      cancelButtonColor: '#2e1a20',
+      didOpen: () => {
+        document.getElementById('swal-reason').addEventListener('change', function () {
+          document.getElementById('swal-other').style.display =
+            this.value === 'Other' ? 'block' : 'none'
+        })
+      },
+      preConfirm: () => {
+        const sel   = document.getElementById('swal-reason').value
+        const other = document.getElementById('swal-other').value.trim()
+        if (!sel) { Swal.showValidationMessage('Please select a reason'); return false }
+        return sel === 'Other' ? (other || 'Other') : sel
+      }
+    })
+    return { reason, isConfirmed }
+  }
+
+  /* ── cancel entire order ── */
+  async function cancelOrder(orderId) {
+    const { reason, isConfirmed } = await askCancelReason('Cancel this order?')
+    if (!isConfirmed) return
+
+    try {
+      const res  = await fetch(`/admin/orders/${orderId}/cancel`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason })
+      })
+      const data = await res.json()
+      if (data.success) {
+        showToast(data.message || 'Order cancelled.', 'success')
+        setTimeout(() => location.reload(), 1200)
+      } else {
+        showToast(data.message || 'Something went wrong.', 'error')
+      }
+    } catch {
+      showToast('Server error. Please try again.', 'error')
+    }
+  }
+
+  /* ── cancel single item ── */
+  async function cancelItem(orderId, itemId, itemName) {
+    const { reason, isConfirmed } = await askCancelReason(`Cancel "${itemName}"?`)
+    if (!isConfirmed) return
+
+    try {
+      const res  = await fetch(`/admin/orders/${orderId}/items/${itemId}/cancel`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason })
+      })
+      const data = await res.json()
+      if (data.success) {
+        showToast(data.message || 'Item cancelled.', 'success')
+        setTimeout(() => location.reload(), 1200)
+      } else {
+        showToast(data.message || 'Something went wrong.', 'error')
+      }
+    } catch {
+      showToast('Server error. Please try again.', 'error')
+    }
+  }
+
+  /* ── update order status ── */
   async function updateStatus(orderId) {
     const select = document.getElementById('statusSelect')
     const newStatus = select.value
@@ -538,44 +659,45 @@
     }
   }
 
+  /* ── update return status ── */
   async function updateReturnStatus(orderId, itemId, selectId) {
-  const returnStatus = document.getElementById(selectId).value
+    const returnStatus = document.getElementById(selectId).value
 
-  const result = await Swal.fire({
-    title: 'Update Return Status?',
-    text: `Mark return as "${returnStatus}"?`,
-    icon: 'question',
-    background: '#130a0d', color: '#fdf0f3', iconColor: '#f4a7bc',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, Update',
-    cancelButtonText: 'Cancel',
-    confirmButtonColor: '#f4a7bc',
-    cancelButtonColor: '#2e1a20'
-  })
-
-  if (!result.isConfirmed) return
-
-  try {
-    const body = { returnStatus }
-    if (itemId) body.itemId = itemId
-
-    const res  = await fetch(`/admin/orders/${orderId}/return-status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+    const result = await Swal.fire({
+      title: 'Update Return Status?',
+      text: `Mark return as "${returnStatus}"?`,
+      icon: 'question',
+      background: '#130a0d', color: '#fdf0f3', iconColor: '#f4a7bc',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Update',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#f4a7bc',
+      cancelButtonColor: '#2e1a20'
     })
-    const data = await res.json()
 
-    if (data.success) {
-      showToast(data.message, 'success')
-      setTimeout(() => location.reload(), 1200)
-    } else {
-      showToast(data.message, 'error')
+    if (!result.isConfirmed) return
+
+    try {
+      const body = { returnStatus }
+      if (itemId) body.itemId = itemId
+
+      const res  = await fetch(`/admin/orders/${orderId}/return-status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        showToast(data.message, 'success')
+        setTimeout(() => location.reload(), 1200)
+      } else {
+        showToast(data.message, 'error')
+      }
+    } catch {
+      showToast('Something went wrong.', 'error')
     }
-  } catch {
-    showToast('Something went wrong.', 'error')
   }
-}
 </script>
 </body>
 </html>

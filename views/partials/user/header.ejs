@@ -50,9 +50,9 @@
           <path d="M16 10a4 4 0 0 1-8 0"/>
         </svg>
         <% if (typeof cartCount !== 'undefined' && cartCount > 0) { %>
-          <span style="position:absolute;top:-4px;right:-4px;background:#c0415a;color:#fff;font-size:9px;font-weight:700;font-family:'Poppins',sans-serif;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;line-height:1;">
-            <%= cartCount %>
-          </span>
+         <span id="cartCount" style="display:<%= (typeof cartCount !== 'undefined' && cartCount > 0) ? 'flex' : 'none' %>;position:absolute;top:-4px;right:-4px;background:#c0415a;color:#fff;font-size:9px;font-weight:700;font-family:'Poppins',sans-serif;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 3px;line-height:1;">
+  <%= typeof cartCount !== 'undefined' ? cartCount : 0 %>
+</span>
         <% } %>
       </a>
     </li>
