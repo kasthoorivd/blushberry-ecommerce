@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Offers – Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:       #0f1117;
+      --surface:  #181c27;
+      --border:   #252a38;
+      --accent:   #fca8ea;
+      --accent2:  #e05555;
+      --green:    #22c97a;
+      --text:     #e8eaf0;
+      --muted:    #6b7280;
+      --radius:   10px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    a{text-decoration:none;color:inherit;}
+
+
+    /* Main */
+    .main{flex:1;padding:36px 40px;}
+    .page-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px;}
+    .page-head-left p{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:4px;}
+    .page-head-left h1{font-family:'DM Serif Display',serif;font-size:28px;color:var(--text);}
+    .btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#000;padding:10px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;transition:opacity .2s;}
+    .btn-primary:hover{opacity:.85;}
+
+    /* Alerts */
+    .alert{padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+    .alert-success{background:rgba(34,201,122,.12);border:1px solid rgba(34,201,122,.3);color:var(--green);}
+    .alert-error  {background:rgba(224,85,85,.12); border:1px solid rgba(224,85,85,.3); color:var(--accent2);}
+
+    /* Stats */
+    .stats{display:flex;gap:14px;margin-bottom:28px;flex-wrap:wrap;}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 22px;min-width:130px;}
+    .stat-card .num{font-family:'DM Serif Display',serif;font-size:26px;color:var(--accent);}
+    .stat-card .lbl{font-size:11px;color:var(--muted);letter-spacing:.5px;margin-top:2px;}
+
+    /* Table */
+    .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+    .table-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
+    .table-header h3{font-size:14px;font-weight:600;}
+    .search-box{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 12px;}
+    .search-box input{background:none;border:none;outline:none;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;width:180px;}
+    .search-box input::placeholder{color:var(--muted);}
+
+    table{width:100%;border-collapse:collapse;}
+    thead tr{background:rgba(255,255,255,.03);}
+    th{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:12px 16px;text-align:left;font-weight:500;}
+    td{padding:14px 16px;font-size:13px;border-top:1px solid var(--border);}
+    tr:hover td{background:rgba(255,255,255,.02);}
+
+    .offer-name{font-weight:600;color:var(--text);}
+    .offer-target{color:var(--muted);font-size:12px;margin-top:2px;}
+
+    .type-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+    .type-product {background:rgba(99,179,237,.12);color:#63b3ed;border:1px solid rgba(99,179,237,.25);}
+    .type-category{background:rgba(154,117,234,.12);color:#9a75ea;border:1px solid rgba(154,117,234,.25);}
+
+    .status-dot{display:inline-flex;align-items:center;gap:5px;font-size:12px;}
+    .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+    .dot-active  {background:var(--green);}
+    .dot-inactive{background:var(--muted);}
+    .dot-expired {background:var(--accent2);}
+    .dot-upcoming{background:var(--accent);}
+
+    .discount-chip{background:rgba(240,165,0,.12);color:var(--accent);border:1px solid rgba(240,165,0,.2);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;}
+
+    .actions{display:flex;gap:6px;align-items:center;}
+    .btn-sm{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+    .btn-toggle-on {background:rgba(34,201,122,.12);color:var(--green);border:1px solid rgba(34,201,122,.2);}
+    .btn-toggle-on:hover{background:rgba(34,201,122,.22);}
+    .btn-toggle-off{background:rgba(107,114,128,.12);color:var(--muted);border:1px solid var(--border);}
+    .btn-toggle-off:hover{background:rgba(107,114,128,.22);color:var(--text);}
+    .btn-delete{background:rgba(224,85,85,.1);color:var(--accent2);border:1px solid rgba(224,85,85,.2);}
+    .btn-delete:hover{background:rgba(224,85,85,.2);}
+
+    .date-range{font-size:11px;color:var(--muted);}
+
+    .empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
+    .empty-state .icon{font-size:48px;margin-bottom:12px;}
+    .empty-state p{font-size:13px;margin-bottom:20px;}
+
+    /* Modal confirm */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;width:360px;max-width:90vw;}
+    .modal h3{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:8px;}
+    .modal p{font-size:13px;color:var(--muted);margin-bottom:24px;}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+    .btn-cancel{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 18px;border-radius:6px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+    .btn-confirm-del{background:var(--accent2);color:#fff;border:none;padding:8px 18px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+    @media(max-width:768px){.main{padding:20px;}.sidebar{display:none;}}
+  </style>
+</head>
+<body>
+<div class="layout">
+<%- include('../partials/admin/adminSidebar') %>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="page-head">
+      <div class="page-head-left">
+        <p>Blush Berry Admin</p>
+        <h1>Offers</h1>
+      </div>
+      <a href="/admin/offers/add" class="btn-primary">＋ New Offer</a>
+    </div>
+
+    <% if (success) { %><div class="alert alert-success">✓ <%= success %></div><% } %>
+    <% if (error)   { %><div class="alert alert-error">✗ <%= error %></div><% } %>
+
+    <%
+      const activeCount   = offers.filter(o => o.status === 'active').length
+      const upcomingCount = offers.filter(o => o.status === 'upcoming').length
+      const expiredCount  = offers.filter(o => o.status === 'expired').length
+    %>
+    <div class="stats">
+      <div class="stat-card"><div class="num"><%= offers.length %></div><div class="lbl">Total Offers</div></div>
+      <div class="stat-card"><div class="num" style="color:var(--green)"><%= activeCount %></div><div class="lbl">Active Now</div></div>
+      <div class="stat-card"><div class="num" style="color:var(--accent)"><%= upcomingCount %></div><div class="lbl">Upcoming</div></div>
+      <div class="stat-card"><div class="num" style="color:var(--accent2)"><%= expiredCount %></div><div class="lbl">Expired</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header">
+        <h3>All Offers</h3>
+        <div class="search-box">
+          <span style="color:var(--muted)">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search offers…" oninput="filterOffers()"/>
+        </div>
+      </div>
+
+      <% if (offers.length === 0) { %>
+      <div class="empty-state">
+        <div class="icon">🏷️</div>
+        <p>No offers yet. Create your first one!</p>
+        <a href="/admin/offers/add" class="btn-primary">＋ New Offer</a>
+      </div>
+      <% } else { %>
+      <table id="offersTable">
+        <thead>
+          <tr>
+            <th>Offer</th>
+            <th>Type</th>
+            <th>Discount</th>
+            <th>Date Range</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% offers.forEach(function(o){ %>
+          <tr data-name="<%= o.name.toLowerCase() %>">
+            <td>
+              <div class="offer-name"><%= o.name %></div>
+              <div class="offer-target">
+                <%= o.type === 'product' ? '📦' : '📂' %>
+                <%= o.targetId?.name || 'Deleted item' %>
+              </div>
+            </td>
+            <td>
+              <span class="type-badge type-<%= o.type %>"><%= o.type %></span>
+            </td>
+            <td>
+              <span class="discount-chip"><%= o.discountPercent %>% OFF</span>
+            </td>
+            <td>
+              <div class="date-range">
+                <%= new Date(o.startDate).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
+                <br>→ <%= new Date(o.endDate).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %>
+              </div>
+            </td>
+            <td>
+              <span class="status-dot">
+                <span class="dot dot-<%= o.status %>"></span>
+                <%= o.status.charAt(0).toUpperCase() + o.status.slice(1) %>
+              </span>
+            </td>
+            <td>
+              <div class="actions">
+                <form action="/admin/offers/toggle/<%= o._id %>" method="POST" style="display:inline;">
+                  <button type="submit" class="btn-sm <%= o.isActive ? 'btn-toggle-on' : 'btn-toggle-off' %>">
+                    <%= o.isActive ? 'Deactivate' : 'Activate' %>
+                  </button>
+                </form>
+                <button class="btn-sm btn-delete"
+                  onclick="confirmDelete('<%= o._id %>', '<%= o.name %>')">
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </main>
+</div>
+
+<!-- Delete confirm modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h3>Delete Offer?</h3>
+    <p id="deleteModalMsg">This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <form id="deleteForm" method="POST">
+        <button type="submit" class="btn-confirm-del">Yes, Delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+<%- include('../partials/admin/adminFooter') %>
+<script>
+  function confirmDelete(id, name) {
+    document.getElementById('deleteModalMsg').textContent = 'Delete "' + name + '"? This cannot be undone.'
+    document.getElementById('deleteForm').action = '/admin/offers/delete/' + id
+    document.getElementById('deleteModal').classList.add('open')
+  }
+  function closeModal() {
+    document.getElementById('deleteModal').classList.remove('open')
+  }
+  document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal()
+  })
+  function filterOffers() {
+    var q = document.getElementById('searchInput').value.toLowerCase()
+    document.querySelectorAll('#offersTable tbody tr').forEach(function(row) {
+      row.style.display = row.dataset.name.includes(q) ? '' : 'none'
+    })
+  }
+</script>
+</body>
+</html>

@@ -69,24 +69,7 @@
       gap: 18px;
     }
 
-    /* Bell icon */
-    .btn-bell {
-      background: none; border: none; cursor: pointer;
-      color: rgba(255,255,255,0.6);
-      font-size: 18px;
-      position: relative;
-      transition: color 0.2s;
-      padding: 4px;
-    }
-    .btn-bell:hover { color: var(--pink-mid); }
-    .btn-bell .badge {
-      position: absolute; top: 2px; right: 2px;
-      width: 8px; height: 8px;
-      background: var(--pink-hot);
-      border-radius: 50%;
-      border: 1.5px solid var(--dark-nav);
-    }
-
+    
     /* User chip */
     .user-chip {
       display: flex; align-items: center; gap: 8px;
@@ -232,11 +215,7 @@
   <span class="nav-title"><span>Blush-Berry</span> </span>
 
   <div class="nav-right">
-    <!-- Bell notification -->
-    <button class="btn-bell" title="Notifications">
-      🔔
-      <span class="badge"></span>
-    </button>
+    
 
     <!-- User chip -->
     <div class="user-chip">
@@ -283,9 +262,8 @@
   </nav>
 
   <div class="sidebar-footer">
-    <a href="/admin/settings" class="nav-link ">
-      <span class="icon">⚙️</span> Settings
-    </a>
+    
+    
     <a href="/admin/logout" class="nav-link">
       <span class="icon">↩</span> Logout
     </a>

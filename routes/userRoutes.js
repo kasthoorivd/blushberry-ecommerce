@@ -11,6 +11,8 @@ const productController = require('../controllers/user/productController')
 const productDetailController = require('../controllers/user/productDetailController')
 const cartController = require('../controllers/user/cartController')
 const checkoutController = require('../controllers/user/checkoutController')
+const walletController = require('../controllers/user/walletController')
+const contactController = require('../controllers/user/contactController')
 const {isLoggedIn, isLoggedOut,isBlocked} = require('../middleware/authMiddleware')
 
 
@@ -119,7 +121,14 @@ userRouter.delete('/cart/remove-coupon',isBlocked,cartController.removeCoupon)
 // checkout
 userRouter.get('/checkout',           isBlocked, checkoutController.loadCheckout)
 userRouter.post('/checkout/place-order', isBlocked, checkoutController.placeOrder)
- 
+ userRouter.post('/checkout/create-razorpay-order', isBlocked, checkoutController.createRazorpayOrder)  
+userRouter.post('/checkout/verify-payment',      isBlocked, checkoutController.verifyPayment)          
+
+// order failure page
+userRouter.get('/order-failure',                 isBlocked, (req, res) => {                           
+  res.render('user/orderFailure', { reason: req.query.reason || null })
+})
+
 // order success
 userRouter.get('/order-success/:orderId', isBlocked, checkoutController.loadOrderSuccess)
  
@@ -136,6 +145,13 @@ userRouter.post('/orders/:orderId/return', isBlocked, checkoutController.returnO
 //invoice
 userRouter.get('/orders/:orderId/invoice', isBlocked, checkoutController.downloadInvoice)
 
+//wallet
+userRouter.get('/wallet', isBlocked, walletController.getWallet)
+
+//coupon
+userRouter.get('/coupons',isBlocked , profileController.loadCoupons)
+
+userRouter.get('/contact', isBlocked , contactController.loadContact)
 // logout
 userRouter.get('/logout', isLoggedIn, userController.logout)
 

@@ -549,6 +549,15 @@
       background: var(--accent-soft);
     }
 
+    .payment-option.disabled-option {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .payment-option.disabled-option:hover {
+      border-color: var(--border);
+    }
+
     .payment-option input[type="radio"] {
       accent-color: var(--accent);
       width: 16px;
@@ -583,13 +592,14 @@
       color: var(--muted);
     }
 
-    .payment-coming-soon {
+    .badge-low {
       font-size: 0.65rem;
-      background: rgba(194, 24, 91, 0.1);
-      color: var(--accent);
+      background: rgba(224, 108, 108, 0.1);
+      color: #c0392b;
       padding: 0.15rem 0.45rem;
       border-radius: 999px;
-      margin-left: 0.4rem;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     /* PLACE ORDER */
@@ -658,9 +668,7 @@
       opacity: 0.4;
     }
 
-    /* ══════════════════════════════════
-       ADD ADDRESS MODAL
-    ══════════════════════════════════ */
+    /* MODAL */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -689,15 +697,8 @@
     }
 
     @keyframes modalIn {
-      from {
-        opacity: 0;
-        transform: scale(0.93) translateY(16px);
-      }
-
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
+      from { opacity: 0; transform: scale(0.93) translateY(16px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
     }
 
     .modal-head {
@@ -740,11 +741,8 @@
       color: var(--accent);
     }
 
-    .modal-body {
-      padding: 1.5rem;
-    }
+    .modal-body { padding: 1.5rem; }
 
-    /* form inside modal */
     .modal-alert-error {
       background: #fce8e8;
       border: 1px solid #f0c0c0;
@@ -758,9 +756,7 @@
       gap: 8px;
     }
 
-    .modal-alert-error.show {
-      display: flex;
-    }
+    .modal-alert-error.show { display: flex; }
 
     .modal-section-label {
       font-size: 10px;
@@ -793,9 +789,7 @@
       gap: 4px;
     }
 
-    .modal-group.full {
-      grid-column: 1 / -1;
-    }
+    .modal-group.full { grid-column: 1 / -1; }
 
     .modal-group label {
       font-size: 10px;
@@ -805,9 +799,7 @@
       text-transform: uppercase;
     }
 
-    .modal-group label span {
-      color: var(--accent);
-    }
+    .modal-group label span { color: var(--accent); }
 
     .modal-group input,
     .modal-group select,
@@ -850,16 +842,13 @@
       background-position: right 13px center;
     }
 
-    /* type pills */
     .type-group {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
     }
 
-    .type-pill input[type=radio] {
-      display: none;
-    }
+    .type-pill input[type=radio] { display: none; }
 
     .type-pill label {
       display: inline-block;
@@ -874,13 +863,12 @@
       font-family: var(--body);
     }
 
-    .type-pill input[type=radio]:checked+label {
+    .type-pill input[type=radio]:checked + label {
       border-color: var(--accent);
       background: rgba(194, 24, 91, 0.08);
       color: var(--accent);
     }
 
-    /* modal buttons */
     .modal-btn-row {
       display: flex;
       gap: 10px;
@@ -937,24 +925,14 @@
         grid-template-columns: 1fr;
         padding: 1rem;
       }
-
-      .address-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .summary-card {
-        position: static;
-      }
-
-      .modal-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .modal-group.full {
-        grid-column: 1;
-      }
+      .address-grid { grid-template-columns: 1fr; }
+      .summary-card { position: static; }
+      .modal-grid { grid-template-columns: 1fr; }
+      .modal-group.full { grid-column: 1; }
     }
   </style>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 
 <body>
@@ -993,7 +971,7 @@
         <span>Checkout</span>
       </div>
 
-      <% if (outOfStock && outOfStock.length> 0) { %>
+      <% if (outOfStock && outOfStock.length > 0) { %>
         <div class="oos-banner">
           <i class="fas fa-exclamation-triangle"></i>
           <div>
@@ -1002,162 +980,191 @@
               <div>
                 <%= l.productName %> (<%= l.shade %>) — only <%= l.stock %> left but <%= l.quantity %> in cart.
               </div>
-              <% }) %>
-                Please update your cart before placing the order.
+            <% }) %>
+            Please update your cart before placing the order.
           </div>
         </div>
-        <% } %>
+      <% } %>
 
-          <!-- DELIVERY ADDRESS -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-header-left">
-                <div class="card-icon"><i class="fas fa-map-marker-alt"></i></div>
-                <span class="card-title">Delivery Address</span>
-              </div>
-              <!-- Changed from <a href> to button that opens modal -->
-              <button type="button" class="btn-add-address" onclick="openAddressModal()">
-                <i class="fas fa-plus"></i> Add New
-              </button>
-            </div>
-            <div class="card-body">
-              <div class="address-grid" id="addressGrid">
-                <% if (addresses && addresses.length> 0) { %>
-                  <% addresses.forEach(function(addr, i) { %>
-                    <label class="address-card <%= i === 0 ? 'selected' : '' %>" id="addrCard-<%= addr._id %>"
-                      onclick="selectAddress('<%= addr._id %>', this)">
-                      <input type="radio" name="addressId" value="<%= addr._id %>" <%=i===0 ? 'checked' : '' %> />
-                      <div class="address-select-indicator"></div>
-                      <div class="address-top">
-                        <div class="address-name">
-                          <%= addr.name %>
-                        </div>
-                        <div style="display:flex;gap:0.25rem;flex-wrap:wrap;justify-content:flex-end;">
-                          <span class="address-type-badge">
-                            <%= addr.addressType %>
-                          </span>
-                          <% if (addr.isDefault) { %><span class="address-default-badge">Default</span>
-                            <% } %>
-                        </div>
-                      </div>
-                      <div class="address-line">
-                        <%= addr.address %>
-                          <% if (addr.city) { %>, <%= addr.city %>
-                              <% } %>,<br />
-                                <%= addr.state %>, <%= addr.country %> — <%= addr.pincode %>
-                                      <% if (addr.landmark) { %><br /><span
-                                          style="color:var(--muted);font-size:0.72rem;">Near: <%= addr.landmark %>
-                                        </span>
-                                        <% } %>
-                      </div>
-                      <div class="address-mobile"><i class="fas fa-phone"
-                          style="font-size:0.68rem;margin-right:0.3rem;"></i>
-                        <%= addr.mobile %>
-                      </div>
-                      <div class="address-actions">
-                        <button type="button" class="btn-addr-edit" data-id="<%= addr._id %>"
-                          data-name="<%= addr.name %>" data-mobile="<%= addr.mobile %>" data-email="<%= addr.email %>"
-                          data-alt="<%= addr.alternateNumber || '' %>" data-address="<%= addr.address %>"
-                          data-landmark="<%= addr.landmark || '' %>" data-city="<%= addr.city || '' %>"
-                          data-state="<%= addr.state %>" data-pincode="<%= addr.pincode %>"
-                          data-country="<%= addr.country %>" data-type="<%= addr.addressType %>"
-                          onclick="event.stopPropagation(); openEditFromBtn(this)">
-                          <i class="fas fa-pen"></i> Edit
-                        </button>
-                      </div>
-                    </label>
-                    <% }) %>
-                      <% } else { %>
-                        <div class="no-address" id="noAddressMsg">
-                          <i class="fas fa-map-marker-alt"
-                            style="font-size:2rem;color:var(--border);display:block;margin-bottom:0.75rem;"></i>
-                          No addresses saved yet.<br />
-                          <button type="button" class="btn-add-address" style="margin-top:0.75rem;"
-                            onclick="openAddressModal()">
-                            <i class="fas fa-plus"></i> Add Address
-                          </button>
-                        </div>
-                        <% } %>
-              </div>
-            </div>
+      <!-- DELIVERY ADDRESS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <span class="card-title">Delivery Address</span>
           </div>
-
-          <!-- ORDER ITEMS -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-header-left">
-                <div class="card-icon"><i class="fas fa-shopping-bag"></i></div>
-                <span class="card-title">Order Items (<%= lines.length %>)</span>
+          <button type="button" class="btn-add-address" onclick="openAddressModal()">
+            <i class="fas fa-plus"></i> Add New
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="address-grid" id="addressGrid">
+            <% if (addresses && addresses.length > 0) { %>
+              <% addresses.forEach(function(addr, i) { %>
+                <label class="address-card <%= i === 0 ? 'selected' : '' %>" id="addrCard-<%= addr._id %>"
+                  onclick="selectAddress('<%= addr._id %>', this)">
+                  <input type="radio" name="addressId" value="<%= addr._id %>" <%= i === 0 ? 'checked' : '' %> />
+                  <div class="address-select-indicator"></div>
+                  <div class="address-top">
+                    <div class="address-name"><%= addr.name %></div>
+                    <div style="display:flex;gap:0.25rem;flex-wrap:wrap;justify-content:flex-end;">
+                      <span class="address-type-badge"><%= addr.addressType %></span>
+                      <% if (addr.isDefault) { %>
+                        <span class="address-default-badge">Default</span>
+                      <% } %>
+                    </div>
+                  </div>
+                  <div class="address-line">
+                    <%= addr.address %>
+                    <% if (addr.city) { %>, <%= addr.city %><% } %>,<br />
+                    <%= addr.state %>, <%= addr.country %> — <%= addr.pincode %>
+                    <% if (addr.landmark) { %>
+                      <br /><span style="color:var(--muted);font-size:0.72rem;">Near: <%= addr.landmark %></span>
+                    <% } %>
+                  </div>
+                  <div class="address-mobile">
+                    <i class="fas fa-phone" style="font-size:0.68rem;margin-right:0.3rem;"></i>
+                    <%= addr.mobile %>
+                  </div>
+                  <div class="address-actions">
+                    <button type="button" class="btn-addr-edit"
+                      data-id="<%= addr._id %>"
+                      data-name="<%= addr.name %>"
+                      data-mobile="<%= addr.mobile %>"
+                      data-email="<%= addr.email %>"
+                      data-alt="<%= addr.alternateNumber || '' %>"
+                      data-address="<%= addr.address %>"
+                      data-landmark="<%= addr.landmark || '' %>"
+                      data-city="<%= addr.city || '' %>"
+                      data-state="<%= addr.state %>"
+                      data-pincode="<%= addr.pincode %>"
+                      data-country="<%= addr.country %>"
+                      data-type="<%= addr.addressType %>"
+                      onclick="event.stopPropagation(); openEditFromBtn(this)">
+                      <i class="fas fa-pen"></i> Edit
+                    </button>
+                  </div>
+                </label>
+              <% }) %>
+            <% } else { %>
+              <div class="no-address" id="noAddressMsg">
+                <i class="fas fa-map-marker-alt"
+                  style="font-size:2rem;color:var(--border);display:block;margin-bottom:0.75rem;"></i>
+                No addresses saved yet.<br />
+                <button type="button" class="btn-add-address" style="margin-top:0.75rem;"
+                  onclick="openAddressModal()">
+                  <i class="fas fa-plus"></i> Add Address
+                </button>
               </div>
-              <a href="/cart" style="font-size:0.75rem;color:var(--accent);text-decoration:none;"><i class="fas fa-pen"
-                  style="font-size:0.65rem;"></i> Edit Cart</a>
-            </div>
-            <div class="card-body" style="padding-top:0.5rem;">
-              <% lines.forEach(function(line) { %>
-                <div class="order-item">
-                  <img class="item-img" src="<%= line.image || '/images/placeholder.png' %>"
-                    alt="<%= line.productName %>" onerror="this.src='/images/placeholder.png'" />
-                  <div class="item-info">
-                    <div class="item-name">
-                      <%= line.productName %>
-                    </div>
-                    <% if (line.shade) { %>
-                      <div class="item-shade"><i class="fas fa-circle"
-                          style="font-size:0.5rem;color:var(--accent);"></i>
-                        <%= line.shade %>
-                      </div>
-                      <% } %>
-                        <div class="item-qty">Qty: <%= line.quantity %>
-                        </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- ORDER ITEMS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon"><i class="fas fa-shopping-bag"></i></div>
+            <span class="card-title">Order Items (<%= lines.length %>)</span>
+          </div>
+          <a href="/cart" style="font-size:0.75rem;color:var(--accent);text-decoration:none;">
+            <i class="fas fa-pen" style="font-size:0.65rem;"></i> Edit Cart
+          </a>
+        </div>
+        <div class="card-body" style="padding-top:0.5rem;">
+          <% lines.forEach(function(line) { %>
+            <div class="order-item">
+              <img class="item-img" src="<%= line.image || '/images/placeholder.png' %>"
+                alt="<%= line.productName %>" onerror="this.src='/images/placeholder.png'" />
+              <div class="item-info">
+                <div class="item-name"><%= line.productName %></div>
+                <% if (line.shade) { %>
+                  <div class="item-shade">
+                    <i class="fas fa-circle" style="font-size:0.5rem;color:var(--accent);"></i>
+                    <%= line.shade %>
                   </div>
-                  <div class="item-pricing">
-                    <div class="item-price-final">₹<%= (line.finalUnitPrice * line.quantity).toLocaleString('en-IN') %>
-                    </div>
-                    <% if (line.itemDiscount> 0) { %>
-                      <div class="item-price-original">₹<%= (line.originalPrice * line.quantity).toLocaleString('en-IN')
-                          %>
-                      </div>
-                      <div class="item-discount-tag">Save ₹<%= line.itemDiscount.toLocaleString('en-IN') %>
-                      </div>
-                      <% } %>
-                  </div>
+                <% } %>
+                <div class="item-qty">Qty: <%= line.quantity %></div>
+              </div>
+              <div class="item-pricing">
+                <div class="item-price-final">
+                  ₹<%= (line.finalUnitPrice * line.quantity).toLocaleString('en-IN') %>
                 </div>
-                <% }) %>
-            </div>
-          </div>
-
-          <!-- PAYMENT METHOD -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-header-left">
-                <div class="card-icon"><i class="fas fa-credit-card"></i></div>
-                <span class="card-title">Payment Method</span>
+                <% if (line.itemDiscount > 0) { %>
+                  <div class="item-price-original">
+                    ₹<%= (line.originalPrice * line.quantity).toLocaleString('en-IN') %>
+                  </div>
+                  <div class="item-discount-tag">
+                    Save ₹<%= line.itemDiscount.toLocaleString('en-IN') %>
+                  </div>
+                <% } %>
               </div>
             </div>
-            <div class="card-body">
-              <div class="payment-options">
-                <label class="payment-option selected" id="pmCOD" onclick="selectPayment('COD', this)">
-                  <input type="radio" name="paymentMethod" value="COD" checked />
-                  <div class="payment-option-icon">💵</div>
-                  <div class="payment-option-info">
-                    <div class="payment-option-label">Cash on Delivery</div>
-                    <div class="payment-option-sub">Pay when your order arrives</div>
-                  </div>
-                </label>
-                <label class="payment-option" style="opacity:0.5;cursor:not-allowed;">
-                  <input type="radio" name="paymentMethod" value="Online" disabled />
-                  <div class="payment-option-icon">💳</div>
-                  <div class="payment-option-info">
-                    <div class="payment-option-label">Online Payment <span class="payment-coming-soon">Coming
-                        soon</span></div>
-                    <div class="payment-option-sub">UPI, Cards, Net Banking</div>
-                  </div>
-                </label>
-              </div>
-            </div>
-          </div>
+          <% }) %>
+        </div>
+      </div>
 
-    </div>
+      <!-- PAYMENT METHOD -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon"><i class="fas fa-credit-card"></i></div>
+            <span class="card-title">Payment Method</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="payment-options">
+
+            <!-- COD -->
+            <label class="payment-option selected" id="pmCOD" onclick="selectPayment('COD', this)">
+              <input type="radio" name="paymentMethod" value="COD" checked />
+              <div class="payment-option-icon">💵</div>
+              <div class="payment-option-info">
+                <div class="payment-option-label">Cash on Delivery</div>
+                <div class="payment-option-sub">Pay when your order arrives</div>
+              </div>
+            </label>
+
+            <!-- ONLINE -->
+            <label class="payment-option" id="pmOnline" onclick="selectPayment('Online', this)">
+              <input type="radio" name="paymentMethod" value="Online" />
+              <div class="payment-option-icon">💳</div>
+              <div class="payment-option-info">
+                <div class="payment-option-label">Online Payment</div>
+                <div class="payment-option-sub">UPI, Cards, Net Banking via Razorpay</div>
+              </div>
+            </label>
+
+            <!-- WALLET -->
+            <%
+              var wb = walletBalance || 0;
+              var hasEnough = wb >= totals.finalAmount;
+            %>
+            <label class="payment-option <%= !hasEnough ? 'disabled-option' : '' %>"
+              id="pmWallet"
+              onclick="selectPayment('Wallet', this)">
+              <input type="radio" name="paymentMethod" value="Wallet" <%= !hasEnough ? 'disabled' : '' %> />
+              <div class="payment-option-icon">👛</div>
+              <div class="payment-option-info">
+                <div class="payment-option-label">Blushberry Wallet</div>
+                <div class="payment-option-sub">
+                  Balance:
+                  <strong style="color:<%= hasEnough ? 'var(--success)' : '#c0392b' %>">
+                    ₹<%= wb.toLocaleString('en-IN') %>
+                  </strong>
+                </div>
+              </div>
+              <% if (!hasEnough) { %>
+                <span class="badge-low">Low balance</span>
+              <% } %>
+            </label>
+
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /checkout-left -->
 
     <!-- RIGHT COLUMN — SUMMARY -->
     <div class="checkout-right">
@@ -1166,62 +1173,81 @@
           <div class="summary-title">Order Summary</div>
         </div>
         <div class="summary-body">
-          <% if (totals.amountForFreeShipping> 0) { %>
+
+          <% if (totals.amountForFreeShipping > 0) { %>
             <div class="free-shipping-bar">
-              <div class="free-shipping-text">Add <strong>₹<%= totals.amountForFreeShipping.toLocaleString('en-IN') %>
-                </strong> more for free shipping!</div>
+              <div class="free-shipping-text">
+                Add <strong>₹<%= totals.amountForFreeShipping.toLocaleString('en-IN') %></strong> more for free shipping!
+              </div>
               <div class="progress-bar">
                 <div class="progress-fill"
                   style="width:<%= Math.min(100, Math.round(((totals.subtotal - totals.itemDiscounts) / totals.freeShippingThreshold) * 100)) %>%">
                 </div>
               </div>
             </div>
+          <% } else { %>
+            <div class="summary-savings" style="margin-bottom:0.75rem;">
+              <i class="fas fa-truck"></i> You've unlocked <strong>Free Shipping!</strong>
+            </div>
+          <% } %>
+
+          <div class="summary-row">
+            <span>Subtotal (<%= lines.length %> items)</span>
+            <span>₹<%= totals.subtotal.toLocaleString('en-IN') %></span>
+          </div>
+
+          <% if (totals.itemDiscounts > 0) { %>
+            <div class="summary-row">
+              <span>Item Discounts</span>
+              <span class="green">−₹<%= totals.itemDiscounts.toLocaleString('en-IN') %></span>
+            </div>
+          <% } %>
+
+          <% if (totals.couponDiscount > 0) { %>
+            <div class="summary-row">
+              <span>Coupon (<%= couponCode %>)</span>
+              <span class="green">−₹<%= totals.couponDiscount.toLocaleString('en-IN') %></span>
+            </div>
+          <% } %>
+
+          <div class="summary-row">
+            <span>Shipping</span>
+            <% if (totals.shippingCharge === 0) { %>
+              <span class="green">Free</span>
             <% } else { %>
-              <div class="summary-savings" style="margin-bottom:0.75rem;">
-                <i class="fas fa-truck"></i> You've unlocked <strong>Free Shipping!</strong>
-              </div>
-              <% } %>
+              <span>₹<%= totals.shippingCharge %></span>
+            <% } %>
+          </div>
 
-                <div class="summary-row"><span>Subtotal (<%= lines.length %> items)</span><span>₹<%=
-                      totals.subtotal.toLocaleString('en-IN') %></span></div>
-                <% if (totals.itemDiscounts> 0) { %>
-                  <div class="summary-row"><span>Item Discounts</span><span class="green">−₹<%=
-                        totals.itemDiscounts.toLocaleString('en-IN') %></span></div>
-                  <% } %>
-                    <% if (totals.couponDiscount> 0) { %>
-                      <div class="summary-row"><span>Coupon (<%= couponCode %>)</span><span class="green">−₹<%=
-                            totals.couponDiscount.toLocaleString('en-IN') %></span></div>
-                      <% } %>
-                        <div class="summary-row">
-                          <span>Shipping</span>
-                          <% if (totals.shippingCharge===0) { %><span class="green">Free</span>
-                            <% } else { %><span>₹<%= totals.shippingCharge %></span>
-                              <% } %>
-                        </div>
-                        <div class="summary-row"><span>GST (5%)</span><span>₹<%= totals.tax.toLocaleString('en-IN') %>
-                          </span></div>
-                        <div class="summary-row total"><span>Total</span><span>₹<%=
-                              totals.finalAmount.toLocaleString('en-IN') %></span></div>
-                        <% if (totals.totalDiscount> 0) { %>
-                          <div class="summary-savings"><i class="fas fa-tag"></i> You're saving <strong>₹<%=
-                                totals.totalDiscount.toLocaleString('en-IN') %></strong> on this order!</div>
-                          <% } %>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span>₹<%= totals.finalAmount.toLocaleString('en-IN') %></span>
+          </div>
 
-                            <button class="btn-place-order" id="btnPlaceOrder" onclick="placeOrder()" <%=(outOfStock &&
-                              outOfStock.length> 0) || !addresses.length ? 'disabled' : '' %>>
-                              <i class="fas fa-lock"></i>
-                              Place Order · ₹<%= totals.finalAmount.toLocaleString('en-IN') %>
-                            </button>
-                            <div class="secure-note"><i class="fas fa-shield-alt"></i> Safe & secure checkout</div>
+          <% if (totals.totalDiscount > 0) { %>
+            <div class="summary-savings">
+              <i class="fas fa-tag"></i> You're saving
+              <strong>₹<%= totals.totalDiscount.toLocaleString('en-IN') %></strong> on this order!
+            </div>
+          <% } %>
+
+          <button class="btn-place-order" id="btnPlaceOrder" onclick="placeOrder()"
+            <%= (outOfStock && outOfStock.length > 0) || !addresses.length ? 'disabled' : '' %>>
+            <i class="fas fa-lock"></i>
+            Place Order · ₹<%= totals.finalAmount.toLocaleString('en-IN') %>
+          </button>
+          <div class="secure-note">
+            <i class="fas fa-shield-alt"></i> Safe & secure checkout
+          </div>
+
         </div>
       </div>
     </div>
 
-  </div>
+  </div><!-- /checkout-wrap -->
 
-  <!-- ══════════════════════════════════
-     ADD ADDRESS MODAL
-══════════════════════════════════ -->
+
+  <!-- ADD ADDRESS MODAL -->
   <div class="modal-overlay" id="addressModal" onclick="handleOverlayClick(event)">
     <div class="modal-box">
       <div class="modal-head">
@@ -1229,13 +1255,10 @@
         <button class="modal-close" onclick="closeAddressModal()"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body">
-
         <div class="modal-alert-error" id="modalError">
           <span>✗</span><span id="modalErrorMsg">Please fill all required fields.</span>
         </div>
-
         <form id="modalAddressForm">
-
           <p class="modal-section-label">📋 Contact Info</p>
           <div class="modal-grid">
             <div class="modal-group">
@@ -1255,13 +1278,12 @@
               <input type="tel" name="alternateNumber" placeholder="Optional" maxlength="10" />
             </div>
           </div>
-
           <p class="modal-section-label">📍 Address Details</p>
           <div class="modal-grid">
             <div class="modal-group full">
               <label>Address (House No, Street, Area) <span>*</span></label>
-              <textarea name="address" placeholder="e.g. Kulirma Lane, Niravath Rd, Kundannoor" required
-                maxlength="200"></textarea>
+              <textarea name="address" placeholder="e.g. Kulirma Lane, Niravath Rd, Kundannoor"
+                required maxlength="200"></textarea>
             </div>
             <div class="modal-group">
               <label>Landmark</label>
@@ -1275,39 +1297,17 @@
               <label>State <span>*</span></label>
               <select name="state" required>
                 <option value="" disabled selected>Select state</option>
-                <option>Andhra Pradesh</option>
-                <option>Arunachal Pradesh</option>
-                <option>Assam</option>
-                <option>Bihar</option>
-                <option>Chhattisgarh</option>
-                <option>Goa</option>
-                <option>Gujarat</option>
-                <option>Haryana</option>
-                <option>Himachal Pradesh</option>
-                <option>Jharkhand</option>
-                <option>Karnataka</option>
-                <option selected>Kerala</option>
-                <option>Madhya Pradesh</option>
-                <option>Maharashtra</option>
-                <option>Manipur</option>
-                <option>Meghalaya</option>
-                <option>Mizoram</option>
-                <option>Nagaland</option>
-                <option>Odisha</option>
-                <option>Punjab</option>
-                <option>Rajasthan</option>
-                <option>Sikkim</option>
-                <option>Tamil Nadu</option>
-                <option>Telangana</option>
-                <option>Tripura</option>
-                <option>Uttar Pradesh</option>
-                <option>Uttarakhand</option>
-                <option>West Bengal</option>
-                <option>Delhi</option>
-                <option>Jammu &amp; Kashmir</option>
-                <option>Ladakh</option>
-                <option>Puducherry</option>
-                <option>Chandigarh</option>
+                <option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option>
+                <option>Bihar</option><option>Chhattisgarh</option><option>Goa</option>
+                <option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option>
+                <option>Jharkhand</option><option>Karnataka</option><option selected>Kerala</option>
+                <option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
+                <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option>
+                <option>Odisha</option><option>Punjab</option><option>Rajasthan</option>
+                <option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option>
+                <option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option>
+                <option>West Bengal</option><option>Delhi</option><option>Jammu &amp; Kashmir</option>
+                <option>Ladakh</option><option>Puducherry</option><option>Chandigarh</option>
               </select>
             </div>
             <div class="modal-group">
@@ -1321,24 +1321,27 @@
               </select>
             </div>
           </div>
-
           <p class="modal-section-label">🏷 Address Type</p>
           <div class="type-group">
-            <div class="type-pill"><input type="radio" name="addressType" id="mTypeHome" value="Home" checked /><label
-                for="mTypeHome">🏠 Home</label></div>
-            <div class="type-pill"><input type="radio" name="addressType" id="mTypeWork" value="Work" /><label
-                for="mTypeWork">💼 Work</label></div>
-            <div class="type-pill"><input type="radio" name="addressType" id="mTypeOther" value="Other" /><label
-                for="mTypeOther">📦 Other</label></div>
+            <div class="type-pill">
+              <input type="radio" name="addressType" id="mTypeHome" value="Home" checked />
+              <label for="mTypeHome">🏠 Home</label>
+            </div>
+            <div class="type-pill">
+              <input type="radio" name="addressType" id="mTypeWork" value="Work" />
+              <label for="mTypeWork">💼 Work</label>
+            </div>
+            <div class="type-pill">
+              <input type="radio" name="addressType" id="mTypeOther" value="Other" />
+              <label for="mTypeOther">📦 Other</label>
+            </div>
           </div>
-
           <div class="modal-btn-row">
             <button type="button" class="modal-btn-cancel" onclick="closeAddressModal()">Cancel</button>
             <button type="button" class="modal-btn-save" id="modalSaveBtn" onclick="submitModalAddress()">
               <i class="fas fa-check"></i> Save Address
             </button>
           </div>
-
         </form>
       </div>
     </div>
@@ -1395,39 +1398,17 @@
               <label>State <span>*</span></label>
               <select id="editState">
                 <option value="" disabled>Select state</option>
-                <option>Andhra Pradesh</option>
-                <option>Arunachal Pradesh</option>
-                <option>Assam</option>
-                <option>Bihar</option>
-                <option>Chhattisgarh</option>
-                <option>Goa</option>
-                <option>Gujarat</option>
-                <option>Haryana</option>
-                <option>Himachal Pradesh</option>
-                <option>Jharkhand</option>
-                <option>Karnataka</option>
-                <option>Kerala</option>
-                <option>Madhya Pradesh</option>
-                <option>Maharashtra</option>
-                <option>Manipur</option>
-                <option>Meghalaya</option>
-                <option>Mizoram</option>
-                <option>Nagaland</option>
-                <option>Odisha</option>
-                <option>Punjab</option>
-                <option>Rajasthan</option>
-                <option>Sikkim</option>
-                <option>Tamil Nadu</option>
-                <option>Telangana</option>
-                <option>Tripura</option>
-                <option>Uttar Pradesh</option>
-                <option>Uttarakhand</option>
-                <option>West Bengal</option>
-                <option>Delhi</option>
-                <option>Jammu &amp; Kashmir</option>
-                <option>Ladakh</option>
-                <option>Puducherry</option>
-                <option>Chandigarh</option>
+                <option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option>
+                <option>Bihar</option><option>Chhattisgarh</option><option>Goa</option>
+                <option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option>
+                <option>Jharkhand</option><option>Karnataka</option><option>Kerala</option>
+                <option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option>
+                <option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option>
+                <option>Odisha</option><option>Punjab</option><option>Rajasthan</option>
+                <option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option>
+                <option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option>
+                <option>West Bengal</option><option>Delhi</option><option>Jammu &amp; Kashmir</option>
+                <option>Ladakh</option><option>Puducherry</option><option>Chandigarh</option>
               </select>
             </div>
             <div class="modal-group">
@@ -1443,12 +1424,18 @@
           </div>
           <p class="modal-section-label">🏷 Address Type</p>
           <div class="type-group">
-            <div class="type-pill"><input type="radio" name="editType" id="eHome" value="Home" checked /><label
-                for="eHome">🏠 Home</label></div>
-            <div class="type-pill"><input type="radio" name="editType" id="eWork" value="Work" /><label for="eWork">💼
-                Work</label></div>
-            <div class="type-pill"><input type="radio" name="editType" id="eOther" value="Other" /><label
-                for="eOther">📦 Other</label></div>
+            <div class="type-pill">
+              <input type="radio" name="editType" id="eHome" value="Home" checked />
+              <label for="eHome">🏠 Home</label>
+            </div>
+            <div class="type-pill">
+              <input type="radio" name="editType" id="eWork" value="Work" />
+              <label for="eWork">💼 Work</label>
+            </div>
+            <div class="type-pill">
+              <input type="radio" name="editType" id="eOther" value="Other" />
+              <label for="eOther">📦 Other</label>
+            </div>
           </div>
           <div class="modal-btn-row">
             <button type="button" class="modal-btn-cancel" onclick="closeEditModal()">Cancel</button>
@@ -1464,24 +1451,46 @@
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
   <script>
+    // ── State ──────────────────────────────────────────────────────────────
     var selectedAddressId = '<%= addresses && addresses.length > 0 ? addresses[0]._id : "" %>';
-    var selectedPayment = 'COD';
+    var selectedPayment   = 'COD';
+    var WALLET_BALANCE    = <%= walletBalance || 0 %>;
+    var ORDER_TOTAL       = <%= totals.finalAmount %>;
+    var FINAL_AMOUNT_STR  = '₹<%= totals.finalAmount.toLocaleString("en-IN") %>';
 
+    // ── Address selection ──────────────────────────────────────────────────
     function selectAddress(id, el) {
       selectedAddressId = id;
-      document.querySelectorAll('.address-card').forEach(function (c) { c.classList.remove('selected'); });
+      document.querySelectorAll('.address-card').forEach(function(c) {
+        c.classList.remove('selected');
+      });
       el.classList.add('selected');
       el.querySelector('input[type="radio"]').checked = true;
     }
 
+    // ── Payment selection (single definition — with wallet guard) ──────────
     function selectPayment(method, el) {
+      if (method === 'Wallet') {
+        if (WALLET_BALANCE < ORDER_TOTAL) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Insufficient Wallet Balance',
+            text: 'Your wallet balance of ₹' + WALLET_BALANCE.toLocaleString('en-IN') +
+                  ' is not enough to cover this order of ₹' + ORDER_TOTAL.toLocaleString('en-IN') + '.',
+            confirmButtonColor: '#c2185b'
+          });
+          return;
+        }
+      }
       selectedPayment = method;
-      document.querySelectorAll('.payment-option').forEach(function (c) { c.classList.remove('selected'); });
+      document.querySelectorAll('.payment-option').forEach(function(c) {
+        c.classList.remove('selected');
+      });
       el.classList.add('selected');
       el.querySelector('input[type="radio"]').checked = true;
     }
 
-    // ── Modal open / close ──
+    // ── Add address modal ──────────────────────────────────────────────────
     function openAddressModal() {
       document.getElementById('addressModal').classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -1498,16 +1507,25 @@
       if (e.target === document.getElementById('addressModal')) closeAddressModal();
     }
 
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeAddressModal();
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeAddressModal();
+        closeEditModal();
+      }
     });
 
-    // ── Submit address via AJAX ──
+    function showModalError(msg) {
+      var el = document.getElementById('modalError');
+      document.getElementById('modalErrorMsg').textContent = msg;
+      el.classList.add('show');
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
     function submitModalAddress() {
-      var form = document.getElementById('modalAddressForm');
-      var data = {};
+      var form   = document.getElementById('modalAddressForm');
+      var data   = {};
       var inputs = form.querySelectorAll('input, select, textarea');
-      inputs.forEach(function (el) {
+      inputs.forEach(function(el) {
         if (el.type === 'radio') {
           if (el.checked) data[el.name] = el.value;
         } else {
@@ -1515,7 +1533,6 @@
         }
       });
 
-      // client validation
       if (!data.name || !data.mobile || !data.email || !data.address || !data.state || !data.pincode) {
         showModalError('Please fill in all required fields.');
         return;
@@ -1542,26 +1559,21 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       })
-        .then(function (r) {
-          // controller redirects on success — if we get a non-JSON response it means success
-          if (r.redirected || r.ok) {
-            return { success: true };
-          }
+        .then(function(r) {
+          if (r.redirected || r.ok) return { success: true };
           return r.json();
         })
-        .then(function (result) {
+        .then(function(result) {
           btn.disabled = false;
           btn.innerHTML = '<i class="fas fa-check"></i> Save Address';
           if (result.success) {
             closeAddressModal();
-            // reload the page so new address appears in the list
             window.location.reload();
           } else {
             showModalError(result.message || 'Something went wrong.');
           }
         })
-        .catch(function () {
-          // redirect responses from Express also land here — reload to show new address
+        .catch(function() {
           btn.disabled = false;
           btn.innerHTML = '<i class="fas fa-check"></i> Save Address';
           closeAddressModal();
@@ -1569,62 +1581,26 @@
         });
     }
 
-    function showModalError(msg) {
-      var el = document.getElementById('modalError');
-      document.getElementById('modalErrorMsg').textContent = msg;
-      el.classList.add('show');
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    // ── Place order ──
-    async function placeOrder() {
-      if (!selectedAddressId) {
-        Swal.fire({ icon: 'warning', title: 'No address selected', text: 'Please select a delivery address.', confirmButtonColor: '#c2185b' });
-        return;
-      }
-      var btn = document.getElementById('btnPlaceOrder');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Placing Order…';
-      try {
-        var res = await fetch('/checkout/place-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ addressId: selectedAddressId, paymentMethod: selectedPayment })
-        });
-        var data = await res.json();
-        if (data.success) {
-          window.location.href = '/order-success/' + data.dbId;
-        } else {
-          Swal.fire({ icon: 'error', title: 'Order Failed', text: data.message, confirmButtonColor: '#c2185b' });
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-lock"></i> Place Order · ₹<%= totals.finalAmount.toLocaleString("en-IN") %>';
-        }
-      } catch (err) {
-        Swal.fire({ icon: 'error', title: 'Something went wrong', text: 'Please try again.', confirmButtonColor: '#c2185b' });
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-lock"></i> Place Order · ₹<%= totals.finalAmount.toLocaleString("en-IN") %>';
-      }
-    }
-
+    // ── Edit address modal ─────────────────────────────────────────────────
     function openEditFromBtn(btn) {
       var d = btn.dataset;
       document.getElementById('editAddressId').value = d.id;
-      document.getElementById('editName').value = d.name;
-      document.getElementById('editMobile').value = d.mobile;
-      document.getElementById('editEmail').value = d.email;
+      document.getElementById('editName').value      = d.name;
+      document.getElementById('editMobile').value    = d.mobile;
+      document.getElementById('editEmail').value     = d.email;
       document.getElementById('editAlternate').value = d.alt;
-      document.getElementById('editAddr').value = d.address;
-      document.getElementById('editLandmark').value = d.landmark;
-      document.getElementById('editCity').value = d.city;
-      document.getElementById('editPincode').value = d.pincode;
-      document.getElementById('editCountry').value = d.country;
+      document.getElementById('editAddr').value      = d.address;
+      document.getElementById('editLandmark').value  = d.landmark;
+      document.getElementById('editCity').value      = d.city;
+      document.getElementById('editPincode').value   = d.pincode;
+      document.getElementById('editCountry').value   = d.country;
 
       var sel = document.getElementById('editState');
       for (var i = 0; i < sel.options.length; i++) {
         if (sel.options[i].value === d.state) { sel.selectedIndex = i; break; }
       }
 
-      document.querySelectorAll('input[name="editType"]').forEach(function (r) {
+      document.querySelectorAll('input[name="editType"]').forEach(function(r) {
         r.checked = r.value === d.type;
       });
 
@@ -1634,70 +1610,203 @@
     }
 
     function closeEditModal() {
-  document.getElementById('editAddressModal').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function submitEditAddress() {
-  var id = document.getElementById('editAddressId').value;
-  var data = {
-    name:            document.getElementById('editName').value.trim(),
-    mobile:          document.getElementById('editMobile').value.trim(),
-    email:           document.getElementById('editEmail').value.trim(),
-    alternateNumber: document.getElementById('editAlternate').value.trim(),
-    address:         document.getElementById('editAddr').value.trim(),
-    landmark:        document.getElementById('editLandmark').value.trim(),
-    city:            document.getElementById('editCity').value.trim(),
-    state:           document.getElementById('editState').value,
-    pincode:         document.getElementById('editPincode').value.trim(),
-    country:         document.getElementById('editCountry').value,
-    addressType:     document.querySelector('input[name="editType"]:checked').value,
-  };
-
-  if (!data.name || !data.mobile || !data.email || !data.address || !data.state || !data.pincode) {
-    showEditError('Please fill in all required fields.'); return;
-  }
-  if (!/^\d{10}$/.test(data.mobile)) {
-    showEditError('Mobile must be exactly 10 digits.'); return;
-  }
-  if (!/^\d{6}$/.test(data.pincode)) {
-    showEditError('Pincode must be exactly 6 digits.'); return;
-  }
-
-  var btn = document.getElementById('editSaveBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
-
-  fetch('/addresses/edit/' + id, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(result) {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-check"></i> Save Changes';
-    if (result.success) {
-      closeEditModal();
-      window.location.reload();
-    } else {
-      showEditError(result.message || 'Something went wrong.');
+      document.getElementById('editAddressModal').classList.remove('open');
+      document.body.style.overflow = '';
     }
-  })
-  .catch(function() {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-check"></i> Save Changes';
-    showEditError('Something went wrong. Please try again.');
-  });
-}
 
-function showEditError(msg) {
-  var el = document.getElementById('editModalError');
-  document.getElementById('editModalErrorMsg').textContent = msg;
-  el.classList.add('show');
-  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
+    function showEditError(msg) {
+      var el = document.getElementById('editModalError');
+      document.getElementById('editModalErrorMsg').textContent = msg;
+      el.classList.add('show');
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function submitEditAddress() {
+      var id   = document.getElementById('editAddressId').value;
+      var data = {
+        name:            document.getElementById('editName').value.trim(),
+        mobile:          document.getElementById('editMobile').value.trim(),
+        email:           document.getElementById('editEmail').value.trim(),
+        alternateNumber: document.getElementById('editAlternate').value.trim(),
+        address:         document.getElementById('editAddr').value.trim(),
+        landmark:        document.getElementById('editLandmark').value.trim(),
+        city:            document.getElementById('editCity').value.trim(),
+        state:           document.getElementById('editState').value,
+        pincode:         document.getElementById('editPincode').value.trim(),
+        country:         document.getElementById('editCountry').value,
+        addressType:     document.querySelector('input[name="editType"]:checked').value,
+      };
+
+      if (!data.name || !data.mobile || !data.email || !data.address || !data.state || !data.pincode) {
+        showEditError('Please fill in all required fields.'); return;
+      }
+      if (!/^\d{10}$/.test(data.mobile)) {
+        showEditError('Mobile must be exactly 10 digits.'); return;
+      }
+      if (!/^\d{6}$/.test(data.pincode)) {
+        showEditError('Pincode must be exactly 6 digits.'); return;
+      }
+
+      var btn = document.getElementById('editSaveBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+
+      fetch('/addresses/edit/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+        .then(function(r) { return r.json(); })
+        .then(function(result) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-check"></i> Save Changes';
+          if (result.success) {
+            closeEditModal();
+            window.location.reload();
+          } else {
+            showEditError(result.message || 'Something went wrong.');
+          }
+        })
+        .catch(function() {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-check"></i> Save Changes';
+          showEditError('Something went wrong. Please try again.');
+        });
+    }
+
+    // ── Place order ────────────────────────────────────────────────────────
+    async function placeOrder() {
+      if (!selectedAddressId) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'No address selected',
+          text: 'Please select a delivery address.',
+          confirmButtonColor: '#c2185b'
+        });
+        return;
+      }
+
+      var btn = document.getElementById('btnPlaceOrder');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…';
+
+      try {
+
+        // ── COD ────────────────────────────────────────────────────────────
+        if (selectedPayment === 'COD') {
+          var codRes  = await fetch('/checkout/place-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ addressId: selectedAddressId, paymentMethod: 'COD' })
+          });
+          var codData = await codRes.json();
+          if (codData.success) {
+            window.location.href = '/order-success/' + codData.dbId;
+          } else {
+            throw new Error(codData.message || 'Order failed');
+          }
+
+        // ── WALLET ─────────────────────────────────────────────────────────
+        } else if (selectedPayment === 'Wallet') {
+          var walletRes  = await fetch('/checkout/place-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ addressId: selectedAddressId, paymentMethod: 'Wallet' })
+          });
+          var walletData = await walletRes.json();
+          if (walletData.success) {
+            window.location.href = '/order-success/' + walletData.dbId;
+          } else {
+            throw new Error(walletData.message || 'Wallet payment failed');
+          }
+
+        // ── RAZORPAY ONLINE ────────────────────────────────────────────────
+        } else {
+          // Step 1: create order on server
+          var rpRes  = await fetch('/checkout/create-razorpay-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ addressId: selectedAddressId })
+          });
+          var rpData = await rpRes.json();
+          if (!rpData.success) throw new Error(rpData.message || 'Could not initiate payment');
+
+          // Step 2: open Razorpay modal
+          var options = {
+            key:         rpData.razorpayKeyId,
+            amount:      rpData.amount,
+            currency:    'INR',
+            name:        'Blushberry',
+            description: 'Order Payment',
+            order_id:    rpData.razorpayOrderId,
+            prefill: {
+              name:    rpData.customerName,
+              email:   rpData.customerEmail,
+              contact: rpData.customerPhone
+            },
+            theme: { color: '#c2185b' },
+
+            handler: async function(response) {
+              // Step 3: verify + save order
+              btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming…';
+              try {
+                var verifyRes  = await fetch('/checkout/verify-payment', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    razorpay_order_id:   response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature:  response.razorpay_signature,
+                    addressId:           selectedAddressId
+                  })
+                });
+                var verifyData = await verifyRes.json();
+                if (verifyData.success) {
+                  window.location.href = '/order-success/' + verifyData.dbId;
+                } else {
+                  window.location.href = '/order-failure?reason=' +
+                    encodeURIComponent(verifyData.message || 'Payment verification failed');
+                }
+              } catch(e) {
+                window.location.href = '/order-failure?reason=verification_error';
+              }
+            },
+
+            modal: {
+              ondismiss: function() {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-lock"></i> Place Order · ' + FINAL_AMOUNT_STR;
+                Swal.fire({
+                  icon: 'info',
+                  title: 'Payment Cancelled',
+                  text: 'You closed the payment window. No charge was made.',
+                  confirmButtonColor: '#c2185b'
+                });
+              }
+            }
+          };
+
+          var rzp = new Razorpay(options);
+          rzp.on('payment.failed', function(response) {
+            window.location.href = '/order-failure?reason=' +
+              encodeURIComponent(response.error.description);
+          });
+          rzp.open();
+          return; // keep button disabled while Razorpay modal is open
+        }
+
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Something went wrong',
+          text: err.message || 'Please try again.',
+          confirmButtonColor: '#c2185b'
+        });
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-lock"></i> Place Order · ' + FINAL_AMOUNT_STR;
+      }
+    }
   </script>
-</body>
 
+</body>
 </html>

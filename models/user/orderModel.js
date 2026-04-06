@@ -66,6 +66,9 @@ const orderSchema = new Schema(
       default: 'Placed'
     },
 
+    razorpayOrderId:   { type: String, default: null },
+razorpayPaymentId: { type: String, default: null },
+
     // per-item status for partial cancellations
     itemStatuses: [{
   itemId:       { type: Schema.Types.ObjectId },

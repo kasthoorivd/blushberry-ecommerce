@@ -64,7 +64,7 @@ const loadAddProduct = async (req, res) => {
 
 const addProduct = async (req, res) => {
   try {
-    const { name, description, categoryId, offer, images, variants } = req.body
+    const { name, description, categoryId, images, variants } = req.body
 
     const uploadedImages = await Promise.all(
       images.map(base64 => cloudinary.uploader.upload(base64, { folder: 'blushberry/products' }))
@@ -96,7 +96,6 @@ const addProduct = async (req, res) => {
       name,
       description,
       categoryId,
-      offer: offer || 0,
       images: imageUrls,
       variants: processedVariants
     })
@@ -126,7 +125,7 @@ const loadEditProduct = async (req, res) => {
 const editProduct = async (req, res) => {
   try {
     const { id } = req.params
-    const { name, description, categoryId, offer, existingImages, newImages, variants } = req.body
+    const { name, description, categoryId, existingImages, newImages, variants } = req.body
 
   
     const uploadedNew = await Promise.all(
@@ -167,7 +166,6 @@ const editProduct = async (req, res) => {
       name,
       description,
       categoryId,
-      offer: offer || 0,
       images: finalImages,
       variants: processedVariants
     })

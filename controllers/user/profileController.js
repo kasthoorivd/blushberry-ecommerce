@@ -1,6 +1,7 @@
 const User = require('../../models/user/userModel')
 const Otp = require('../../models/user/otpModel')
 const Address = require('../../models/user/addressModel')
+const Coupon = require('../../models/user/couponModel')
 const bcrypt = require('bcrypt')
 const mongoose = require('mongoose')
 const generateOtp = require('../../utils/generateOtp')
@@ -53,7 +54,9 @@ const updateProfile = async (req, res) => {
             return res.render('user/userProfile', {
                 errors,
                 user: findUser,
-                success: null
+                success: null,
+                address:null,
+                pwSuccess:false
             });
         }
 
@@ -82,6 +85,7 @@ const updateProfile = async (req, res) => {
         res.status(500).json({ error: "cannot update" });
     }
 }
+
 
 
 const changePassword = async (req, res) => {
@@ -138,7 +142,6 @@ const changePassword = async (req, res) => {
 };
 
 
-// Step 1: Validate new email, send OTP to it, redirect to /otp page
 const requestEmailChange = async (req, res) => {
     try {
         const { newEmail } = req.body;
@@ -169,7 +172,7 @@ const requestEmailChange = async (req, res) => {
         await Otp.deleteMany({ email: newEmail, purpose: 'emailChange' });
         await Otp.create({ email: newEmail, otp, expiresAt, purpose: 'emailChange' });
 
-        // Save new email in session — verifyOtp in userAuthController will read this
+      
         req.session.pendingEmail = newEmail;
 
         await sendEmail(newEmail, otp);
@@ -182,10 +185,41 @@ const requestEmailChange = async (req, res) => {
     }
 };
 
+const loadCoupons = async (req, res) => {
+    try {
+        const userId = req.session.user?._id;
+        const now = new Date();
+
+        
+        const availableCoupons = await Coupon.find({
+            isActive: true,
+            $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }]
+        }).lean();
+
+        const coupons = availableCoupons.map(c => {
+         
+            const usedByUser = c.usedBy.some(id => id.toString() === userId.toString());
+            const isExhausted = c.maxUses && c.usedBy.length >= c.maxUses;
+
+            let status = 'active';
+            if (usedByUser) status = 'used';
+            else if (isExhausted) status = 'expired'; 
+
+            return { ...c, status };
+        });
+
+        return res.render('user/coupon', { coupons });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Could not load coupons' });
+    }
+};
 
 module.exports = {
     loadProfile,
     updateProfile,
     changePassword,
-    requestEmailChange      // ← export new function
+    requestEmailChange,
+    loadCoupons
 }

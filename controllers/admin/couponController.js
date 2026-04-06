@@ -1,10 +1,24 @@
 const Coupon = require('../../models/user/couponModel')
 
-
-const loadCoupons = async (req,res) => {
+const loadCoupons = async (req, res) => {
     try {
-        const coupons = await Coupon.find().sort({createdAt: -1}).lean()
-        res.render('admin/coupons',{coupons})
+        const page = parseInt(req.query.page) || 1
+        const LIMIT = 3
+
+        const totalCoupons = await Coupon.countDocuments()
+
+        const coupons = await Coupon.find()
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * LIMIT)
+            .limit(LIMIT)
+            .lean()
+
+        res.render('admin/coupons', {
+            coupons,
+            currentPage: page,
+            totalPages: Math.ceil(totalCoupons / LIMIT)
+        })
+
     } catch (error) {
         console.error(error)
         res.status(500).send('Error loading coupons')

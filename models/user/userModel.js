@@ -58,7 +58,12 @@ const userSchema = new mongoose.Schema({
     createdAt :{
         type:Date,
         default : Date.now
-    }
+    },
+    referralCode:       { type: String, unique: true },   // e.g. "JOHN4X2K"
+referredBy:         { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+referralRewardGiven:{ type: Boolean, default: false }, // prevent double reward
+walletBalance:      { type: Number, default: 0 }     // for referral reward credit
+
 })
 
 module.exports = mongoose.model('User',userSchema) 

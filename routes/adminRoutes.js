@@ -7,12 +7,16 @@ const productController = require('../controllers/admin/productController')
 const couponController = require('../controllers/admin/couponController')
 const orderController = require('../controllers/admin/orderController')
 const inventoryController = require('../controllers/admin/inventoryConrtoller')
+const offerController = require('../controllers/admin/offerController')
+const salesReportController = require('../controllers/admin/salesReortController')
+const dashboardController = require('../controllers/admin/dashboardController')
+
 const adminAuth          = require('../middleware/adminAuth')
 const { uploadProductImages } = require('../config/cloudinary');
 
 adminRouter.get('/login',     adminController.loadAdminLogin)
 adminRouter.post('/login',    adminController.adminLogin)
-adminRouter.get('/dashboard', adminAuth, adminController.loadDashboard)
+adminRouter.get('/dashboard', adminAuth, dashboardController.loadDashboard)
 
 
 
@@ -62,8 +66,18 @@ adminRouter.get('/inventory',        adminAuth, inventoryController.loadInventor
 adminRouter.patch('/inventory/:productId/variant/:shade/stock', adminAuth, inventoryController.updateVariantStock)
 adminRouter.get('/inventory/:productId/history', adminAuth, inventoryController.getStockHistory)
 
+//offers
+adminRouter.get('/offers' ,adminAuth , offerController.loadOffers)
+adminRouter.get('/offers/add' , adminAuth , offerController.loadAddOffer)
+adminRouter.post('/offers/add', adminAuth , offerController.addOffer)
+adminRouter.post('/offers/toggle/:id',adminAuth, offerController.toggleOffer)
+adminRouter.post('/offers/delete/:id',adminAuth,offerController.deleteOffer)
 
 
+adminRouter.get('/sales-report',                adminAuth, salesReportController.loadSalesReport)
+adminRouter.get('/sales-report/download/pdf',   adminAuth, salesReportController.downloadPDF)
+adminRouter.get('/sales-report/download/excel', adminAuth, salesReportController.downloadExcel)
+ 
 adminRouter.get('/logout',adminAuth,adminController.adminLogout)
 
 module.exports = adminRouter;

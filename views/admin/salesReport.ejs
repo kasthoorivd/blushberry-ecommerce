@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Report — Blush-Berry</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --pink-soft:  #f9d4df;
+      --pink-mid:   #f4a7bc;
+      --pink-hot:   #e8527a;
+      --pink-deep:  #c93060;
+      --dark-nav:   #1a1a2e;
+      --sidebar-bg: #f9d4df;
+      --text-dark:  #3a1a2e;
+      --text-mid:   #7a4a5e;
+      --text-light: #b07090;
+      --white:      #fff;
+      --active-bg:  #fff;
+      --active-text:#c93060;
+      --sidebar-w:  220px;
+      --topbar-h:   58px;
+    }
+    body { font-family: 'Nunito', sans-serif; background: #f5e8ee; color: var(--text-dark); display: flex; flex-direction: column; min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── MAIN ── */
+    .main-content { margin-left: var(--sidebar-w); margin-top: var(--topbar-h); padding: 28px 28px 80px; flex: 1; }
+
+    /* ── PAGE HEADER ── */
+    .page-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 24px; }
+    .page-title { font-size: 22px; font-weight: 800; color: var(--text-dark); }
+    .page-title span { color: var(--pink-deep); }
+    .dl-group { display: flex; gap: 10px; }
+    .btn-dl { display: flex; align-items: center; gap: 6px; padding: 9px 18px; font-size: 13px; font-weight: 700; border-radius: 10px; border: none; cursor: pointer; transition: opacity .15s, transform .1s; }
+    .btn-dl:active { transform: scale(0.97); }
+    .btn-pdf   { background: var(--pink-deep); color: #fff; }
+    .btn-excel { background: #1d6f42; color: #fff; }
+    .btn-dl:hover { opacity: .88; }
+
+    /* ── FILTER BAR ── */
+    .filter-card { background: #fff; border-radius: 16px; padding: 18px 22px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(200,80,120,0.07); display: flex; align-items: flex-end; flex-wrap: wrap; gap: 14px; }
+    .filter-group { display: flex; flex-direction: column; gap: 5px; }
+    .filter-label { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .4px; }
+    .filter-card input[type=date],
+    .filter-card select { height: 36px; padding: 0 10px; border: 1.5px solid #f4a7bc; border-radius: 9px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600; color: var(--text-dark); background: #fff; outline: none; }
+    .filter-card input[type=date]:focus,
+    .filter-card select:focus { border-color: var(--pink-deep); }
+    .btn-apply { height: 36px; padding: 0 20px; background: var(--pink-deep); color: #fff; border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; }
+    .btn-apply:hover { opacity: .88; }
+    .tab-group { display: flex; gap: 6px; background: var(--pink-soft); border-radius: 10px; padding: 4px; }
+    .tab-btn { padding: 6px 16px; border: none; background: transparent; border-radius: 8px; font-size: 13px; font-weight: 700; color: var(--text-mid); cursor: pointer; font-family: 'Nunito', sans-serif; transition: background .15s, color .15s; }
+    .tab-btn.active { background: #fff; color: var(--pink-deep); box-shadow: 0 1px 6px rgba(200,48,96,0.12); }
+    #custom-dates { display: none; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+    #custom-dates.visible { display: flex; }
+
+    /* ── METRIC CARDS ── */
+    .metrics-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .metric-card { background: #fff; border-radius: 16px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(200,80,120,0.07); }
+    .metric-label { font-size: 12px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 8px; }
+    .metric-value { font-size: 24px; font-weight: 800; color: var(--text-dark); }
+    .metric-sub { font-size: 12px; color: var(--text-light); margin-top: 4px; }
+    .metric-card.highlight .metric-value { color: var(--pink-deep); }
+
+    /* ── CHART ROW ── */
+    .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 24px; }
+    .card { background: #fff; border-radius: 16px; padding: 20px 22px; box-shadow: 0 2px 12px rgba(200,80,120,0.07); }
+    .card-title { font-size: 15px; font-weight: 800; color: var(--text-dark); margin-bottom: 14px; }
+    .chart-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; }
+    .leg { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-mid); font-weight: 600; }
+    .leg-dot { width: 11px; height: 11px; border-radius: 3px; }
+
+    /* ── TABLE ── */
+    .table-card { background: #fff; border-radius: 16px; padding: 20px 22px; box-shadow: 0 2px 12px rgba(200,80,120,0.07); margin-bottom: 22px; overflow-x: auto; }
+    .table-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+    .table-head-title { font-size: 15px; font-weight: 800; color: var(--text-dark); }
+    .table-count { font-size: 12px; color: var(--text-light); font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .3px; border-bottom: 1.5px solid var(--pink-soft); }
+    tbody td { padding: 11px 12px; border-bottom: 1px solid #fdf0f4; color: var(--text-dark); font-weight: 600; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #fdf8fa; }
+    .mono { font-family: monospace; font-size: 12px; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .b-delivered  { background: #e6f9ef; color: #1a7a46; }
+    .b-placed     { background: #e8f0ff; color: #2249a0; }
+    .b-processing { background: #fff4e0; color: #9a6200; }
+    .b-shipped    { background: #ede0ff; color: #6c27b0; }
+    .b-cancelled  { background: #ffe0e6; color: #a0222a; }
+    .b-returned   { background: #f0f0f0; color: #555; }
+    .coupon-tag { background: #fdf0f4; color: var(--pink-deep); font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 700; }
+
+    /* ── PAGINATION ── */
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+    .page-btn { width: 36px; height: 36px; border-radius: 9px; border: 1.5px solid var(--pink-mid); background: transparent; font-size: 13px; font-weight: 700; color: var(--text-mid); cursor: pointer; font-family: 'Nunito', sans-serif; transition: background .15s; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+    .page-btn:hover { background: var(--pink-soft); }
+    .page-btn.active { background: var(--pink-deep); color: #fff; border-color: var(--pink-deep); }
+    .page-btn.disabled { opacity: .4; pointer-events: none; }
+
+    /* ── FOOTER ── */
+    .admin-footer { position: fixed; bottom: 0; left: var(--sidebar-w); right: 0; height: 42px; background: #f9d4df; border-top: 1px solid rgba(200,100,140,0.2); display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 11.5px; color: #b07090; font-weight: 600; z-index: 99; }
+    .footer-brand { font-family: 'Dancing Script', cursive; font-size: 1.1rem; color: #c93060; line-height: 1; }
+    .footer-sep { color: #e8a0b8; }
+    .footer-version { background: rgba(232,82,122,0.12); color: #c93060; padding: 2px 8px; border-radius: 20px; font-size: 10.5px; }
+
+    @media (max-width: 900px) {
+      .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .chart-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .metrics-grid { grid-template-columns: 1fr 1fr; }
+      .main-content { margin-left: 0; }
+      .top-nav { padding-left: 16px; }
+      .menu-toggle { display: block; }
+      .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
+      .sidebar.open { transform: translateX(0); }
+      .admin-footer { left: 0; }
+    }
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; }
+    .overlay.show { display: block; }
+  </style>
+</head>
+<body>
+ <%- include('../partials/admin/adminSidebar') %>
+
+
+
+
+<!-- MAIN -->
+<main class="main-content">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="page-title">Sales <span>Report</span></div>
+    <div class="dl-group">
+      <a href="/admin/sales-report/download/pdf?type=<%= type %>&from=<%= from %>&to=<%= to %>&coupon=<%= coupon %>" class="btn-dl btn-pdf">
+        📄 Download PDF
+      </a>
+      <a href="/admin/sales-report/download/excel?type=<%= type %>&from=<%= from %>&to=<%= to %>&coupon=<%= coupon %>" class="btn-dl btn-excel">
+        📊 Download Excel
+      </a>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-card">
+    <div class="filter-group">
+      <span class="filter-label">Report Period</span>
+      <div class="tab-group">
+        <button class="tab-btn <%= type==='daily'  ? 'active' : '' %>" onclick="setType('daily')">Daily</button>
+        <button class="tab-btn <%= type==='weekly' ? 'active' : '' %>" onclick="setType('weekly')">Weekly</button>
+        <button class="tab-btn <%= type==='yearly' ? 'active' : '' %>" onclick="setType('yearly')">Yearly</button>
+        <button class="tab-btn <%= type==='custom' ? 'active' : '' %>" onclick="setType('custom')">Custom</button>
+      </div>
+    </div>
+
+    <div id="custom-dates" class="<%= type==='custom' ? 'visible' : '' %>">
+      <div class="filter-group">
+        <span class="filter-label">From</span>
+        <input type="date" id="inp-from" value="<%= from %>">
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">To</span>
+        <input type="date" id="inp-to" value="<%= to %>">
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <span class="filter-label">Coupon</span>
+      <select id="inp-coupon">
+        <option value="">All coupons</option>
+        <% allCoupons.forEach(c => { %>
+          <option value="<%= c %>" <%= coupon===c ? 'selected' : '' %>><%= c %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <button class="btn-apply" onclick="applyFilters()">Apply</button>
+  </div>
+
+  <!-- Metric cards -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-label">Total Orders</div>
+      <div class="metric-value"><%= stats.totalOrders.toLocaleString('en-IN') %></div>
+      <div class="metric-sub"><%= start.toDateString() %> → <%= end.toDateString() %></div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Gross Revenue</div>
+      <div class="metric-value">₹<%= stats.grossRevenue.toLocaleString('en-IN') %></div>
+      <div class="metric-sub">Before discounts</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Total Discounts</div>
+      <div class="metric-value" style="color:#e8527a">₹<%= stats.totalDiscount.toLocaleString('en-IN') %></div>
+      <div class="metric-sub">Coupon: ₹<%= stats.couponDiscount.toLocaleString('en-IN') %></div>
+    </div>
+    <div class="metric-card highlight">
+      <div class="metric-label">Net Revenue</div>
+      <div class="metric-value">₹<%= stats.netRevenue.toLocaleString('en-IN') %></div>
+      <div class="metric-sub">After all deductions</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-row">
+    <div class="card">
+      <div class="card-title">Revenue vs Discount</div>
+      <div class="chart-legend">
+        <span class="leg"><span class="leg-dot" style="background:#c93060"></span>Gross</span>
+        <span class="leg"><span class="leg-dot" style="background:#7a4a5e"></span>Net</span>
+        <span class="leg"><span class="leg-dot" style="background:#e8527a"></span>Discounts</span>
+      </div>
+      <div style="position:relative;width:100%;height:240px"><canvas id="lineChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Discount Breakdown</div>
+      <div class="chart-legend">
+        <span class="leg"><span class="leg-dot" style="background:#c93060"></span>Coupon</span>
+        <span class="leg"><span class="leg-dot" style="background:#f4a7bc"></span>Item offers</span>
+      </div>
+      <div style="position:relative;width:100%;height:200px;display:flex;align-items:center;justify-content:center">
+        <canvas id="donutChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order table -->
+  <div class="table-card">
+    <div class="table-head">
+      <span class="table-head-title">Order Details</span>
+      <span class="table-count">Showing <%= orders.length %> of <%= total %></span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Date</th>
+          <th>Customer</th>
+          <th>Payment</th>
+          <th>Coupon</th>
+          <th>Gross</th>
+          <th>Discount</th>
+          <th>Net</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (orders.length === 0) { %>
+          <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-light)">No orders found for this period.</td></tr>
+        <% } %>
+        <% orders.forEach(o => { %>
+          <tr>
+            <td class="mono"><%= o.orderId %></td>
+            <td style="color:var(--text-mid)"><%= new Date(o.createdAt).toLocaleDateString('en-IN') %></td>
+            <td><%= o.userId?.name || o.shippingAddress?.name || '—' %></td>
+            <td><%= o.paymentMethod %></td>
+            <td>
+              <% if (o.couponCode) { %>
+                <span class="coupon-tag"><%= o.couponCode %></span>
+              <% } else { %>
+                <span style="color:var(--text-light)">—</span>
+              <% } %>
+            </td>
+            <td>₹<%= (o.subtotal || 0).toLocaleString('en-IN') %></td>
+            <td style="color:#e8527a">
+              <% if (o.totalDiscount > 0) { %>
+                ₹<%= o.totalDiscount.toLocaleString('en-IN') %>
+              <% } else { %>
+                <span style="color:var(--text-light)">—</span>
+              <% } %>
+            </td>
+            <td style="font-weight:800">₹<%= (o.finalAmount || 0).toLocaleString('en-IN') %></td>
+            <td>
+              <span class="badge b-<%= o.orderStatus.toLowerCase() %>"><%= o.orderStatus %></span>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+    <div class="pagination">
+      <a href="?type=<%= type %>&from=<%= from %>&to=<%= to %>&coupon=<%= coupon %>&page=<%= currentPage-1 %>"
+         class="page-btn <%= currentPage===1 ? 'disabled' : '' %>">‹</a>
+      <% for (let p = 1; p <= totalPages; p++) { %>
+        <a href="?type=<%= type %>&from=<%= from %>&to=<%= to %>&coupon=<%= coupon %>&page=<%= p %>"
+           class="page-btn <%= p===currentPage ? 'active' : '' %>"><%= p %></a>
+      <% } %>
+      <a href="?type=<%= type %>&from=<%= from %>&to=<%= to %>&coupon=<%= coupon %>&page=<%= currentPage+1 %>"
+         class="page-btn <%= currentPage===totalPages ? 'disabled' : '' %>">›</a>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- Coupon performance table -->
+  <% if (couponBreakdown.length > 0) { %>
+  <div class="table-card">
+    <div class="table-head">
+      <span class="table-head-title">Coupon Performance</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Coupon Code</th>
+          <th>Uses</th>
+          <th>Total Deducted</th>
+          <th>Net Revenue (after coupon)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% couponBreakdown.forEach(c => { %>
+          <tr>
+            <td><span class="coupon-tag"><%= c._id %></span></td>
+            <td><%= c.uses %></td>
+            <td style="color:#e8527a">₹<%= c.totalDeducted.toLocaleString('en-IN') %></td>
+            <td style="font-weight:800">₹<%= c.netRevenue.toLocaleString('en-IN') %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+
+</main>
+
+ <%- include('../partials/admin/adminFooter') %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+  /* ── sidebar toggle ── */
+  document.getElementById('menuToggle').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open')
+    document.getElementById('overlay').classList.toggle('show')
+  })
+  document.getElementById('overlay').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open')
+    document.getElementById('overlay').classList.remove('show')
+  })
+
+  /* ── tab type ── */
+  let activeType = '<%= type %>'
+  function setType(t) {
+    activeType = t
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
+    event.target.classList.add('active')
+    const cd = document.getElementById('custom-dates')
+    t === 'custom' ? cd.classList.add('visible') : cd.classList.remove('visible')
+  }
+
+  function applyFilters() {
+    const from   = document.getElementById('inp-from').value
+    const to     = document.getElementById('inp-to').value
+    const coupon = document.getElementById('inp-coupon').value
+    let url = `/admin/sales-report?type=${activeType}`
+    if (from)   url += `&from=${from}`
+    if (to)     url += `&to=${to}`
+    if (coupon) url += `&coupon=${coupon}`
+    window.location.href = url
+  }
+
+  /* ── Line chart ── */
+  const labels   = <%- chartLabels %>
+  const gross    = <%- chartGross %>
+  const net      = <%- chartNet %>
+  const discount = <%- chartDiscount %>
+
+  new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'Gross',     data: gross,    borderColor:'#c93060', backgroundColor:'rgba(201,48,96,.08)', tension:.35, fill:true, pointRadius:3 },
+        { label:'Net',       data: net,      borderColor:'#7a4a5e', backgroundColor:'transparent',         tension:.35, pointRadius:3 },
+        { label:'Discounts', data: discount, borderColor:'#e8527a', backgroundColor:'transparent',         tension:.35, borderDash:[4,3], pointRadius:3 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color:'rgba(200,80,120,.07)' }, ticks: { font:{ size:11 } } },
+        y: { grid: { color:'rgba(200,80,120,.07)' }, ticks: { font:{ size:11 }, callback: v => '₹'+(v>=1000?(v/1000).toFixed(0)+'k':v) } }
+      }
+    }
+  })
+
+  /* ── Donut chart ── */
+  const couponDisc = <%= stats.couponDiscount %>
+  const itemDisc   = <%= stats.totalDiscount %> - couponDisc
+
+  new Chart(document.getElementById('donutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Coupon discounts', 'Item offer discounts'],
+      datasets: [{ data: [couponDisc, Math.max(0, itemDisc)], backgroundColor:['#c93060','#f4a7bc'], borderWidth:0, hoverOffset:4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: { legend: { display: false } }
+    }
+  })
+</script>
+</body>
+</html>
