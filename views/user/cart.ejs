@@ -132,6 +132,60 @@
   display: none;
 }
 
+/* ── Available Coupons Section ── */
+.avail-coupons-wrap { margin-top: 10px; }
+.avail-coupons-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 11px; color: #c0415a; font-weight: 600; cursor: pointer;
+  letter-spacing: 0.5px; padding: 6px 0; border: none; background: none;
+  width: 100%; font-family: 'Poppins', sans-serif;
+}
+.avail-coupons-toggle .chevron {
+  font-size: 10px; transition: transform 0.2s;
+}
+.avail-coupons-toggle.open .chevron { transform: rotate(180deg); }
+
+.avail-coupons-list {
+  display: none; flex-direction: column; gap: 8px;
+  margin-top: 8px; max-height: 260px; overflow-y: auto;
+  padding-right: 2px;
+}
+.avail-coupons-list.open { display: flex; }
+
+.coupon-card {
+  border: 1.5px dashed #e8d8dc; border-radius: 8px;
+  padding: 10px 12px; background: #fffafb;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 8px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.coupon-card:hover { border-color: #c0415a; background: #fff5f7; }
+.coupon-card.used { opacity: 0.45; pointer-events: none; }
+
+.coupon-card-left { flex: 1; min-width: 0; }
+.coupon-card-code {
+  font-size: 12px; font-weight: 700; color: #c0415a;
+  letter-spacing: 1px; margin-bottom: 2px;
+  display: flex; align-items: center; gap: 5px;
+}
+.coupon-card-code .tag-icon { font-size: 10px; }
+.coupon-card-desc { font-size: 11px; color: #888; line-height: 1.4; }
+.coupon-card-min {
+  font-size: 10px; color: #bbb; margin-top: 2px;
+}
+.btn-coupon-use {
+  background: none; border: 1.5px solid #c0415a; color: #c0415a;
+  border-radius: 5px; padding: 5px 11px; font-size: 11px;
+  font-weight: 600; font-family: 'Poppins', sans-serif;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  transition: background 0.2s, color 0.2s;
+}
+.btn-coupon-use:hover { background: #c0415a; color: #fff; }
+
+.no-coupons {
+  font-size: 12px; color: #bbb; text-align: center;
+  padding: 12px 0;
+}
     @media(max-width:860px){
       .cart-wrap{flex-direction:column;padding:20px;}
       .cart-summary{width:100%;min-width:unset;position:static;}
@@ -249,20 +303,19 @@
         <div class="coupon-section">
           <p class="coupon-label">🏷 Have a coupon?</p>
 
+          <!-- Applied tag (shown after coupon is applied) -->
           <div class="coupon-applied-tag" id="couponAppliedTag">
             <span id="couponAppliedText">🎉 Coupon applied!</span>
             <button class="remove-coupon" onclick="removeCoupon()">Remove</button>
           </div>
 
+          <!-- Input row (shown by default) -->
           <div class="coupon-input-row" id="couponInputRow">
-            <input
-              type="text"
-              id="couponCodeInput"
+            <input type="text" id="couponCodeInput"
               placeholder="Enter code e.g. SAVE10"
-              maxlength="20"
-              autocomplete="off"
-            />
-            <button class="coupon-apply-btn" id="couponApplyBtn" onclick="applyCoupon()">Apply</button>
+              maxlength="20" autocomplete="off" />
+            <button class="coupon-apply-btn" id="couponApplyBtn"
+              onclick="applyCoupon()">Apply</button>
           </div>
 
           <div class="coupon-feedback success" id="couponSuccess" style="display:none;">
@@ -271,21 +324,56 @@
           <div class="coupon-feedback error" id="couponError" style="display:none;">
             <span>✗</span><span id="couponErrorMsg">Invalid coupon code</span>
           </div>
+
+          <!-- ── Available Coupons ── -->
+          <% if (coupons && coupons.length > 0) { %>
+          <div class="avail-coupons-wrap">
+            <button class="avail-coupons-toggle" id="couponsToggleBtn"
+              onclick="toggleCouponList()">
+              <span>🎁 View <%= coupons.length %> available coupon<%= coupons.length > 1 ? 's' : '' %></span>
+              <span class="chevron">▼</span>
+            </button>
+
+            <div class="avail-coupons-list" id="couponsList">
+              <% coupons.forEach(function(c) { %>
+                <div class="coupon-card" id="coupon-card-<%= c.code %>">
+                  <div class="coupon-card-left">
+                    <div class="coupon-card-code">
+                      <span class="tag-icon">🏷</span>
+                      <%= c.code %>
+                    </div>
+                    <div class="coupon-card-desc">
+                      Save ₹<%= c.discountAmount %> on your order
+                    </div>
+                    <% if (c.minOrderAmount > 0) { %>
+                      <div class="coupon-card-min">
+                        Min. order: ₹<%= c.minOrderAmount %>
+                      </div>
+                    <% } %>
+                    <% if (c.expiresAt) { %>
+                      <div class="coupon-card-min">
+                        Expires: <%= new Date(c.expiresAt).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}) %>
+                      </div>
+                    <% } %>
+                  </div>
+                  <button class="btn-coupon-use"
+                    onclick="useCoupon('<%= c.code %>')">
+                    USE
+                  </button>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+          <% } %>
         </div>
 
-        <hr class="coupon-divider"/>
-
-        <div class="summary-row">
-          <span>Items (<%= items.length %>)</span>
-          <span>₹<%= subtotal.toFixed(2) %></span>
-        </div>
-
+        <!-- ── DISCOUNT ROW (hidden until coupon applied) ── -->
         <div class="summary-row" id="discountRow" style="display:none;">
-          <span style="color:#1a7a47;">Discount</span>
-          <span id="discountAmt" style="color:#1a7a47;">−₹0.00</span>
+          <span>Coupon discount</span>
+          <span id="discountAmt" style="color:#1a7a47;font-weight:600;">−₹0.00</span>
         </div>
 
-
+        <!-- TOTAL -->
         <div class="summary-row total">
           <span>Total</span>
           <span id="cartTotal">₹<%= subtotal.toFixed(2) %></span>
@@ -324,6 +412,25 @@
 
   <script>
     var subtotalBase = <%= subtotal %>;
+
+    // ── Restore coupon UI if one is already applied in session ──
+    // Pass appliedCoupon from your controller: res.render('cart', { ..., appliedCoupon: req.session.coupon || null })
+    var appliedCoupon = <%- JSON.stringify(typeof appliedCoupon !== 'undefined' ? appliedCoupon : null) %>;
+    if (appliedCoupon && appliedCoupon.code && appliedCoupon.discount) {
+      showAppliedCouponUI(appliedCoupon.code, appliedCoupon.discount);
+    }
+
+    function showAppliedCouponUI(code, discount) {
+      document.getElementById('couponInputRow').style.display = 'none';
+      document.getElementById('couponError').style.display = 'none';
+      document.getElementById('couponSuccess').style.display = 'none';
+      var tag = document.getElementById('couponAppliedTag');
+      tag.style.display = 'flex';
+      document.getElementById('couponAppliedText').textContent = '🎉 "' + code + '" — ₹' + parseFloat(discount).toFixed(2) + ' off';
+      document.getElementById('discountRow').style.display = 'flex';
+      document.getElementById('discountAmt').textContent = '−₹' + parseFloat(discount).toFixed(2);
+      document.getElementById('cartTotal').textContent = '₹' + (subtotalBase - parseFloat(discount)).toFixed(2);
+    }
 
     function showToast(msg, type) {
       type = type || 'success';
@@ -386,11 +493,6 @@
       .catch(function() { showToast('Something went wrong', 'error'); });
     }
 
-    function updateCartBadge(count) {
-      var badge = document.getElementById('cartCount');
-      if (badge) badge.textContent = count || 0;
-    }
-
     function checkEmptyCart() {
       var remaining = document.querySelectorAll('.cart-item');
       if (remaining.length === 0) {
@@ -416,15 +518,7 @@
         btn.disabled = false;
         btn.textContent = 'Apply';
         if (data.success) {
-          document.getElementById('couponInputRow').style.display = 'none';
-          document.getElementById('couponError').style.display = 'none';
-          document.getElementById('couponSuccess').style.display = 'none';
-          var tag = document.getElementById('couponAppliedTag');
-          tag.style.display = 'flex';
-          document.getElementById('couponAppliedText').textContent = '🎉 "' + code + '" — ₹' + data.discount.toFixed(2) + ' off';
-          document.getElementById('discountRow').style.display = 'flex';
-          document.getElementById('discountAmt').textContent = '−₹' + data.discount.toFixed(2);
-          document.getElementById('cartTotal').textContent = '₹' + (subtotalBase - data.discount).toFixed(2);
+          showAppliedCouponUI(code, data.discount);
         } else {
           showCouponError(data.message || 'Invalid coupon code');
         }
@@ -437,15 +531,26 @@
     }
 
     function removeCoupon() {
-      fetch('/cart/remove-coupon', { method: 'POST' })
-        .then(function(r) { return r.json(); })
-        .catch(function() {});
+  var btn = document.querySelector('.remove-coupon');
+  if (btn) { btn.disabled = true; btn.textContent = '...'; }
+
+  fetch('/cart/remove-coupon', { method: 'DELETE' })
+    .then(function(r) { return r.json(); })
+    .then(function() {
       document.getElementById('couponAppliedTag').style.display = 'none';
       document.getElementById('couponInputRow').style.display = 'flex';
       document.getElementById('couponCodeInput').value = '';
       document.getElementById('discountRow').style.display = 'none';
       document.getElementById('cartTotal').textContent = '₹' + subtotalBase.toFixed(2);
-    }
+      showToast('Coupon removed', 'warn');
+      if (btn) { btn.disabled = false; btn.textContent = 'Remove'; }
+    })
+    .catch(function() {
+      showToast('Could not remove coupon. Try again.', 'error');
+      if (btn) { btn.disabled = false; btn.textContent = 'Remove'; }
+    });
+}
+  
 
     function showCouponError(msg) {
       document.getElementById('couponSuccess').style.display = 'none';
@@ -455,19 +560,39 @@
       setTimeout(function() { el.style.display = 'none'; }, 4000);
     }
 
-  function updateCartBadge(count) {
-  var badge = document.getElementById('cartCount');
-  if (!badge) return;
-  badge.textContent = count || 0;
-  badge.setAttribute('data-count', count || 0);
-  badge.classList.remove('pop');
-  void badge.offsetWidth; // reflow to restart animation
-  badge.classList.add('pop');
-  setTimeout(function () { badge.classList.remove('pop'); }, 300);
-}
+    function updateCartBadge(count) {
+      var badge = document.getElementById('cartCount');
+      if (!badge) return;
+      badge.textContent = count || 0;
+      badge.setAttribute('data-count', count || 0);
+      badge.classList.remove('pop');
+      void badge.offsetWidth;
+      badge.classList.add('pop');
+      setTimeout(function () { badge.classList.remove('pop'); }, 300);
+    }
+
     document.getElementById('couponCodeInput') && document.getElementById('couponCodeInput').addEventListener('keydown', function(e) {
       if (e.key === 'Enter') applyCoupon();
     });
+
+    function toggleCouponList() {
+      var list = document.getElementById('couponsList');
+      var btn  = document.getElementById('couponsToggleBtn');
+      list.classList.toggle('open');
+      btn.classList.toggle('open');
+    }
+
+    function useCoupon(code) {
+      var input = document.getElementById('couponCodeInput');
+      if (input) {
+        input.value = code;
+        var list = document.getElementById('couponsList');
+        var btn  = document.getElementById('couponsToggleBtn');
+        if (list) list.classList.remove('open');
+        if (btn)  btn.classList.remove('open');
+        applyCoupon();
+      }
+    }
   </script>
 </body>
 </html>

@@ -1,0 +1,302 @@
+<%- include('../partials/user/header') %>
+
+<style>
+  .contact-wrapper {
+    background: #fff;
+    min-height: 80vh;
+  }
+
+  /* ── Hero ── */
+  .contact-hero {
+    background: linear-gradient(135deg, #fdf0f0 0%, #fce4e4 60%, #f8d5d5 100%);
+    padding: 4rem 5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    min-height: 260px;
+  }
+
+  .contact-hero::after {
+    content: '';
+    position: absolute;
+    right: -60px;
+    top: -60px;
+    width: 380px;
+    height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(197,59,90,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .contact-hero-text .label {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #c53b5a;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+  }
+
+  .contact-hero-text h1 {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: clamp(2.4rem, 4vw, 3.4rem);
+    font-weight: 800;
+    color: #1a1a2e;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.8rem;
+  }
+
+  .contact-hero-text p {
+    font-size: 0.95rem;
+    color: #888;
+    max-width: 380px;
+    line-height: 1.7;
+  }
+
+  .contact-hero-deco {
+    display: flex;
+    gap: 1.4rem;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+
+  .deco-circle { border-radius: 50%; opacity: 0.75; }
+  .deco-circle.lg { width: 90px;  height: 90px;  background: #c53b5a; }
+  .deco-circle.md { width: 68px;  height: 68px;  background: #e07b8f; margin-bottom: 10px; }
+  .deco-circle.sm { width: 50px;  height: 50px;  background: #f0b8c4; margin-bottom: 25px; }
+
+  /* ── Section intro ── */
+  .contact-intro {
+    text-align: center;
+    padding: 4rem 2rem 2rem;
+  }
+
+  .contact-intro .section-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #c53b5a;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+  }
+
+  .contact-intro h2 {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 0.8rem;
+  }
+
+  .contact-intro p {
+    font-size: 0.92rem;
+    color: #999;
+    max-width: 460px;
+    margin: 0 auto;
+    line-height: 1.75;
+  }
+
+  /* ── Cards grid ── */
+  .contact-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.4rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 2rem 5rem;
+  }
+
+  .contact-card {
+    background: #fdf8f8;
+    border: 1.5px solid #f5e8e8;
+    border-radius: 16px;
+    padding: 2.2rem 1.6rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    transition: box-shadow 0.25s, transform 0.2s, border-color 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .contact-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #c53b5a, #e07b8f);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+
+  .contact-card:hover {
+    box-shadow: 0 8px 32px rgba(197, 59, 90, 0.1);
+    transform: translateY(-4px);
+    border-color: #f0c8d0;
+  }
+
+  .contact-card:hover::before {
+    opacity: 1;
+  }
+
+  .card-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #fce4e4, #f8d5d5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .card-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #c53b5a;
+    font-weight: 700;
+  }
+
+  .card-value {
+    font-size: 0.92rem;
+    color: #1a1a2e;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .card-sub {
+    font-size: 0.78rem;
+    color: #bbb;
+    line-height: 1.55;
+    margin-top: -0.3rem;
+  }
+
+  /* ── Divider strip ── */
+  .contact-strip {
+    background: linear-gradient(135deg, #c53b5a, #e07b8f);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .contact-strip p {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.75);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .contact-strip h3 {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 1.6rem;
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .contact-strip a {
+    display: inline-block;
+    margin-top: 1.2rem;
+    padding: 0.75rem 2rem;
+    background: #fff;
+    color: #c53b5a;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .contact-strip a:hover {
+    background: #fce4e4;
+    transform: translateY(-1px);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .contact-hero    { padding: 3rem 2rem; }
+    .contact-hero-deco { display: none; }
+    .contact-cards   { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 540px) {
+    .contact-cards { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="contact-wrapper">
+
+  <!-- Hero -->
+  <div class="contact-hero">
+    <div class="contact-hero-text">
+      <p class="label">We're Here For You</p>
+      <h1>CONTACT<br/>US</h1>
+      <p>Have a question about an order, shade, or anything else?<br/>Our team is ready to help.</p>
+    </div>
+    <div class="contact-hero-deco">
+      <div class="deco-circle sm"></div>
+      <div class="deco-circle md"></div>
+      <div class="deco-circle lg"></div>
+    </div>
+  </div>
+
+  <!-- Intro -->
+  <div class="contact-intro">
+    <p class="section-label">Reach Out</p>
+    <h2>Let's Talk Beauty</h2>
+    <p>Whether it's a shade question, an order update, or just a hello — we'd love to hear from you.</p>
+  </div>
+
+  <!-- Cards -->
+  <div class="contact-cards">
+
+    <div class="contact-card">
+      <div class="card-icon">📧</div>
+      <p class="card-label">Email</p>
+      <p class="card-value">support@blushberry.com</p>
+      <p class="card-sub">Drop us a line anytime</p>
+    </div>
+
+    <div class="contact-card">
+      <div class="card-icon">📞</div>
+      <p class="card-label">Phone</p>
+      <p class="card-value">+91 98765 43210</p>
+      <p class="card-sub">Call us during support hours</p>
+    </div>
+
+    <div class="contact-card">
+      <div class="card-icon">🕐</div>
+      <p class="card-label">Support Hours</p>
+      <p class="card-value">Mon – Sat</p>
+      <p class="card-sub">9 AM – 7 PM IST</p>
+    </div>
+
+    <div class="contact-card">
+      <div class="card-icon">📍</div>
+      <p class="card-label">Office</p>
+      <p class="card-value">Kochi, Kerala</p>
+      <p class="card-sub">India</p>
+    </div>
+
+  </div>
+
+  <!-- CTA Strip -->
+  <div class="contact-strip">
+    <p>Prefer email?</p>
+    <h3>We typically respond within 24 hours</h3>
+    <a href="mailto:support@blushberry.com">EMAIL US NOW</a>
+  </div>
+
+</div>
+
+<%- include('../partials/user/footer') %>

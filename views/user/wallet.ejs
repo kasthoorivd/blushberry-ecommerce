@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wallet – BlushBerry</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --rose: #c0415a;
+      --rose-light: #f7e8ec;
+      --rose-mid: #e8c8d0;
+      --dark: #1a1a2e;
+      --muted: #7a7a8a;
+      --white: #ffffff;
+      --bg: #fdf6f8;
+      --card: #ffffff;
+      --border: #f0dde4;
+      --green: #2d7a4f;
+      --green-light: #d4edda;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+      min-height: 100vh;
+    }
+
+    /* ── NAV (matches profile page) ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 48px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+    .logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--rose); text-decoration: none; }
+    .logo span { color: var(--dark); }
+
+    /* ── LAYOUT ── */
+    .page-wrapper {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 28px;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SIDEBAR (identical to profile) ── */
+    .sidebar { display: flex; flex-direction: column; gap: 12px; }
+
+    .profile-card {
+      background: linear-gradient(135deg, var(--rose) 0%, #a0304a 100%);
+      border-radius: 20px; padding: 28px 20px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      position: relative; overflow: hidden;
+    }
+    .profile-card::before {
+      content:''; position:absolute; top:-30px; right:-30px;
+      width:120px; height:120px;
+      background:rgba(255,255,255,0.08); border-radius:50%;
+    }
+    .profile-card::after {
+      content:''; position:absolute; bottom:-20px; left:-20px;
+      width:80px; height:80px;
+      background:rgba(255,255,255,0.06); border-radius:50%;
+    }
+    .avatar-wrap { position:relative; width:82px; height:82px; }
+    .avatar-wrap img, .avatar-wrap .avatar-placeholder {
+      width:82px; height:82px; border-radius:50%; object-fit:cover;
+      border:3px solid rgba(255,255,255,0.5);
+    }
+    .avatar-wrap .avatar-placeholder {
+      background:rgba(255,255,255,0.2);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .profile-card .user-name {
+      font-family:'Playfair Display',serif; font-size:18px; font-weight:700;
+      color:var(--white); text-align:center;
+    }
+    .profile-card .user-email { font-size:11px; color:rgba(255,255,255,0.75); text-align:center; word-break:break-all; }
+    .verified-badge {
+      display:flex; align-items:center; gap:4px;
+      background:rgba(255,255,255,0.15); border-radius:20px;
+      padding:3px 10px; font-size:10px; color:white; font-weight:500;
+    }
+
+    .side-nav { background:var(--card); border-radius:16px; border:1px solid var(--border); overflow:hidden; }
+    .side-nav a {
+      display:flex; align-items:center; gap:10px;
+      padding:13px 18px; font-size:13px; color:var(--muted);
+      text-decoration:none; border-left:3px solid transparent;
+      transition:all 0.2s;
+    }
+    .side-nav a:hover, .side-nav a.active { color:var(--rose); background:var(--rose-light); border-left-color:var(--rose); }
+    .side-nav a svg { flex-shrink:0; }
+    .side-nav a.logout { color:#e53e3e; }
+    .side-nav a.logout:hover { background:#fff5f5; border-left-color:#e53e3e; }
+    .side-nav hr { border:none; border-top:1px solid var(--border); margin:4px 0; }
+
+    /* ── MAIN CONTENT ── */
+    .main-content { display:flex; flex-direction:column; gap:20px; }
+
+    .card {
+      background:var(--card); border-radius:20px;
+      border:1px solid var(--border); padding:28px;
+      animation:fadeUp 0.5s ease both;
+    }
+    .card:nth-child(2) { animation-delay:0.1s; }
+
+    .card-title {
+      font-family:'Playfair Display',serif; font-size:18px; font-weight:700;
+      color:var(--dark); margin-bottom:20px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .card-title span {
+      width:4px; height:20px; background:var(--rose);
+      border-radius:2px; display:inline-block;
+    }
+
+    /* ── BALANCE HERO ── */
+    .balance-hero {
+      background: linear-gradient(135deg, var(--rose) 0%, #a0304a 100%);
+      border-radius: 16px;
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .balance-hero::before {
+      content: '';
+      position: absolute; top: -40px; right: -40px;
+      width: 160px; height: 160px;
+      background: rgba(255,255,255,0.08); border-radius: 50%;
+    }
+    .balance-hero::after {
+      content: '';
+      position: absolute; bottom: -30px; left: 30%;
+      width: 100px; height: 100px;
+      background: rgba(255,255,255,0.05); border-radius: 50%;
+    }
+    .balance-info { z-index: 1; }
+    .balance-label {
+      font-size: 12px; font-weight: 500;
+      color: rgba(255,255,255,0.75);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .balance-amount {
+      font-family: 'Playfair Display', serif;
+      font-size: 38px; font-weight: 900;
+      color: white;
+      line-height: 1;
+    }
+    .balance-amount .currency {
+      font-size: 20px; font-weight: 700;
+      vertical-align: super; margin-right: 2px;
+    }
+    .balance-sub {
+      font-size: 11px; color: rgba(255,255,255,0.6);
+      margin-top: 6px;
+    }
+    .wallet-icon-wrap {
+      z-index: 1;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%; width: 64px; height: 64px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 0;
+    }
+    .stat-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-box .stat-val {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; font-weight: 700;
+      color: var(--dark);
+    }
+    .stat-box .stat-val.green { color: var(--green); }
+    .stat-box .stat-val.rose  { color: var(--rose); }
+    .stat-box .stat-lbl {
+      font-size: 10px; color: var(--muted);
+      font-weight: 500; text-transform: uppercase;
+      letter-spacing: 0.5px; margin-top: 4px;
+    }
+
+    /* ── TRANSACTIONS ── */
+    .tx-filter {
+      display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 6px 14px; border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: white; color: var(--muted);
+      font-family: 'Poppins', sans-serif;
+      font-size: 11px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .filter-btn.active, .filter-btn:hover {
+      background: var(--rose); color: white;
+      border-color: var(--rose);
+    }
+
+    .tx-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .tx-item {
+      display: flex; align-items: center;
+      gap: 14px; padding: 14px 16px;
+      background: var(--bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .tx-item:hover { border-color: var(--rose-mid); background: var(--rose-light); }
+
+    .tx-icon {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .tx-icon.credit { background: var(--green-light); }
+    .tx-icon.debit  { background: #fff0f0; }
+
+    .tx-details { flex: 1; }
+    .tx-desc { font-size: 13px; font-weight: 500; color: var(--dark); }
+    .tx-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .tx-amount {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px; font-weight: 700;
+    }
+    .tx-amount.credit { color: var(--green); }
+    .tx-amount.debit  { color: var(--rose); }
+
+    .tx-badge {
+      font-size: 9px; font-weight: 600;
+      padding: 2px 8px; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .tx-badge.completed { background: var(--green-light); color: var(--green); }
+    .tx-badge.pending   { background: #fff3cd; color: #856404; }
+    .tx-badge.failed    { background: #f8d7da; color: #842029; }
+
+    .empty-state {
+      text-align: center; padding: 48px 20px; color: var(--muted);
+    }
+    .empty-state svg { opacity: 0.3; margin-bottom: 12px; }
+    .empty-state p { font-size: 13px; }
+
+    /* ── INFO BOX ── */
+    .info-box {
+      background: var(--rose-light);
+      border: 1.5px solid var(--rose-mid);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex; gap: 10px; align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    .info-box svg { flex-shrink: 0; margin-top: 1px; }
+    .info-box p { font-size: 12px; color: #7a3040; line-height: 1.6; }
+    .info-box strong { font-weight: 600; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 28px; right: 28px;
+      background: #2d7a4f; color: white;
+      padding: 12px 20px; border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      display: flex; align-items: center; gap: 8px;
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 999;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .page-wrapper { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .balance-amount { font-size: 28px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <%- include('../partials/user/header') %>
+
+  <div class="page-wrapper">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="profile-card">
+        <div class="avatar-wrap">
+          <% if (user && user.profilePhoto) { %>
+            <img src="<%= user.profilePhoto %>" alt="<%= user.fullName %>">
+          <% } else { %>
+            <div class="avatar-placeholder">
+              <svg width="36" height="36" fill="none" stroke="white" stroke-width="1.5" viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M6 20c0-3.33 5.33-5 6-5s6 1.67 6 5"/>
+              </svg>
+            </div>
+          <% } %>
+        </div>
+        <div class="user-name"><%= user ? user.fullName : 'Guest User' %></div>
+        <div class="user-email"><%= user ? user.email : '' %></div>
+        <% if (user && user.isVerified) { %>
+          <div class="verified-badge">
+            <svg width="10" height="10" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            Verified Account
+          </div>
+        <% } %>
+      </div>
+
+      <div class="side-nav">
+        <a href="/profile">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="4"/><path d="M6 20c0-3.33 5.33-5 6-5s6 1.67 6 5"/>
+          </svg>
+          Account Overview
+        </a>
+        <a href="/orders">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+          </svg>
+          My Orders
+        </a>
+        <a href="/addresses">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+            <circle cx="12" cy="9" r="2.5"/>
+          </svg>
+          Manage Addresses
+        </a>
+        <a href="/wallet" class="active">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 12h2"/>
+          </svg>
+          Wallet
+        </a>
+        <a href="/coupons">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M20 12V6a2 2 0 00-2-2H6a2 2 0 00-2 2v6m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4"/>
+          </svg>
+          Coupons
+        </a>
+        <hr>
+        <a href="/logout" class="logout">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+          </svg>
+          Log out
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+      <!-- Wallet Balance Card -->
+      <div class="card">
+        <div class="card-title"><span></span> My Wallet</div>
+
+        <!-- Balance Hero -->
+        <div class="balance-hero">
+          <div class="balance-info">
+            <div class="balance-label">Available Balance</div>
+            <div class="balance-amount">
+              <span class="currency">₹</span><%= wallet.balance.toFixed(2) %>
+            </div>
+            <div class="balance-sub">BlushBerry Wallet Credits</div>
+          </div>
+          <div class="wallet-icon-wrap">
+            <svg width="30" height="30" fill="none" stroke="white" stroke-width="1.8" viewBox="0 0 24 24">
+              <rect x="2" y="5" width="20" height="14" rx="2"/>
+              <path d="M16 12h2"/>
+              <circle cx="17" cy="12" r="0.5" fill="white"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <%
+          const totalCredits = transactions
+            .filter(t => t.type === 'credit' && t.status === 'completed')
+            .reduce((sum, t) => sum + t.amount, 0);
+          const totalDebits = transactions
+            .filter(t => t.type === 'debit' && t.status === 'completed')
+            .reduce((sum, t) => sum + t.amount, 0);
+          const totalTx = transactions.length;
+        %>
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-val green">₹<%= totalCredits.toFixed(2) %></div>
+            <div class="stat-lbl">Total Received</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val rose">₹<%= totalDebits.toFixed(2) %></div>
+            <div class="stat-lbl">Total Spent</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val"><%= totalTx %></div>
+            <div class="stat-lbl">Transactions</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions Card -->
+      <div class="card">
+        <div class="card-title"><span></span> Transaction History</div>
+
+        <!-- Info box -->
+        <div class="info-box">
+          <svg width="16" height="16" fill="none" stroke="#c0415a" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v4M12 16h.01"/>
+          </svg>
+          <p>
+            <strong>Cancellations</strong> are refunded instantly to your wallet. &nbsp;
+            <strong>Returns</strong> are refunded after admin confirmation. &nbsp;
+            Wallet balance can be used at checkout.
+          </p>
+        </div>
+
+        <!-- Filter buttons -->
+        <div class="tx-filter">
+          <button class="filter-btn active" onclick="filterTx('all', this)">All</button>
+          <button class="filter-btn" onclick="filterTx('credit', this)">Credits</button>
+          <button class="filter-btn" onclick="filterTx('debit', this)">Debits</button>
+        </div>
+
+        <!-- Transaction list -->
+        <div class="tx-list" id="txList">
+          <% if (transactions.length === 0) { %>
+            <div class="empty-state">
+              <svg width="48" height="48" fill="none" stroke="#c0415a" stroke-width="1.2" viewBox="0 0 24 24">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <path d="M16 12h2"/>
+              </svg>
+              <p>No transactions yet.<br>Refunds and payments will appear here.</p>
+            </div>
+          <% } else { %>
+            <% transactions.forEach(tx => { %>
+              <div class="tx-item" data-type="<%= tx.type %>">
+                <div class="tx-icon <%= tx.type %>">
+                  <% if (tx.type === 'credit') { %>
+                    <svg width="18" height="18" fill="none" stroke="#2d7a4f" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M12 19V5M5 12l7-7 7 7"/>
+                    </svg>
+                  <% } else { %>
+                    <svg width="18" height="18" fill="none" stroke="#c0415a" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M12 5v14M5 12l7 7 7-7"/>
+                    </svg>
+                  <% } %>
+                </div>
+                <div class="tx-details">
+                  <div class="tx-desc"><%= tx.description %></div>
+                  <div class="tx-date">
+                    <%= new Date(tx.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) %>
+                    &nbsp;
+                    <span class="tx-badge <%= tx.status %>"><%= tx.status %></span>
+                  </div>
+                </div>
+                <div class="tx-amount <%= tx.type %>">
+                  <%= tx.type === 'credit' ? '+' : '-' %>₹<%= tx.amount.toFixed(2) %>
+                </div>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+    </svg>
+    <span id="toastMsg">Done!</span>
+  </div>
+
+  <script>
+    function filterTx(type, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tx-item').forEach(item => {
+        item.style.display = (type === 'all' || item.dataset.type === type) ? 'flex' : 'none';
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    <% if (success) { %>
+      window.addEventListener('DOMContentLoaded', () => showToast('<%= success %>'));
+    <% } %>
+    <% if (error) { %>
+      window.addEventListener('DOMContentLoaded', () => showToast('<%= error %>'));
+    <% } %>
+  </script>
+
+  <%- include('../partials/user/footer') %>
+</body>
+</html>

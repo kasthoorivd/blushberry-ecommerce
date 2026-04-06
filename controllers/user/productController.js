@@ -1,9 +1,62 @@
 const Product = require('../../models/user/productModel')
 const Category = require('../../models/user/categoryModel')
-
+const Offer = require('../../models/user/offerModel')
 
 const LIMIT = 6
 
+
+
+// ─── helper: fetch all active offers and build lookup maps ───────────────────
+async function getActiveOfferMaps() {
+  const now = new Date()
+  const activeOffers = await Offer.find({
+    isActive:  true,
+    startDate: { $lte: now },
+    endDate:   { $gte: now }
+  }).lean()
+
+  const productOfferMap  = {}  
+  const categoryOfferMap = {}   
+
+  for (const o of activeOffers) {
+    const key = String(o.targetId)
+    if (o.type === 'product') {
+      if (!productOfferMap[key] || o.discountPercent > productOfferMap[key]) {
+        productOfferMap[key] = o.discountPercent
+      }
+    } else if (o.type === 'category') {
+      if (!categoryOfferMap[key] || o.discountPercent > categoryOfferMap[key]) {
+        categoryOfferMap[key] = o.discountPercent
+      }
+    }
+  }
+
+  return { productOfferMap, categoryOfferMap }
+}
+
+
+function applyBestOffer(p, productOfferMap, categoryOfferMap) {
+  const productOffer  = productOfferMap[String(p._id)]         || 0
+  const categoryOffer = categoryOfferMap[String(p.categoryId)] || 0
+  const bestOffer     = Math.max(productOffer, categoryOffer)
+
+  const basePrices  = p.variants.map(v => v.varientPrice)
+  const baseMin     = Math.min(...basePrices)
+
+  p.originalPrice  = baseMin
+  p.displayOffer   = bestOffer
+
+  if (bestOffer > 0) {
+    p.displayPrice = parseFloat((baseMin * (1 - bestOffer / 100)).toFixed(2))
+  } else {
+    
+    const effectivePrices = p.variants.map(v => v.salePrice > 0 ? v.salePrice : v.varientPrice)
+    p.displayPrice = Math.min(...effectivePrices)
+  }
+
+  p.inStock = p.variants.some(v => v.stock > 0)
+  return p
+}
 
 const loadProductListing = async (req, res) => {
   try {
@@ -14,30 +67,20 @@ const loadProductListing = async (req, res) => {
     const sortBy      = req.query.sort     || 'newest'
     const minPrice    = parseFloat(req.query.minPrice) || 0
     const maxPrice    = parseFloat(req.query.maxPrice) || 999999
- 
-    // ── Base filter: only listed, non-deleted products ──
+
     const filter = { isDeleted: false, isListed: true }
- 
-    if (searchQuery) {
-      filter.name = { $regex: searchQuery, $options: 'i' }
-    }
- 
-    if (categoryId) {
-      filter.categoryId = categoryId
-    }
- 
-    if (shade) {
-      filter['variants.shade'] = { $regex: shade, $options: 'i' }
-    }
- 
+
+    if (searchQuery) filter.name = { $regex: searchQuery, $options: 'i' }
+    if (categoryId)  filter.categoryId = categoryId
+    if (shade)       filter['variants.shade'] = { $regex: shade, $options: 'i' }
+
     if (minPrice > 0 || maxPrice < 999999) {
       filter.$or = [
         { 'variants.salePrice':    { $gte: minPrice, $lte: maxPrice } },
         { 'variants.varientPrice': { $gte: minPrice, $lte: maxPrice } }
       ]
     }
- 
-    // ── Sort ──
+
     const sortMap = {
       newest:    { createdAt: -1 },
       oldest:    { createdAt:  1 },
@@ -47,32 +90,63 @@ const loadProductListing = async (req, res) => {
       nameDesc:  { name: -1 },
     }
     const sortOption = sortMap[sortBy] || sortMap.newest
- 
+
     const totalProducts = await Product.countDocuments(filter)
     const totalPages    = Math.ceil(totalProducts / LIMIT) || 1
     const safePage      = Math.min(page, totalPages)
- 
+
     const products = await Product.find(filter)
       .populate('categoryId', 'name')
       .sort(sortOption)
       .skip((safePage - 1) * LIMIT)
       .limit(LIMIT)
       .lean()
- 
+
+    // ── fetch all active offers once ──────────────────────────────────────
+    const now = new Date()
+    const activeOffers = await Offer.find({
+      isActive:  true,
+      startDate: { $lte: now },
+      endDate:   { $gte: now }
+    }).lean()
+
+    const productOfferMap  = {}
+    const categoryOfferMap = {}
+
+    for (const o of activeOffers) {
+      const key = String(o.targetId)
+      if (o.type === 'product') {
+        if (!productOfferMap[key] || o.discountPercent > productOfferMap[key])
+          productOfferMap[key] = o.discountPercent
+      } else if (o.type === 'category') {
+        if (!categoryOfferMap[key] || o.discountPercent > categoryOfferMap[key])
+          categoryOfferMap[key] = o.discountPercent
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────────
+
     products.forEach(p => {
-      const prices = p.variants.map(v => v.salePrice > 0 ? v.salePrice : v.varientPrice)
-      p.displayPrice    = Math.min(...prices)
-      p.displayMaxPrice = Math.max(...prices)
-      p.displayOffer    = p.offer || 0
-      const origPrices  = p.variants.map(v => v.varientPrice)
-      p.originalPrice   = Math.min(...origPrices)
-      p.inStock         = p.variants.some(v => v.stock > 0)
+      const productOffer  = productOfferMap[String(p._id)]              || 0
+      const categoryOffer = categoryOfferMap[String(p.categoryId?._id || p.categoryId)] || 0
+      const bestOffer     = Math.max(productOffer, categoryOffer)
+
+      const origPrices    = p.variants.map(v => v.varientPrice)
+      p.originalPrice     = Math.min(...origPrices)
+      p.displayOffer      = bestOffer
+
+      if (bestOffer > 0) {
+        p.displayPrice = parseFloat((p.originalPrice * (1 - bestOffer / 100)).toFixed(2))
+      } else {
+        const effectivePrices = p.variants.map(v => v.salePrice > 0 ? v.salePrice : v.varientPrice)
+        p.displayPrice = Math.min(...effectivePrices)
+      }
+
+      p.inStock = p.variants.some(v => v.stock > 0)
     })
- 
-    const categories = await Category.find({ isDeleted: false }).lean()
- 
+
+    const categories      = await Category.find({ isDeleted: false }).lean()
     const paginationPages = buildPaginationWindow(safePage, totalPages)
- 
+
     const queryParams = {
       search:   searchQuery,
       category: categoryId,
@@ -81,7 +155,7 @@ const loadProductListing = async (req, res) => {
       minPrice: minPrice || '',
       maxPrice: maxPrice < 999999 ? maxPrice : ''
     }
- 
+
     res.render('user/productListing', {
       products,
       categories,
@@ -99,7 +173,7 @@ const loadProductListing = async (req, res) => {
       queryParams,
       user: req.session.user || null
     })
- 
+
   } catch (err) {
     console.error('loadProductListing error:', err)
     res.status(500).render('error', { message: 'Could not load products.' })

@@ -2,9 +2,11 @@ const User = require('../../models/user/userModel');
 const Otp = require('../../models/user/otpModel');
 const Product = require('../../models/user/productModel')
 const bcrypt = require('bcrypt');
+const crypto = require('crypto')
 const generateOtp = require('../../utils/generateOtp');
 const sendEmail = require("../../utils/sendEmail");
 const passport = require('../../config/passport');
+const getEffectivePrice = require('../../utils/getEffectivePrice')
 const { isBlocked } = require('../../middleware/authMiddleware');
 
 
@@ -27,14 +29,22 @@ const loadHomePage = async (req, res) => {
       .limit(8)
       .lean()
 
-    products.forEach(p => {
-      const prices     = p.variants.map(v => v.salePrice > 0 ? v.salePrice : v.varientPrice)
-      p.displayPrice   = Math.min(...prices)
-      const origPrices = p.variants.map(v => v.varientPrice)
-      p.originalPrice  = Math.min(...origPrices)
-      p.displayOffer   = p.offer || 0
-      p.inStock        = p.variants.some(v => v.stock > 0)
-    })
+    // products.forEach(p => {
+    //   const prices     = p.variants.map(v => v.salePrice > 0 ? v.salePrice : v.varientPrice)
+    //   p.displayPrice   = Math.min(...prices)
+    //   const origPrices = p.variants.map(v => v.varientPrice)
+    //   p.originalPrice  = Math.min(...origPrices)
+    //   p.displayOffer   = p.offer || 0
+    //   p.inStock        = p.variants.some(v => v.stock > 0)
+    // })
+
+    await Promise.all(products.map(async (p) => {
+  const { finalPrice, bestDiscount, originalPrice } = await getEffectivePrice(p)
+  p.displayPrice   = finalPrice
+  p.originalPrice  = originalPrice
+  p.displayOffer   = bestDiscount   // this is now the % from Offer collection
+  p.inStock        = p.variants.some(v => v.stock > 0)
+}))
 
     res.render('user/homePage', { user, products });  
   } catch (error) {
@@ -46,6 +56,9 @@ const loadHomePage = async (req, res) => {
 // Load signup page
 const loadSignUp = (req, res) => {
   try {
+    if(req.query.ref){
+      req.session.referralCode = req.query.ref
+    }
     res.render('user/userSignup.ejs');
   } catch (error) {
     console.log(`Error loading signup page: ${error}`);
@@ -136,11 +149,21 @@ const verifyOtp = async (req, res) => {
     // ── Signup flow ──
     if (flow === 'signup') {
       const hashedPassword = await bcrypt.hash(req.session.tempUser.password, 10);
+
+      const referralCode = generateReferralCode(req.session.tempUser.fullName)
+      let referredBy = null
+      if(req.session.referralCode){
+        const referrer = await User.findOne({referralCode : req.session.referralCode})
+        if(referrer) referredBy = referrer._id
+        req.session.referralCode
+      }
       const newUser = await User.create({
         fullName: req.session.tempUser.fullName,
         email,
         password: hashedPassword,
-        isVerified: true
+        isVerified: true,
+        referralCode,
+        referredBy
       });
 
       req.login(newUser, (err) => {

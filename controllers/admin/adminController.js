@@ -5,14 +5,7 @@ const loadAdminLogin = (req, res) => {
     res.render('admin/adminLogin.ejs')
 }
 
-const loadDashboard = async (req, res) => {
-   try {
-    const user = req.session.user || null   
-    res.render('admin/dashboard', { user })  
-  } catch (error) {
-    console.log(error)
-  }
-}
+
 
 const adminLogin = async (req, res) => {
     try {
@@ -72,7 +65,6 @@ const adminLogout = async (req, res) => {
 
 module.exports = {
     loadAdminLogin,
-    loadDashboard,
     adminLogin,
     adminLogout
 }

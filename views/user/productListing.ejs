@@ -22,7 +22,6 @@
     .filter-label input{accent-color:#c0415a;width:14px;height:14px;cursor:pointer;}
     .filter-label:hover{color:#c0415a;}
 
-    /* price range */
     .price-inputs{display:flex;align-items:center;gap:8px;margin-top:8px;}
     .price-inputs input{width:80px;padding:6px 8px;border:1px solid #e8d8dc;border-radius:4px;font-size:12px;font-family:'Poppins',sans-serif;color:#333;}
     .price-inputs input:focus{outline:none;border-color:#c0415a;}
@@ -74,9 +73,12 @@
     .card-name{font-size:13px;font-weight:500;color:#1a1a2e;margin-bottom:4px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .card-category{font-size:11px;color:#c0415a;margin-bottom:8px;}
     .card-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+
+    /* ── Price styles ── */
     .card-price{font-weight:700;color:#c0415a;font-size:15px;}
-    .card-orig{color:#ccc;font-size:12px;text-decoration:line-through;margin-left:5px;}
-    .card-offer{background:#fce8ed;color:#c0415a;font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;margin-left:5px;}
+    .card-orig{color:#ccc;font-size:11px;text-decoration:line-through;margin-left:5px;}
+    .card-save{font-size:10px;color:#22b573;font-weight:600;display:block;margin-top:2px;}
+
     .btn-cart{background:#1a1a2e;color:#fff;border:none;padding:8px 14px;font-size:10px;cursor:pointer;border-radius:4px;font-weight:500;letter-spacing:.5px;transition:background .2s;white-space:nowrap;}
     .btn-cart:hover{background:#c0415a;}
     .btn-cart:disabled{background:#ccc;cursor:not-allowed;}
@@ -305,11 +307,11 @@
               <span style="font-size:40px;">💄</span>
             <% } %>
 
-            <!-- Badge -->
+            <!-- ✅ Badge: shows exact % off -->
             <% if(!product.inStock){ %>
               <span class="badge badge-out">Sold Out</span>
             <% } else if(product.displayOffer >= 10){ %>
-              <span class="badge badge-sale"><%= product.displayOffer %>% Off</span>
+              <span class="badge badge-sale"><%= product.displayOffer %>% OFF</span>
             <% } else if((Date.now() - new Date(product.createdAt)) < 7*24*60*60*1000){ %>
               <span class="badge badge-new">New</span>
             <% } %>
@@ -344,13 +346,17 @@
             </div>
             <% } %>
 
-            <!-- Price + cart -->
+            <!-- ✅ Price + cart: sale price, strikethrough, save amount -->
             <div class="card-footer">
               <div>
-                <span class="card-price">₹<%= product.displayPrice.toFixed(2) %></span>
+                <div style="display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;">
+                  <span class="card-price">₹<%= product.displayPrice.toFixed(2) %></span>
+                  <% if(product.displayOffer > 0){ %>
+                    <span class="card-orig">₹<%= product.originalPrice.toFixed(2) %></span>
+                  <% } %>
+                </div>
                 <% if(product.displayOffer > 0){ %>
-                  <span class="card-orig">₹<%= product.originalPrice.toFixed(2) %></span>
-                  <span class="card-offer"><%= product.displayOffer %>% off</span>
+                  <span class="card-save">Save ₹<%= (product.originalPrice - product.displayPrice).toFixed(2) %></span>
                 <% } %>
               </div>
               <% if(product.inStock){ %>
@@ -473,11 +479,11 @@
         if (data.success) {
           btn.textContent      = '✓ Added'
           btn.style.background = '#22b573'
-        const badge = document.getElementById('cartCount')
-if (badge && data.cartCount) {
-  badge.textContent = data.cartCount
-  badge.style.display = 'flex'
-
+          const badge = document.getElementById('cartCount')
+          if (badge && data.cartCount) {
+            badge.textContent = data.cartCount
+            badge.style.display = 'flex'
+          }
           setTimeout(() => {
             btn.textContent      = 'ADD TO CART'
             btn.style.background = ''

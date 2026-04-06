@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Offer – Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --bg:#0f1117;--surface:#181c27;--border:#252a38;
+      --accent:#ffa9f8;--accent2:#e05555;--green:#22c97a;
+      --text:#e8eaf0;--muted:#6b7280;--radius:10px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    a{text-decoration:none;color:inherit;}
+
+    
+    .main{flex:1;padding:36px 40px;}
+    .page-head{display:flex;align-items:center;gap:14px;margin-bottom:32px;}
+    .btn-back{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:8px 14px;border-radius:var(--radius);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:color .15s;}
+    .btn-back:hover{color:var(--text);}
+    .page-head-txt p{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;}
+    .page-head-txt h1{font-family:'DM Serif Display',serif;font-size:26px;}
+
+    /* Form card */
+    .form-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px;max-width:640px;}
+
+    .alert-error{background:rgba(224,85,85,.12);border:1px solid rgba(224,85,85,.3);color:var(--accent2);padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-bottom:20px;}
+
+    .form-section{margin-bottom:28px;}
+    .form-section-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+    .form-section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+    .form-group label{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.3px;}
+    .form-group input,
+    .form-group select{
+      background:var(--bg);border:1px solid var(--border);border-radius:8px;
+      padding:11px 14px;font-size:13px;color:var(--text);
+      font-family:'DM Sans',sans-serif;outline:none;
+      transition:border-color .2s,box-shadow .2s;
+      appearance:none;
+    }
+    .form-group input:focus,
+    .form-group select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(240,165,0,.1);}
+    .form-group select option{background:var(--surface);}
+    .field-error{font-size:11px;color:var(--accent2);margin-top:2px;}
+
+    /* Type selector cards */
+    .type-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .type-card{border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:6px;}
+    .type-card:hover{border-color:var(--accent);background:rgba(240,165,0,.04);}
+    .type-card.selected{border-color:var(--accent);background:rgba(240,165,0,.08);}
+    .type-card input[type="radio"]{display:none;}
+    .type-card-icon{font-size:22px;}
+    .type-card-label{font-size:13px;font-weight:600;}
+    .type-card-desc{font-size:11px;color:var(--muted);line-height:1.4;}
+
+    /* Discount preview */
+    .discount-preview{background:rgba(240,165,0,.08);border:1px solid rgba(240,165,0,.2);border-radius:8px;padding:14px 16px;display:none;align-items:center;justify-content:space-between;margin-top:8px;}
+    .discount-preview.show{display:flex;}
+    .discount-preview .preview-label{font-size:12px;color:var(--muted);}
+    .discount-preview .preview-val{font-family:'DM Serif Display',serif;font-size:22px;color:var(--accent);}
+
+    /* Target select with filter */
+    .target-section{display:none;}
+    .target-section.show{display:block;}
+
+    /* Submit */
+    .form-actions{display:flex;gap:12px;margin-top:8px;}
+    .btn-submit{background:var(--accent);color:#000;border:none;padding:12px 28px;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s;letter-spacing:.3px;}
+    .btn-submit:hover{opacity:.85;}
+    .btn-cancel-link{background:var(--bg);border:1px solid var(--border);color:var(--muted);padding:12px 20px;border-radius:var(--radius);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:color .15s;}
+    .btn-cancel-link:hover{color:var(--text);}
+
+    /* Date min today helper */
+    .date-hint{font-size:11px;color:var(--muted);margin-top:3px;}
+
+    @media(max-width:768px){.main{padding:20px;}.sidebar{display:none;}.form-row{grid-template-columns:1fr;}.type-cards{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <%- include('../partials/admin/adminSidebar') %>
+
+  <main class="main">
+    <div class="page-head">
+      <a href="/admin/offers" class="btn-back">← Back</a>
+      <div class="page-head-txt">
+        <p>Blush Berry Admin</p>
+        <h1>Create Offer</h1>
+      </div>
+    </div>
+
+    <div class="form-card">
+
+      <% if (errors && errors.general) { %>
+        <div class="alert-error">⚠ <%= errors.general %></div>
+      <% } %>
+
+      <form action="/admin/offers/add" method="POST" id="offerForm">
+
+        <!-- Section 1: Basics -->
+        <div class="form-section">
+          <p class="form-section-title">Offer Details</p>
+
+          <div class="form-group">
+            <label>Offer Name</label>
+            <input type="text" name="name" placeholder="e.g. Summer Sale, Lip Color Fest"
+              value="<%= formData.name || '' %>" required/>
+            <% if (errors && errors.name) { %><span class="field-error"><%= errors.name %></span><% } %>
+          </div>
+
+          <div class="form-group">
+            <label>Discount Percentage</label>
+            <input type="number" name="discountPercent" id="discountInput"
+              placeholder="e.g. 20" min="1" max="99"
+              value="<%= formData.discountPercent || '' %>"
+              oninput="updatePreview()" required/>
+            <% if (errors && errors.discountPercent) { %><span class="field-error"><%= errors.discountPercent %></span><% } %>
+            <div class="discount-preview" id="discountPreview">
+              <span class="preview-label">Customers save</span>
+              <span class="preview-val" id="previewVal">0% OFF</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Type -->
+        <div class="form-section">
+          <p class="form-section-title">Offer Type</p>
+          <div class="type-cards">
+            <label class="type-card <%= formData.type === 'product' || !formData.type ? 'selected' : '' %>" id="card-product">
+              <input type="radio" name="type" value="product"
+                <%= formData.type === 'category' ? '' : 'checked' %>
+                onchange="switchType('product')"/>
+              <span class="type-card-icon">📦</span>
+              <span class="type-card-label">Product Offer</span>
+              <span class="type-card-desc">Apply discount to a specific product</span>
+            </label>
+            <label class="type-card <%= formData.type === 'category' ? 'selected' : '' %>" id="card-category">
+              <input type="radio" name="type" value="category"
+                <%= formData.type === 'category' ? 'checked' : '' %>
+                onchange="switchType('category')"/>
+              <span class="type-card-icon">📂</span>
+              <span class="type-card-label">Category Offer</span>
+              <span class="type-card-desc">Apply discount to all products in a category</span>
+            </label>
+          </div>
+          <% if (errors && errors.type) { %><span class="field-error" style="display:block;margin-top:8px;"><%= errors.type %></span><% } %>
+        </div>
+
+        <!-- Section 3: Target -->
+        <div class="form-section">
+          <p class="form-section-title">Apply To</p>
+
+          <!-- Product select -->
+          <div class="target-section <%= formData.type === 'category' ? '' : 'show' %>" id="target-product">
+            <div class="form-group">
+              <label>Select Product</label>
+              <select name="targetId" id="productSelect">
+                <option value="">— Choose a product —</option>
+                <% products.forEach(function(p){ %>
+                  <option value="<%= p._id %>"
+                    <%= (formData.type !== 'category' && formData.targetId === p._id.toString()) ? 'selected' : '' %>>
+                    <%= p.name %>
+                  </option>
+                <% }) %>
+              </select>
+              <% if (errors && errors.targetId) { %><span class="field-error"><%= errors.targetId %></span><% } %>
+            </div>
+          </div>
+
+          <!-- Category select -->
+          <div class="target-section <%= formData.type === 'category' ? 'show' : '' %>" id="target-category">
+            <div class="form-group">
+              <label>Select Category</label>
+              <select name="targetId" id="categorySelect">
+                <option value="">— Choose a category —</option>
+                <% categories.forEach(function(c){ %>
+                  <option value="<%= c._id %>"
+                    <%= (formData.type === 'category' && formData.targetId === c._id.toString()) ? 'selected' : '' %>>
+                    <%= c.name %>
+                  </option>
+                <% }) %>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Dates -->
+        <div class="form-section">
+          <p class="form-section-title">Validity Period</p>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Start Date</label>
+              <input type="date" name="startDate" id="startDate"
+                value="<%= formData.startDate || '' %>"
+                onchange="updateEndMin()" required/>
+              <% if (errors && errors.startDate) { %><span class="field-error"><%= errors.startDate %></span><% } %>
+            </div>
+            <div class="form-group">
+              <label>End Date</label>
+              <input type="date" name="endDate" id="endDate"
+                value="<%= formData.endDate || '' %>" required/>
+              <% if (errors && errors.endDate) { %><span class="field-error"><%= errors.endDate %></span><% } %>
+              <span class="date-hint">Must be after start date</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-submit">Create Offer</button>
+          <a href="/admin/offers" class="btn-cancel-link">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+  </main>
+</div>
+<%- include('../partials/admin/adminFooter') %>
+<script>
+  // Set date min to today
+  var today = new Date().toISOString().split('T')[0]
+  document.getElementById('startDate').min = today
+  document.getElementById('endDate').min   = today
+
+  function updateEndMin() {
+    var start = document.getElementById('startDate').value
+    if (start) document.getElementById('endDate').min = start
+  }
+
+  function switchType(type) {
+    document.getElementById('target-product').classList.toggle('show',  type === 'product')
+    document.getElementById('target-category').classList.toggle('show', type === 'category')
+    document.getElementById('card-product').classList.toggle('selected',  type === 'product')
+    document.getElementById('card-category').classList.toggle('selected', type === 'category')
+
+    // Swap the name attribute so the right select submits
+    if (type === 'product') {
+      document.getElementById('productSelect').name  = 'targetId'
+      document.getElementById('categorySelect').name = '_targetId_unused'
+    } else {
+      document.getElementById('categorySelect').name = 'targetId'
+      document.getElementById('productSelect').name  = '_targetId_unused'
+    }
+  }
+
+  function updatePreview() {
+    var val = parseFloat(document.getElementById('discountInput').value)
+    var preview = document.getElementById('discountPreview')
+    var previewVal = document.getElementById('previewVal')
+    if (val >= 1 && val <= 99) {
+      preview.classList.add('show')
+      previewVal.textContent = val + '% OFF'
+    } else {
+      preview.classList.remove('show')
+    }
+  }
+
+  // Init type swap on page load (for form repopulation after errors)
+  var checkedType = document.querySelector('input[name="type"]:checked')
+  if (checkedType) switchType(checkedType.value)
+
+  // Init preview
+  updatePreview()
+  updateEndMin()
+</script>
+</body>
+</html>

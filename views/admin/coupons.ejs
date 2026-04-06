@@ -92,6 +92,14 @@
         <% }) %>
       </tbody>
     </table>
+    <div class="pagination" style="margin:20px; text-align:center;">
+  <% for(let i = 1; i <= totalPages; i++) { %>
+    <a href="?page=<%= i %>" 
+       style="padding:8px 12px; margin:5px; border:1px solid #ccc; color:white; text-decoration:none; <%= i === currentPage ? 'background:#c0415a;' : '' %>">
+       <%= i %>
+    </a>
+  <% } %>
+</div>
   </div>
 </div>
 
@@ -146,6 +154,7 @@
       </div>
 
     </form>
+   
   </div>
 </div>
 

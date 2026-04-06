@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Coupons – Blush Berry</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Poppins',sans-serif;background:#fff;color:#333;overflow-x:hidden;}
+    a{text-decoration:none;color:inherit;}
+
+    /* ── Page Header (same as cart) ── */
+    .page-header{background:linear-gradient(110deg,#fff8f9 55%,#fce8ed 100%);padding:32px 48px 24px;}
+    .page-header p{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#c0415a;margin-bottom:6px;}
+    .page-header h1{font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:#1a1a2e;}
+    .breadcrumb{font-size:12px;color:#aaa;margin-top:8px;display:flex;gap:6px;align-items:center;}
+    .breadcrumb a{color:#c0415a;}
+    .breadcrumb-sep{color:#ddd;}
+
+    /* ── Layout ── */
+    .coupons-wrap{display:flex;gap:32px;padding:36px 48px 60px;align-items:flex-start;}
+
+    /* ── Sidebar (profile nav) ── */
+    .profile-sidebar{width:220px;min-width:220px;position:sticky;top:20px;}
+    .profile-nav{background:#fffafb;border:1px solid #f0e6e8;border-radius:12px;overflow:hidden;}
+    .profile-nav-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#c0415a;font-weight:600;padding:16px 18px 10px;}
+    .profile-nav a{display:flex;align-items:center;gap:10px;padding:11px 18px;font-size:13px;color:#555;transition:background .15s,color .15s;border-top:1px solid #f8f0f2;}
+    .profile-nav a:first-of-type{border-top:none;}
+    .profile-nav a:hover{background:#fff5f7;color:#c0415a;}
+    .profile-nav a.active{background:#fce8ed;color:#c0415a;font-weight:600;}
+    .profile-nav a .nav-icon{font-size:15px;width:20px;text-align:center;}
+
+    /* ── Main Content ── */
+    .coupons-main{flex:1;}
+
+    /* ── Stats bar ── */
+    .stats-bar{display:flex;gap:12px;margin-bottom:28px;flex-wrap:wrap;}
+    .stat-pill{background:#fffafb;border:1px solid #f0e6e8;border-radius:8px;padding:12px 20px;display:flex;flex-direction:column;gap:2px;min-width:120px;}
+    .stat-pill .stat-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#c0415a;}
+    .stat-pill .stat-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#bbb;}
+
+    /* ── Section header ── */
+    .section-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+    .section-head h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#1a1a2e;}
+    .section-head .count-badge{background:#fce8ed;color:#c0415a;font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;letter-spacing:.5px;}
+    .section-divider{border:none;border-top:1px solid #f0e6e8;margin:28px 0;}
+
+    /* ── Coupon Grid ── */
+    .coupons-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+
+    /* ── Coupon Card ── */
+    .coupon-card{
+      border:2px dashed #e8d8dc;border-radius:12px;
+      background:#fffafb;overflow:hidden;
+      transition:border-color .2s,box-shadow .2s,transform .2s;
+      position:relative;
+    }
+    .coupon-card:hover{
+      border-color:#c0415a;
+      box-shadow:0 6px 24px rgba(192,65,90,0.10);
+      transform:translateY(-2px);
+    }
+    .coupon-card.expired{opacity:.5;pointer-events:none;filter:grayscale(.4);}
+    .coupon-card.used-up{opacity:.5;filter:grayscale(.6);}
+
+    /* notch effect */
+    .coupon-card::before,.coupon-card::after{
+      content:'';position:absolute;top:50%;width:18px;height:18px;
+      background:#fff;border-radius:50%;border:2px dashed #e8d8dc;
+      transform:translateY(-50%);
+    }
+    .coupon-card::before{left:-10px;}
+    .coupon-card::after{right:-10px;}
+
+    .coupon-top{padding:18px 22px 14px;border-bottom:1px dashed #f0e6e8;}
+    .coupon-brand{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#bbb;margin-bottom:4px;}
+    .coupon-code{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#c0415a;letter-spacing:2px;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+    .coupon-code .tag-icon{font-size:16px;}
+    .coupon-desc{font-size:13px;color:#555;line-height:1.4;}
+
+    .coupon-bottom{padding:12px 22px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+    .coupon-meta{display:flex;flex-direction:column;gap:3px;}
+    .coupon-meta span{font-size:11px;color:#aaa;display:flex;align-items:center;gap:4px;}
+    .coupon-meta span strong{color:#888;font-weight:600;}
+
+    .btn-copy{
+      background:none;border:1.5px solid #c0415a;color:#c0415a;
+      border-radius:6px;padding:6px 14px;font-size:11px;font-weight:700;
+      font-family:'Poppins',sans-serif;letter-spacing:.5px;cursor:pointer;
+      transition:background .2s,color .2s,transform .1s;white-space:nowrap;
+      flex-shrink:0;
+    }
+    .btn-copy:hover{background:#c0415a;color:#fff;}
+    .btn-copy:active{transform:scale(.96);}
+    .btn-copy.copied{background:#22b573;border-color:#22b573;color:#fff;}
+
+    /* ── Status badges ── */
+    .status-badge{
+      position:absolute;top:12px;right:14px;
+      font-size:9px;font-weight:700;letter-spacing:1px;
+      text-transform:uppercase;padding:3px 8px;border-radius:10px;
+    }
+    .badge-active{background:#f0faf4;color:#1a7a47;border:1px solid #b6e5cc;}
+    .badge-expired{background:#fce8e8;color:#e05555;border:1px solid #f0c0c0;}
+    .badge-used{background:#f5f5f5;color:#aaa;border:1px solid #e0e0e0;}
+
+    /* ── Discount highlight ── */
+    .discount-pill{
+      display:inline-flex;align-items:center;gap:5px;
+      background:linear-gradient(110deg,#c0415a,#e8728a);
+      color:#fff;font-size:12px;font-weight:700;
+      padding:4px 12px;border-radius:20px;margin-bottom:6px;
+    }
+
+    /* ── Empty state ── */
+    .empty-coupons{text-align:center;padding:60px 20px;}
+    .empty-coupons .icon{font-size:56px;margin-bottom:16px;}
+    .empty-coupons h3{font-family:'Playfair Display',serif;font-size:22px;color:#1a1a2e;margin-bottom:8px;}
+    .empty-coupons p{font-size:13px;color:#aaa;}
+
+    /* ── Toast ── */
+    .toast{position:fixed;bottom:28px;right:28px;padding:12px 22px;border-radius:6px;font-size:13px;font-weight:500;color:#fff;z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s ease;pointer-events:none;max-width:320px;}
+    .toast.show{opacity:1;transform:translateY(0);}
+    .toast.success{background:#22b573;}
+    .toast.warn{background:#e8a826;}
+
+    @media(max-width:860px){
+      .coupons-wrap{flex-direction:column;padding:20px;}
+      .profile-sidebar{width:100%;min-width:unset;position:static;}
+      .page-header{padding:24px 20px 18px;}
+      .coupons-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+  <%- include('../partials/user/header') %>
+
+  <div class="page-header">
+    <p>Blush Berry</p>
+    <h1>My Coupons</h1>
+    <div class="breadcrumb">
+      <a href="/">Home</a><span class="breadcrumb-sep">›</span>
+      <a href="/profile">Profile</a><span class="breadcrumb-sep">›</span>
+      <span style="color:#555;">Coupons</span>
+    </div>
+  </div>
+
+  <div class="coupons-wrap">
+
+    <!-- Sidebar -->
+    <aside class="profile-sidebar">
+      <nav class="profile-nav">
+        <p class="profile-nav-title">My Account</p>
+        <a href="/profile"><span class="nav-icon">👤</span> Profile</a>
+        <a href="/orders"><span class="nav-icon">📦</span> Orders</a>
+        <a href="/addresses"><span class="nav-icon">📍</span> Addresses</a>
+        <a href="/coupons" class="active"><span class="nav-icon">🏷</span> Coupons</a>
+        <a href="/wishlist"><span class="nav-icon">♡</span> Wishlist</a>
+        <a href="/logout"><span class="nav-icon">↩</span> Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="coupons-main">
+
+      <%
+        var activeCoupons  = coupons.filter(function(c){ return c.status === 'active';  });
+        var expiredCoupons = coupons.filter(function(c){ return c.status === 'expired'; });
+        var usedCoupons    = coupons.filter(function(c){ return c.status === 'used';    });
+      %>
+
+      <!-- Stats -->
+      <div class="stats-bar">
+        <div class="stat-pill">
+          <span class="stat-num"><%= activeCoupons.length %></span>
+          <span class="stat-label">Available</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-num"><%= usedCoupons.length %></span>
+          <span class="stat-label">Used</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-num"><%= expiredCoupons.length %></span>
+          <span class="stat-label">Expired</span>
+        </div>
+      </div>
+
+      <% if (coupons.length === 0) { %>
+        <div class="empty-coupons">
+          <div class="icon">🏷️</div>
+          <h3>No coupons yet</h3>
+          <p>Coupons added by admins will appear here.</p>
+        </div>
+
+      <% } else { %>
+
+        <!-- ── Active Coupons ── -->
+        <% if (activeCoupons.length > 0) { %>
+        <div class="section-head">
+          <h2>Available Coupons</h2>
+          <span class="count-badge"><%= activeCoupons.length %></span>
+        </div>
+
+        <div class="coupons-grid">
+          <% activeCoupons.forEach(function(c){ %>
+          <div class="coupon-card">
+            <span class="status-badge badge-active">✓ Active</span>
+            <div class="coupon-top">
+              <p class="coupon-brand">Blush Berry</p>
+              <span class="discount-pill">
+                🎉 Save ₹<%= c.discountAmount %>
+              </span>
+              <div class="coupon-code">
+                <span class="tag-icon">🏷</span>
+                <%= c.code %>
+              </div>
+              <p class="coupon-desc"><%= c.description || 'Flat ₹' + c.discountAmount + ' off on your order' %></p>
+            </div>
+            <div class="coupon-bottom">
+              <div class="coupon-meta">
+                <% if (c.minOrderAmount > 0) { %>
+                  <span>🛒 Min. order: <strong>₹<%= c.minOrderAmount %></strong></span>
+                <% } %>
+                <% if (c.expiresAt) { %>
+                  <span>📅 Expires: <strong><%= new Date(c.expiresAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %></strong></span>
+                <% } else { %>
+                  <span>📅 No expiry</span>
+                <% } %>
+              </div>
+              <button class="btn-copy" onclick="copyCode('<%= c.code %>', this)">Copy Code</button>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+        <% } %>
+
+        <!-- ── Used Coupons ── -->
+        <% if (usedCoupons.length > 0) { %>
+        <hr class="section-divider">
+        <div class="section-head">
+          <h2>Used Coupons</h2>
+          <span class="count-badge" style="background:#f5f5f5;color:#aaa;"><%= usedCoupons.length %></span>
+        </div>
+        <div class="coupons-grid">
+          <% usedCoupons.forEach(function(c){ %>
+          <div class="coupon-card used-up">
+            <span class="status-badge badge-used">Used</span>
+            <div class="coupon-top">
+              <p class="coupon-brand">Blush Berry</p>
+              <div class="coupon-code" style="color:#aaa;">
+                <span class="tag-icon">🏷</span><%= c.code %>
+              </div>
+              <p class="coupon-desc" style="color:#bbb;"><%= c.description || 'Flat ₹' + c.discountAmount + ' off' %></p>
+            </div>
+            <div class="coupon-bottom">
+              <div class="coupon-meta">
+                <span>💰 Saved <strong>₹<%= c.discountAmount %></strong></span>
+                <% if (c.usedAt) { %>
+                  <span>📅 Used on: <strong><%= new Date(c.usedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %></strong></span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+        <% } %>
+
+        <!-- ── Expired Coupons ── -->
+        <% if (expiredCoupons.length > 0) { %>
+        <hr class="section-divider">
+        <div class="section-head">
+          <h2>Expired Coupons</h2>
+          <span class="count-badge" style="background:#fce8e8;color:#e05555;"><%= expiredCoupons.length %></span>
+        </div>
+        <div class="coupons-grid">
+          <% expiredCoupons.forEach(function(c){ %>
+          <div class="coupon-card expired">
+            <span class="status-badge badge-expired">Expired</span>
+            <div class="coupon-top">
+              <p class="coupon-brand">Blush Berry</p>
+              <div class="coupon-code" style="color:#ccc;">
+                <span class="tag-icon">🏷</span><%= c.code %>
+              </div>
+              <p class="coupon-desc" style="color:#ccc;"><%= c.description || 'Flat ₹' + c.discountAmount + ' off' %></p>
+            </div>
+            <div class="coupon-bottom">
+              <div class="coupon-meta">
+                <% if (c.expiresAt) { %>
+                  <span>📅 Expired: <strong><%= new Date(c.expiresAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %></strong></span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+        <% } %>
+
+      <% } %>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <%- include('../partials/user/footer') %>
+
+  <script>
+    function copyCode(code, btn) {
+      navigator.clipboard.writeText(code).then(function() {
+        btn.textContent = '✓ Copied!';
+        btn.classList.add('copied');
+        showToast('Code "' + code + '" copied to clipboard!', 'success');
+        setTimeout(function() {
+          btn.textContent = 'Copy Code';
+          btn.classList.remove('copied');
+        }, 2000);
+      }).catch(function() {
+        // Fallback for older browsers
+        var ta = document.createElement('textarea');
+        ta.value = code;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        btn.textContent = '✓ Copied!';
+        btn.classList.add('copied');
+        showToast('Code "' + code + '" copied!', 'success');
+        setTimeout(function() {
+          btn.textContent = 'Copy Code';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    function showToast(msg, type) {
+      type = type || 'success';
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast ' + type + ' show';
+      setTimeout(function() { t.classList.remove('show'); }, 3000);
+    }
+  </script>
+
+</body>
+</html>

@@ -62,6 +62,13 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use((req, res, next) => {
+  res.locals.success = null
+  res.locals.error   = null
+  res.locals.errors  = null
+  res.locals.formData = {}
+  next()
+})
 
 app.set('view engine','ejs')
 

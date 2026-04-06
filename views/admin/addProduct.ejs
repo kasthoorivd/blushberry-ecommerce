@@ -275,14 +275,7 @@
               <textarea class="form-control" id="description" rows="4" placeholder="Describe the product — finish, wear time, key ingredients…" maxlength="1000"></textarea>
               <span class="form-error" id="errDesc"><i class="fas fa-exclamation-circle"></i> <span id="errDescText"></span></span>
             </div>
-            <div style="margin-top:1.1rem;">
-              <div class="form-group" style="max-width:200px;">
-                <label class="form-label">Product Offer % <span class="optional">(optional)</span></label>
-                <input type="number" class="form-control" id="offer" placeholder="0" min="0" max="100" step="1" />
-                <span class="form-hint">Leave blank for no product-level offer.</span>
-                <span class="form-error" id="errOffer"><i class="fas fa-exclamation-circle"></i> <span id="errOfferText"></span></span>
-              </div>
-            </div>
+           
           </div>
         </div>
 
@@ -717,7 +710,7 @@
     }
   }
 
-  ['name','categoryId','description','offer'].forEach(function(id) {
+  ['name','categoryId','description'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.addEventListener('input', function() {
       this.classList.remove('is-invalid');
@@ -756,16 +749,7 @@
       showErr('description','errDesc','errDescText','Description must be at least 10 characters.'); ok = false;
     }
 
-    /* offer */
-    var offer = document.getElementById('offer').value;
-    clearErr('offer','errOffer');
-    if (offer !== '') {
-      var on = Number(offer);
-      if (isNaN(on) || on < 0 || on > 100) {
-        showErr('offer','errOffer','errOfferText','Offer must be 0–100.'); ok = false;
-      }
-    }
-
+   
     /* images */
     if (croppedImages.length < 3) {
       document.getElementById('imgCountNote').className = 'img-count-note error';
@@ -881,7 +865,6 @@
         name:        document.getElementById('name').value.trim(),
         description: document.getElementById('description').value.trim(),
         categoryId:  document.getElementById('categoryId').value,
-        offer:       document.getElementById('offer').value || 0,
         images:      croppedImages,
         variants:    collectVariants()
       };
