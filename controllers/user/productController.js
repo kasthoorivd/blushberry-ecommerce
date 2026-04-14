@@ -1,7 +1,7 @@
 const Product = require('../../models/user/productModel')
 const Category = require('../../models/user/categoryModel')
 const Offer = require('../../models/user/offerModel')
-
+const Wishlist = require('../../models/user/wishlistModel')
 const LIMIT = 6
 
 
@@ -156,8 +156,15 @@ const loadProductListing = async (req, res) => {
       maxPrice: maxPrice < 999999 ? maxPrice : ''
     }
 
+    let wishlistIds = []
+    if(req.session.user?._id){
+      const wishlist = await Wishlist.findOne({userId: req.session.user._id})
+      wishlistIds = wishlist ? wishlist.products.map(id => String(id)) : []
+    }
+
     res.render('user/productListing', {
       products,
+      wishlistIds ,
       categories,
       currentPage:   safePage,
       totalPages,

@@ -1,7 +1,7 @@
 const Product = require('../../models/user/productModel')
 const Review  = require('../../models/user/reviewModel')
 const Offer   = require('../../models/user/offerModel')  // ← add this
-
+const Wishlist = require('../../models/user/wishlistModel')
 // ── fetch active offers and return lookup maps ────────────────────────────────
 async function getActiveOfferMaps() {
   const now = new Date()
@@ -109,7 +109,11 @@ const loadProductDetail = async (req, res) => {
 
     // apply offers to related products too
     related.forEach(p => applyBestOffer(p, productOfferMap, categoryOfferMap))
-
+let wishlistIds = []
+if (req.session.user?._id) {
+  const wishlist = await Wishlist.findOne({ userId: req.session.user._id })
+  wishlistIds = wishlist ? wishlist.products.map(id => String(id)) : []
+}
     res.render('user/productDetail', {
       product,
       reviews,
@@ -118,6 +122,7 @@ const loadProductDetail = async (req, res) => {
       reviewCount: reviews.length,
       userReview,
       related,
+      wishlistIds,
       user: req.session.user || null
     })
 

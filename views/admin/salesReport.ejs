@@ -26,10 +26,8 @@
     body { font-family: 'Nunito', sans-serif; background: #f5e8ee; color: var(--text-dark); display: flex; flex-direction: column; min-height: 100vh; }
     a { text-decoration: none; color: inherit; }
 
-    /* ── MAIN ── */
     .main-content { margin-left: var(--sidebar-w); margin-top: var(--topbar-h); padding: 28px 28px 80px; flex: 1; }
 
-    /* ── PAGE HEADER ── */
     .page-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 24px; }
     .page-title { font-size: 22px; font-weight: 800; color: var(--text-dark); }
     .page-title span { color: var(--pink-deep); }
@@ -40,7 +38,6 @@
     .btn-excel { background: #1d6f42; color: #fff; }
     .btn-dl:hover { opacity: .88; }
 
-    /* ── FILTER BAR ── */
     .filter-card { background: #fff; border-radius: 16px; padding: 18px 22px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(200,80,120,0.07); display: flex; align-items: flex-end; flex-wrap: wrap; gap: 14px; }
     .filter-group { display: flex; flex-direction: column; gap: 5px; }
     .filter-label { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .4px; }
@@ -56,7 +53,6 @@
     #custom-dates { display: none; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
     #custom-dates.visible { display: flex; }
 
-    /* ── METRIC CARDS ── */
     .metrics-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
     .metric-card { background: #fff; border-radius: 16px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(200,80,120,0.07); }
     .metric-label { font-size: 12px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 8px; }
@@ -64,7 +60,6 @@
     .metric-sub { font-size: 12px; color: var(--text-light); margin-top: 4px; }
     .metric-card.highlight .metric-value { color: var(--pink-deep); }
 
-    /* ── CHART ROW ── */
     .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 24px; }
     .card { background: #fff; border-radius: 16px; padding: 20px 22px; box-shadow: 0 2px 12px rgba(200,80,120,0.07); }
     .card-title { font-size: 15px; font-weight: 800; color: var(--text-dark); margin-bottom: 14px; }
@@ -72,7 +67,6 @@
     .leg { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-mid); font-weight: 600; }
     .leg-dot { width: 11px; height: 11px; border-radius: 3px; }
 
-    /* ── TABLE ── */
     .table-card { background: #fff; border-radius: 16px; padding: 20px 22px; box-shadow: 0 2px 12px rgba(200,80,120,0.07); margin-bottom: 22px; overflow-x: auto; }
     .table-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
     .table-head-title { font-size: 15px; font-weight: 800; color: var(--text-dark); }
@@ -92,18 +86,18 @@
     .b-returned   { background: #f0f0f0; color: #555; }
     .coupon-tag { background: #fdf0f4; color: var(--pink-deep); font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 700; }
 
-    /* ── PAGINATION ── */
     .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
     .page-btn { width: 36px; height: 36px; border-radius: 9px; border: 1.5px solid var(--pink-mid); background: transparent; font-size: 13px; font-weight: 700; color: var(--text-mid); cursor: pointer; font-family: 'Nunito', sans-serif; transition: background .15s; display: flex; align-items: center; justify-content: center; text-decoration: none; }
     .page-btn:hover { background: var(--pink-soft); }
     .page-btn.active { background: var(--pink-deep); color: #fff; border-color: var(--pink-deep); }
     .page-btn.disabled { opacity: .4; pointer-events: none; }
 
-    /* ── FOOTER ── */
     .admin-footer { position: fixed; bottom: 0; left: var(--sidebar-w); right: 0; height: 42px; background: #f9d4df; border-top: 1px solid rgba(200,100,140,0.2); display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 11.5px; color: #b07090; font-weight: 600; z-index: 99; }
     .footer-brand { font-family: 'Dancing Script', cursive; font-size: 1.1rem; color: #c93060; line-height: 1; }
     .footer-sep { color: #e8a0b8; }
     .footer-version { background: rgba(232,82,122,0.12); color: #c93060; padding: 2px 8px; border-radius: 20px; font-size: 10.5px; }
+
+    .filter-error { display: none; color: #c0415a; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; width: 100%; margin: 4px 0 0; background: #fdf0f4; border: 1px solid #f4a7bc; border-radius: 8px; padding: 8px 12px; }
 
     @media (max-width: 900px) {
       .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -113,7 +107,6 @@
       .metrics-grid { grid-template-columns: 1fr 1fr; }
       .main-content { margin-left: 0; }
       .top-nav { padding-left: 16px; }
-      .menu-toggle { display: block; }
       .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
       .sidebar.open { transform: translateX(0); }
       .admin-footer { left: 0; }
@@ -123,22 +116,18 @@
   </style>
 </head>
 <body>
- <%- include('../partials/admin/adminSidebar') %>
+  <%- include('../partials/admin/adminSidebar') %>
 
-
-
-
-<!-- MAIN -->
 <main class="main-content">
 
   <!-- Page header -->
   <div class="page-header">
     <div class="page-title">Sales <span>Report</span></div>
     <div class="dl-group">
-      <a href="/admin/sales-report/download/pdf?type=<%= type %>&from=<%= from %>&to=<%= to %>&coupon=<%= coupon %>" class="btn-dl btn-pdf">
+      <a id="btn-pdf" href="/admin/sales-report/download/pdf?type=<%= type %>&from=<%= from %>&to=<%= to %>&coupon=<%= coupon %>" class="btn-dl btn-pdf">
         📄 Download PDF
       </a>
-      <a href="/admin/sales-report/download/excel?type=<%= type %>&from=<%= from %>&to=<%= to %>&coupon=<%= coupon %>" class="btn-dl btn-excel">
+      <a id="btn-excel" href="/admin/sales-report/download/excel?type=<%= type %>&from=<%= from %>&to=<%= to %>&coupon=<%= coupon %>" class="btn-dl btn-excel">
         📊 Download Excel
       </a>
     </div>
@@ -149,21 +138,21 @@
     <div class="filter-group">
       <span class="filter-label">Report Period</span>
       <div class="tab-group">
-        <button class="tab-btn <%= type==='daily'  ? 'active' : '' %>" onclick="setType('daily')">Daily</button>
-        <button class="tab-btn <%= type==='weekly' ? 'active' : '' %>" onclick="setType('weekly')">Weekly</button>
-        <button class="tab-btn <%= type==='yearly' ? 'active' : '' %>" onclick="setType('yearly')">Yearly</button>
-        <button class="tab-btn <%= type==='custom' ? 'active' : '' %>" onclick="setType('custom')">Custom</button>
+        <button class="tab-btn <%= type==='daily'  ? 'active' : '' %>" onclick="setType('daily', this)">Daily</button>
+        <button class="tab-btn <%= type==='weekly' ? 'active' : '' %>" onclick="setType('weekly', this)">Weekly</button>
+        <button class="tab-btn <%= type==='yearly' ? 'active' : '' %>" onclick="setType('yearly', this)">Yearly</button>
+        <button class="tab-btn <%= type==='custom' ? 'active' : '' %>" onclick="setType('custom', this)">Custom</button>
       </div>
     </div>
 
     <div id="custom-dates" class="<%= type==='custom' ? 'visible' : '' %>">
       <div class="filter-group">
         <span class="filter-label">From</span>
-        <input type="date" id="inp-from" value="<%= from %>">
+        <input type="date" id="inp-from" value="<%= from %>" max="">
       </div>
       <div class="filter-group">
         <span class="filter-label">To</span>
-        <input type="date" id="inp-to" value="<%= to %>">
+        <input type="date" id="inp-to" value="<%= to %>" max="">
       </div>
     </div>
 
@@ -178,6 +167,9 @@
     </div>
 
     <button class="btn-apply" onclick="applyFilters()">Apply</button>
+
+    <!-- Validation error -->
+    <p id="filter-error" class="filter-error"></p>
   </div>
 
   <!-- Metric cards -->
@@ -281,7 +273,6 @@
       </tbody>
     </table>
 
-    <!-- Pagination -->
     <% if (totalPages > 1) { %>
     <div class="pagination">
       <a href="?type=<%= type %>&from=<%= from %>&to=<%= to %>&coupon=<%= coupon %>&page=<%= currentPage-1 %>"
@@ -296,7 +287,6 @@
     <% } %>
   </div>
 
-  <!-- Coupon performance table -->
   <% if (couponBreakdown.length > 0) { %>
   <div class="table-card">
     <div class="table-head">
@@ -327,11 +317,11 @@
 
 </main>
 
- <%- include('../partials/admin/adminFooter') %>
+<%- include('../partials/admin/adminFooter') %>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-  /* ── sidebar toggle ── */
+  /* sidebar toggle */
   document.getElementById('menuToggle').addEventListener('click', () => {
     document.getElementById('sidebar').classList.toggle('open')
     document.getElementById('overlay').classList.toggle('show')
@@ -341,28 +331,91 @@
     document.getElementById('overlay').classList.remove('show')
   })
 
-  /* ── tab type ── */
+  /* today string for max date */
+  function getTodayStr() {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+  }
+  const todayStr = getTodayStr()
+  document.getElementById('inp-from').max = todayStr
+  document.getElementById('inp-to').max   = todayStr
+
+  /* tab switching */
   let activeType = '<%= type %>'
-  function setType(t) {
+  function setType(t, btn) {
     activeType = t
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
-    event.target.classList.add('active')
+    btn.classList.add('active')
     const cd = document.getElementById('custom-dates')
     t === 'custom' ? cd.classList.add('visible') : cd.classList.remove('visible')
+    document.getElementById('filter-error').style.display = 'none'
   }
 
+  /* validate & apply filters */
   function applyFilters() {
     const from   = document.getElementById('inp-from').value
     const to     = document.getElementById('inp-to').value
     const coupon = document.getElementById('inp-coupon').value
+    const err    = document.getElementById('filter-error')
+
+    err.style.display = 'none'
+
+    if (activeType === 'custom') {
+      if (!from || !to) {
+        err.textContent = 'Please select both From and To dates for a custom range.'
+        err.style.display = 'block'; return
+      }
+      if (new Date(from) > new Date(to)) {
+        err.textContent = '"From" date cannot be after "To" date.'
+        err.style.display = 'block'; return
+      }
+      if (to > todayStr) {
+        err.textContent = '"To" date cannot be a future date.'
+        err.style.display = 'block'; return
+      }
+    }
+
     let url = `/admin/sales-report?type=${activeType}`
     if (from)   url += `&from=${from}`
     if (to)     url += `&to=${to}`
     if (coupon) url += `&coupon=${coupon}`
+
+    /* keep download buttons in sync */
+    document.getElementById('btn-pdf').href   = `/admin/sales-report/download/pdf?type=${activeType}&from=${from}&to=${to}&coupon=${coupon}`
+    document.getElementById('btn-excel').href = `/admin/sales-report/download/excel?type=${activeType}&from=${from}&to=${to}&coupon=${coupon}`
+
     window.location.href = url
   }
 
-  /* ── Line chart ── */
+  /* prevent selecting future "from" date */
+  document.getElementById('inp-from').addEventListener('change', function() {
+    const err = document.getElementById('filter-error')
+    if (this.value > todayStr) {
+      err.textContent = '"From" date cannot be a future date.'
+      err.style.display = 'block'
+      this.value = todayStr
+    }
+    /* auto-set to min = from so user cant pick to < from */
+    document.getElementById('inp-to').min = this.value
+  })
+
+  document.getElementById('inp-to').addEventListener('change', function() {
+    const from = document.getElementById('inp-from').value
+    const err  = document.getElementById('filter-error')
+    if (this.value > todayStr) {
+      err.textContent = '"To" date cannot be a future date.'
+      err.style.display = 'block'
+      this.value = todayStr; return
+    }
+    if (from && this.value < from) {
+      err.textContent = '"To" date cannot be before "From" date.'
+      err.style.display = 'block'
+      this.value = from; return
+    }
+    err.style.display = 'none'
+  })
+
+  /* charts */
   const labels   = <%- chartLabels %>
   const gross    = <%- chartGross %>
   const net      = <%- chartNet %>
@@ -388,15 +441,14 @@
     }
   })
 
-  /* ── Donut chart ── */
   const couponDisc = <%= stats.couponDiscount %>
-  const itemDisc   = <%= stats.totalDiscount %> - couponDisc
+  const itemDisc   = Math.max(0, <%= stats.totalDiscount %> - couponDisc)
 
   new Chart(document.getElementById('donutChart'), {
     type: 'doughnut',
     data: {
       labels: ['Coupon discounts', 'Item offer discounts'],
-      datasets: [{ data: [couponDisc, Math.max(0, itemDisc)], backgroundColor:['#c93060','#f4a7bc'], borderWidth:0, hoverOffset:4 }]
+      datasets: [{ data: [couponDisc, itemDisc], backgroundColor:['#c93060','#f4a7bc'], borderWidth:0, hoverOffset:4 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,

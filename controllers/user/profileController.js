@@ -2,10 +2,19 @@ const User = require('../../models/user/userModel')
 const Otp = require('../../models/user/otpModel')
 const Address = require('../../models/user/addressModel')
 const Coupon = require('../../models/user/couponModel')
+const Wallet = require('../../models/user/walletModel')
 const bcrypt = require('bcrypt')
+const crypto = require('crypto')
 const mongoose = require('mongoose')
 const generateOtp = require('../../utils/generateOtp')
 const sendEmail = require('../../utils/sendEmail')
+
+// ── Generate referral code for users who don't have one ──
+const generateReferralCode = (fullName) => {
+    const prefix = fullName.substring(0, 3).toUpperCase();
+    const random = crypto.randomBytes(3).toString('hex').toUpperCase();
+    return `${prefix}${random}`;
+};
 
 
 const loadProfile = async (req, res) => {
@@ -16,7 +25,6 @@ const loadProfile = async (req, res) => {
         const success = req.query.success === 'true' ? 'Profile updated successfully!' : null;
         const pwSuccess = req.query.pwSuccess === 'true';
         return res.render('user/userProfile', { user, address: address || null, success, errors: null, pwSuccess })
-
     } catch (error) {
         res.status(500).json({ error: 'page not loading' })
     }
@@ -25,15 +33,13 @@ const loadProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
     try {
-        console.log("SESSION:", req.session.user);
-        console.log("BODY:", req.body);
         const findUser = await User.findById(req.session.user._id).lean();
 
         if (!findUser) {
             return res.render('user/userProfile', { error: "User not found", user: findUser });
         }
 
-        const { fullName, phoneNumber } = req.body;  // ← email removed from here
+        const { fullName, phoneNumber } = req.body;
         const errors = {};
 
         const nameRegex = /^[A-Za-z\s]{3,}$/;
@@ -55,8 +61,8 @@ const updateProfile = async (req, res) => {
                 errors,
                 user: findUser,
                 success: null,
-                address:null,
-                pwSuccess:false
+                address: null,
+                pwSuccess: false
             });
         }
 
@@ -71,11 +77,13 @@ const updateProfile = async (req, res) => {
             { new: true }
         ).lean();
 
+        // Keep profilePhoto in session so header avatar doesn't break
         req.session.user = {
             _id: updatedUser._id,
             fullName: updatedUser.fullName,
             email: updatedUser.email,
-            isBlocked: updatedUser.isBlocked
+            isBlocked: updatedUser.isBlocked,
+            profilePhoto: updatedUser.profilePhoto
         };
 
         res.redirect('/profile');
@@ -85,7 +93,6 @@ const updateProfile = async (req, res) => {
         res.status(500).json({ error: "cannot update" });
     }
 }
-
 
 
 const changePassword = async (req, res) => {
@@ -121,7 +128,7 @@ const changePassword = async (req, res) => {
         if (Object.keys(errors).length > 0) {
             const address = await Address.findOne({ user: findUser._id, isDefault: true });
             return res.render('user/userProfile', {
-                errors, user: findUser, success: null, address: address || null
+                errors, user: findUser, success: null, address: address || null, pwSuccess: false
             });
         }
 
@@ -147,24 +154,16 @@ const requestEmailChange = async (req, res) => {
         const { newEmail } = req.body;
         const userId = req.session.user?._id;
 
-        if (!userId) {
-            return res.json({ success: false, message: "Not logged in" });
-        }
-
-        if (!newEmail) {
-            return res.json({ success: false, message: "New email is required" });
-        }
+        if (!userId) return res.json({ success: false, message: "Not logged in" });
+        if (!newEmail) return res.json({ success: false, message: "New email is required" });
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(newEmail)) {
             return res.json({ success: false, message: "Enter a valid email address" });
         }
 
-        // Make sure new email isn't already taken by someone else
         const existing = await User.findOne({ email: newEmail });
-        if (existing) {
-            return res.json({ success: false, message: "Email already in use" });
-        }
+        if (existing) return res.json({ success: false, message: "Email already in use" });
 
         const otp = generateOtp();
         const expiresAt = Date.now() + 5 * 60 * 1000;
@@ -172,9 +171,7 @@ const requestEmailChange = async (req, res) => {
         await Otp.deleteMany({ email: newEmail, purpose: 'emailChange' });
         await Otp.create({ email: newEmail, otp, expiresAt, purpose: 'emailChange' });
 
-      
         req.session.pendingEmail = newEmail;
-
         await sendEmail(newEmail, otp);
 
         return res.json({ success: true, redirectUrl: '/otp' });
@@ -185,26 +182,23 @@ const requestEmailChange = async (req, res) => {
     }
 };
 
+
 const loadCoupons = async (req, res) => {
     try {
         const userId = req.session.user?._id;
         const now = new Date();
 
-        
         const availableCoupons = await Coupon.find({
             isActive: true,
             $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }]
         }).lean();
 
         const coupons = availableCoupons.map(c => {
-         
             const usedByUser = c.usedBy.some(id => id.toString() === userId.toString());
             const isExhausted = c.maxUses && c.usedBy.length >= c.maxUses;
-
             let status = 'active';
             if (usedByUser) status = 'used';
-            else if (isExhausted) status = 'expired'; 
-
+            else if (isExhausted) status = 'expired';
             return { ...c, status };
         });
 
@@ -216,10 +210,55 @@ const loadCoupons = async (req, res) => {
     }
 };
 
+
+// ── Referral info API ──
+// Auto-generates a referral code for old users who signed up before this feature.
+// Falls back to req.protocol + host if BASE_URL env var is not set.
+const getReferralInfo = async (req, res) => {
+    try {
+        const userId = req.session.user?._id;
+        if (!userId) return res.status(401).json({ success: false, message: 'Not logged in' });
+
+        let user = await User.findById(userId).lean();
+
+        // ── Generate code on the fly for users who signed up before referrals existed ──
+        if (!user.referralCode) {
+            const newCode = generateReferralCode(user.fullName);
+            user = await User.findByIdAndUpdate(
+                userId,
+                { $set: { referralCode: newCode } },
+                { new: true }
+            ).lean();
+            console.log(`Generated missing referral code for ${user.email}: ${user.referralCode}`);
+        }
+
+        const wallet        = await Wallet.findOne({ userId }).lean();
+        const referralCount = await User.countDocuments({ referredBy: userId });
+
+        // Use BASE_URL from .env — fallback to current host for local dev
+        const baseUrl = process.env.BASE_URL
+            ? process.env.BASE_URL.replace(/\/$/, '')          // strip trailing slash
+            : `${req.protocol}://${req.get('host')}`;
+
+        return res.json({
+            success:      true,
+            referralCode: user.referralCode,
+            referralLink: `${baseUrl}/signup?ref=${user.referralCode}`,
+            referralCount,
+            walletBalance: wallet?.balance || 0
+        });
+    } catch (err) {
+        console.error('getReferralInfo error:', err);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+
 module.exports = {
     loadProfile,
     updateProfile,
     changePassword,
     requestEmailChange,
-    loadCoupons
+    loadCoupons,
+    getReferralInfo
 }

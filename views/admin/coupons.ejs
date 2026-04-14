@@ -54,9 +54,16 @@
                 <%= coupon.code %>
               </span>
             </td>
-            <td style="padding:16px 20px; font-family:'Poppins',sans-serif; font-size:14px; font-weight:700; color:#fff;">
-              ₹<%= coupon.discountAmount %>
-            </td>
+           <td style="padding:16px 20px; font-family:'Poppins',sans-serif; font-size:14px; font-weight:700; color:#fff;">
+  <% if (coupon.discountType === 'percentage') { %>
+    <%= coupon.discountAmount %>%
+    <% if (coupon.maxDiscount) { %>
+      <span style="font-size:11px; color:#aaa; font-weight:400;"> (max ₹<%= coupon.maxDiscount %>)</span>
+    <% } %>
+  <% } else { %>
+    ₹<%= coupon.discountAmount %>
+  <% } %>
+</td>
             <td style="padding:16px 20px; font-family:'Poppins',sans-serif; font-size:13px; color:#ccc;">
               <%= coupon.minOrderAmount > 0 ? '₹' + coupon.minOrderAmount : '—' %>
             </td>
@@ -112,112 +119,165 @@
 
     <h3 style="font-family:'Poppins',sans-serif; font-size:16px; font-weight:700; color:#fff; margin:0 0 24px;">Create New Coupon</h3>
 
-    <form id="couponForm">
-      
-      <div style="margin-bottom:16px;">
-        <label style="font-family:'Poppins',sans-serif; font-size:12px; font-weight:500; color:#aaa; display:block; margin-bottom:6px;">Coupon Code *</label>
-        <input type="text" name="code" placeholder="e.g. SAVE100" required
-          style="width:100%; padding:10px 14px; background:#1a1a2e; border:1px solid #2a2a4a; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#fff; outline:none; box-sizing:border-box; text-transform:uppercase;">
-      </div>
+  <form id="couponForm">
 
-      <div style="margin-bottom:16px;">
-        <label style="font-family:'Poppins',sans-serif; font-size:12px; font-weight:500; color:#aaa; display:block; margin-bottom:6px;">Discount Amount (₹) *</label>
-        <input type="number" name="discountAmount" placeholder="e.g. 100" required min="1"
-          style="width:100%; padding:10px 14px; background:#1a1a2e; border:1px solid #2a2a4a; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#fff; outline:none; box-sizing:border-box;">
-      </div>
+  <div style="margin-bottom:16px;">
+    <label style="font-family:'Poppins',sans-serif; font-size:12px; font-weight:500; color:#aaa; display:block; margin-bottom:6px;">Coupon Code *</label>
+    <input type="text" name="code" placeholder="e.g. SAVE100" required
+      style="width:100%; padding:10px 14px; background:#1a1a2e; border:1px solid #2a2a4a; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#fff; outline:none; box-sizing:border-box; text-transform:uppercase;">
+  </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
-        <div>
-          <label style="font-family:'Poppins',sans-serif; font-size:12px; font-weight:500; color:#aaa; display:block; margin-bottom:6px;">Min Order Amount (₹)</label>
-          <input type="number" name="minOrderAmount" placeholder="Optional" min="0"
-            style="width:100%; padding:10px 14px; background:#1a1a2e; border:1px solid #2a2a4a; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#fff; outline:none; box-sizing:border-box;">
-        </div>
-        <div>
-          <label style="font-family:'Poppins',sans-serif; font-size:12px; font-weight:500; color:#aaa; display:block; margin-bottom:6px;">Max Uses</label>
-          <input type="number" name="maxUses" placeholder="Optional" min="1"
-            style="width:100%; padding:10px 14px; background:#1a1a2e; border:1px solid #2a2a4a; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#fff; outline:none; box-sizing:border-box;">
-        </div>
-      </div>
+  <!-- Discount Type toggle -->
+  <div style="margin-bottom:16px;">
+    <label style="font-family:'Poppins',sans-serif; font-size:12px; font-weight:500; color:#aaa; display:block; margin-bottom:8px;">Discount Type *</label>
+    <div style="display:flex; gap:10px;">
+      <label style="flex:1; display:flex; align-items:center; gap:8px; padding:10px 14px; border:1px solid #2a2a4a; border-radius:8px; cursor:pointer; background:#1a1a2e;" id="flatLabel">
+        <input type="radio" name="discountType" value="flat" checked onchange="toggleDiscountType()" style="accent-color:#c0415a;">
+        <span style="font-family:'Poppins',sans-serif; font-size:13px; color:#fff;">Flat (₹)</span>
+      </label>
+      <label style="flex:1; display:flex; align-items:center; gap:8px; padding:10px 14px; border:1px solid #2a2a4a; border-radius:8px; cursor:pointer; background:#1a1a2e;" id="percentLabel">
+        <input type="radio" name="discountType" value="percentage" onchange="toggleDiscountType()" style="accent-color:#c0415a;">
+        <span style="font-family:'Poppins',sans-serif; font-size:13px; color:#fff;">Percentage (%)</span>
+      </label>
+    </div>
+  </div>
 
-      <div style="margin-bottom:24px;">
-        <label style="font-family:'Poppins',sans-serif; font-size:12px; font-weight:500; color:#aaa; display:block; margin-bottom:6px;">Expiry Date</label>
-        <input type="date" name="expiresAt"
-          style="width:100%; padding:10px 14px; background:#1a1a2e; border:1px solid #2a2a4a; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#fff; outline:none; box-sizing:border-box; color-scheme:dark;">
-      </div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+    <div>
+      <label style="font-family:'Poppins',sans-serif; font-size:12px; font-weight:500; color:#aaa; display:block; margin-bottom:6px;" id="discountLabel">Discount Amount (₹) *</label>
+      <input type="number" name="discountAmount" placeholder="e.g. 100" required min="1"
+        style="width:100%; padding:10px 14px; background:#1a1a2e; border:1px solid #2a2a4a; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#fff; outline:none; box-sizing:border-box;">
+    </div>
+    <!-- Max discount cap — only shown for percentage -->
+    <div id="maxDiscountGroup" style="display:none;">
+      <label style="font-family:'Poppins',sans-serif; font-size:12px; font-weight:500; color:#aaa; display:block; margin-bottom:6px;">Max Discount Cap (₹)</label>
+      <input type="number" name="maxDiscount" placeholder="Optional cap" min="1"
+        style="width:100%; padding:10px 14px; background:#1a1a2e; border:1px solid #2a2a4a; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#fff; outline:none; box-sizing:border-box;">
+    </div>
+    <!-- Min order — only shown for flat (for percentage it's optional but still included) -->
+    <div id="minOrderGroup">
+      <label style="font-family:'Poppins',sans-serif; font-size:12px; font-weight:500; color:#aaa; display:block; margin-bottom:6px;">Min Order Amount (₹)</label>
+      <input type="number" name="minOrderAmount" placeholder="Optional" min="0"
+        style="width:100%; padding:10px 14px; background:#1a1a2e; border:1px solid #2a2a4a; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#fff; outline:none; box-sizing:border-box;">
+    </div>
+    <div>
+      <label style="font-family:'Poppins',sans-serif; font-size:12px; font-weight:500; color:#aaa; display:block; margin-bottom:6px;">Max Uses</label>
+      <input type="number" name="maxUses" placeholder="Optional" min="1"
+        style="width:100%; padding:10px 14px; background:#1a1a2e; border:1px solid #2a2a4a; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#fff; outline:none; box-sizing:border-box;">
+    </div>
+  </div>
 
-      <!-- Error/Success msg -->
-      <p id="formMsg" style="display:none; font-size:12px; font-family:'Poppins',sans-serif; margin:0 0 14px;"></p>
+  <div style="margin-bottom:24px;">
+    <label style="font-family:'Poppins',sans-serif; font-size:12px; font-weight:500; color:#aaa; display:block; margin-bottom:6px;">Expiry Date</label>
+    <input type="date" name="expiresAt" id="expiresAt"
+  style="width:100%; padding:10px 14px; background:#1a1a2e; border:1px solid #2a2a4a; border-radius:8px; font-size:13px; font-family:'Poppins',sans-serif; color:#fff; outline:none; box-sizing:border-box; color-scheme:dark;">
+  </div>
 
-      <div style="display:flex; gap:10px;">
-        <button type="button" onclick="closeModal()" style="flex:1; padding:11px; background:#2a2a4a; color:#aaa; border:none; border-radius:8px; font-size:13px; font-weight:600; font-family:'Poppins',sans-serif; cursor:pointer;">Cancel</button>
-        <button type="submit" style="flex:1; padding:11px; background:#c0415a; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; font-family:'Poppins',sans-serif; cursor:pointer;">Create Coupon</button>
-      </div>
+  <p id="formMsg" style="display:none; font-size:12px; font-family:'Poppins',sans-serif; margin:0 0 14px;"></p>
 
-    </form>
+  <div style="display:flex; gap:10px;">
+    <button type="button" onclick="closeModal()" style="flex:1; padding:11px; background:#2a2a4a; color:#aaa; border:none; border-radius:8px; font-size:13px; font-weight:600; font-family:'Poppins',sans-serif; cursor:pointer;">Cancel</button>
+    <button type="submit" style="flex:1; padding:11px; background:#c0415a; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; font-family:'Poppins',sans-serif; cursor:pointer;">Create Coupon</button>
+  </div>
+
+</form>
    
   </div>
 </div>
-
 <script>
+  // Set min date to tomorrow on modal open
+function setMinDate() {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const yyyy = tomorrow.getFullYear();
+  const mm   = String(tomorrow.getMonth() + 1).padStart(2, '0');
+  const dd   = String(tomorrow.getDate()).padStart(2, '0');
+  document.getElementById('expiresAt').min = `${yyyy}-${mm}-${dd}`;
+}
+  function toggleDiscountType() {
+    const isPercent = document.querySelector('input[name="discountType"]:checked').value === 'percentage'
+    document.getElementById('maxDiscountGroup').style.display = isPercent ? 'block' : 'none'
+    document.getElementById('discountLabel').textContent = isPercent ? 'Discount (%) *' : 'Discount Amount (₹) *'
+    // shift minOrder to second column when percent (maxDiscount takes first slot)
+    const minOrderGroup = document.getElementById('minOrderGroup')
+    minOrderGroup.style.display = 'block'
+  }
+
   function openModal() {
-    document.getElementById('couponModal').style.display = 'flex';
+    document.getElementById('couponModal').style.display = 'flex'
+    setMinDate()
   }
 
   function closeModal() {
-    document.getElementById('couponModal').style.display = 'none';
-    document.getElementById('couponForm').reset();
-    document.getElementById('formMsg').style.display = 'none';
+    document.getElementById('couponModal').style.display = 'none'
+    document.getElementById('couponForm').reset()
+    document.getElementById('formMsg').style.display = 'none'
+    document.getElementById('maxDiscountGroup').style.display = 'none'
+    document.getElementById('discountLabel').textContent = 'Discount Amount (₹) *'
   }
 
-  // Close modal on backdrop click
   document.getElementById('couponModal').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
-  });
+    if (e.target === this) closeModal()
+  })
 
-  // Create coupon
   document.getElementById('couponForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const msg = document.getElementById('formMsg');
+    e.preventDefault()
+    const form = e.target
+    const msg  = document.getElementById('formMsg')
+
+    const type     = form.discountType.value
+    const amount   = parseFloat(form.discountAmount.value) || 0
+    const minOrder = parseFloat(form.minOrderAmount.value) || 0
+
+    if (amount <= 0) {
+      msg.style.display = 'block'; msg.style.color = '#e57373'
+      msg.textContent = 'Discount value must be greater than 0.'; return
+    }
+    if (type === 'percentage' && amount > 90) {
+      msg.style.display = 'block'; msg.style.color = '#e57373'
+      msg.textContent = 'Percentage discount cannot exceed 90%.'; return
+    }
+    if (type === 'flat' && minOrder > 0 && minOrder < amount * 2) {
+      msg.style.display = 'block'; msg.style.color = '#e57373'
+      msg.textContent = `Min Order must be at least 2× the discount (₹${amount * 2} or more).`; return
+    }
 
     const data = {
       code:           form.code.value,
-      discountAmount: form.discountAmount.value,
+      discountType:   type,
+      discountAmount: amount,
+      maxDiscount:    form.maxDiscount?.value || null,
       minOrderAmount: form.minOrderAmount.value,
       maxUses:        form.maxUses.value,
       expiresAt:      form.expiresAt.value
-    };
+    }
 
-    const res = await fetch('/admin/coupons/create', {
+    const res    = await fetch('/admin/coupons/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
-    });
-    const result = await res.json();
+    })
+    const result = await res.json()
 
-    msg.style.display = 'block';
-    msg.style.color = result.success ? '#81c784' : '#e57373';
-    msg.textContent = result.message;
+    msg.style.display = 'block'
+    msg.style.color   = result.success ? '#81c784' : '#e57373'
+    msg.textContent   = result.message
 
-    if (result.success) {
-      setTimeout(() => { closeModal(); location.reload(); }, 800);
-    }
-  });
+    if (result.success) setTimeout(() => { closeModal(); location.reload() }, 800)
+  })
 
-  // Toggle coupon
   async function toggleCoupon(id, checkbox) {
-    const res = await fetch(`/admin/coupons/${id}/toggle`, { method: 'PATCH' });
-    const result = await res.json();
-    if (result.success) location.reload();
-    else checkbox.checked = !checkbox.checked;
+    const res    = await fetch(`/admin/coupons/${id}/toggle`, { method: 'PATCH' })
+    const result = await res.json()
+    if (result.success) location.reload()
+    else checkbox.checked = !checkbox.checked
   }
 
-  // Delete coupon
   async function deleteCoupon(id) {
-    if (!confirm('Delete this coupon?')) return;
-    const res = await fetch(`/admin/coupons/${id}`, { method: 'DELETE' });
-    const result = await res.json();
-    if (result.success) location.reload();
+    if (!confirm('Delete this coupon?')) return
+    const res    = await fetch(`/admin/coupons/${id}`, { method: 'DELETE' })
+    const result = await res.json()
+    if (result.success) location.reload()
   }
 </script>
 

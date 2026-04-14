@@ -67,7 +67,7 @@
     .badge-out{background:#999;}
     .wish-btn{position:absolute;top:10px;left:10px;background:#fff;border:1px solid #f0e6e6;border-radius:50%;width:30px;height:30px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;z-index:2;}
     .wish-btn:hover{border-color:#c0415a;}
-    .wish-btn.active{color:#c0415a;}
+   .wish-btn.active { color: #c0415a; border-color: #c0415a; }
     .card-body{padding:16px;}
     .card-brand{font-size:9px;color:#bbb;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
     .card-name{font-size:13px;font-weight:500;color:#1a1a2e;margin-bottom:4px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -317,7 +317,14 @@
             <% } %>
 
             <!-- Wishlist -->
-            <button class="wish-btn" onclick="toggleWishlist(event,'<%= product._id %>')" title="Wishlist">♡</button>
+            <%
+  const isWished = wishlistIds && wishlistIds.includes(String(product._id));
+%>
+<button class="wish-btn <%= isWished ? 'active' : '' %>"
+        onclick="toggleWishlist(event,'<%= product._id %>')"
+        title="Wishlist">
+  <%= isWished ? '♥' : '♡' %>
+</button>
           </div>
 
           <!-- Body -->

@@ -325,7 +325,14 @@
         <button class="btn-add-cart" id="addCartBtn" onclick="addToCart('<%= product._id %>')">
           ADD TO CART
         </button>
-        <button class="btn-wishlist" id="wishBtn" onclick="toggleWishlist('<%= product._id %>')">♡</button>
+        <%
+  const isWished = wishlistIds && wishlistIds.includes(String(product._id));
+%>
+<button class="btn-wishlist <%= isWished ? 'active' : '' %>"
+        id="wishBtn"
+        onclick="toggleWishlist('<%= product._id %>')">
+  <%= isWished ? '♥' : '♡' %>
+</button>
       </div>
       <% } else { %>
       <div style="margin-bottom:20px;">

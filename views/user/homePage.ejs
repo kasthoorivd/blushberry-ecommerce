@@ -19,6 +19,21 @@
     .product-card:hover { box-shadow: 0 12px 36px rgba(0,0,0,0.12) !important; transform: translateY(-4px); transition: all 0.3s ease; }
     .btn-cart:hover { background: #c0415a !important; }
     .btn-shop:hover { background: #a33049 !important; }
+
+  .wish-icon-btn {
+  border: 1px solid #f0e6e6;  /* default border here, not inline */
+  color: #999;
+}
+.wish-icon-btn.active {
+  color: #c0415a;
+  border-color: #c0415a;
+  background: #fff0f3 !important;
+}
+.wish-icon-btn:hover {
+  border-color: #c0415a;
+  color: #c0415a;
+}
+
   </style>
 </head>
 <body style="background:#fff;">
@@ -182,8 +197,36 @@
           <% } %>
 
           <!-- Wishlist button -->
-          <button onclick="toggleWishlist(event, '<%= product._id %>')"
-                  style="position:absolute;top:10px;left:10px;background:#fff;border:1px solid #f0e6e6;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">♡</button>
+<%
+  const isWished = Array.isArray(wishlistIds) && wishlistIds.includes(String(product._id));
+%>
+<button
+  onclick="toggleWishlist(event, '<%= product._id %>')"
+  class="wish-icon-btn <%= isWished ? 'active' : '' %>"
+  style="
+    position:absolute;top:10px;left:10px;
+    background:#fff;
+    border-radius:50%;width:28px;height:28px;
+    font-size:14px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .2s;
+  ">
+  <%= isWished ? '♥' : '♡' %>
+</button>
+<button
+  onclick="toggleWishlist(event, '<%= product._id %>')"
+  class="wish-icon-btn <%= isWished ? 'active' : '' %>"
+  style="
+    position:absolute;top:10px;left:10px;
+    background:#fff;
+    border:1px solid #f0e6e6;
+    border-radius:50%;width:28px;height:28px;
+    font-size:14px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .2s;
+  ">
+  <%= isWished ? '♥' : '♡' %>
+</button>
         </div>
 
         <!-- Card body -->
@@ -305,30 +348,35 @@
       btn.disabled    = false
     })
   }
+function toggleWishlist(event, productId) {
+  event.stopPropagation()
+  const btn = event.currentTarget
 
-  function toggleWishlist(event, productId) {
-    event.stopPropagation()
-    const btn = event.currentTarget
+  // Optimistic UI update
+  const isNowActive = !btn.classList.contains('active')
+  btn.classList.toggle('active')
+  btn.textContent = isNowActive ? '♥' : '♡'
+
+  fetch('/wishlist/toggle', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ productId })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (!data.success) {
+      // Revert on failure
+      btn.classList.toggle('active')
+      btn.textContent = btn.classList.contains('active') ? '♥' : '♡'
+      if (data.redirect) window.location.href = data.redirect
+    }
+  })
+  .catch(() => {
+    // Revert on network error
     btn.classList.toggle('active')
     btn.textContent = btn.classList.contains('active') ? '♥' : '♡'
-    btn.style.color = btn.classList.contains('active') ? '#c0415a' : ''
-
-    fetch('/wishlist/toggle', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ productId })
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (!data.success) {
-        btn.classList.toggle('active')
-        btn.textContent = btn.classList.contains('active') ? '♥' : '♡'
-        btn.style.color = btn.classList.contains('active') ? '#c0415a' : ''
-        if (data.redirect) window.location.href = data.redirect
-      }
-    })
-    .catch(() => {})
-  }
+  })
+}
   </script>
 
 </body>

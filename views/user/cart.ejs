@@ -18,8 +18,8 @@
     .breadcrumb-sep{color:#ddd;}
 
     .cart-wrap{display:flex;gap:32px;padding:36px 48px 60px;align-items:flex-start;}
-    .cart-items{flex:1;}
-    .cart-summary{width:320px;min-width:320px;position:sticky;top:20px;}
+    .cart-items{flex:1;min-width:0;}
+    .cart-summary{width:320px;min-width:320px;position:sticky;top:20px;flex-shrink:0;}
 
     .alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:20px;display:flex;align-items:flex-start;gap:10px;}
     .alert-warn{background:#fff8e6;border:1px solid #ffe0a0;color:#b07000;}
@@ -31,7 +31,7 @@
     .cart-item.out-of-stock .item-name{color:#aaa;}
     .item-img{width:90px;height:90px;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#fff5f7,#fce8ed);flex-shrink:0;}
     .item-img img{width:100%;height:100%;object-fit:cover;}
-    .item-details{flex:1;}
+    .item-details{flex:1;min-width:0;}
     .item-brand{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#bbb;margin-bottom:3px;}
     .item-name{font-size:14px;font-weight:500;color:#1a1a2e;margin-bottom:4px;line-height:1.3;}
     .item-shade{font-size:11px;color:#c0415a;margin-bottom:8px;}
@@ -51,16 +51,21 @@
     .btn-remove{background:none;border:none;font-size:12px;color:#ccc;cursor:pointer;padding:4px 8px;border-radius:4px;transition:color .2s;}
     .btn-remove:hover{color:#e05555;background:#fce8e8;}
 
-    .summary-card{background:#fffafb;border:1px solid #f0e6e8;border-radius:12px;padding:24px;}
-    .summary-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#1a1a2e;margin-bottom:20px;}
-    .summary-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#666;margin-bottom:12px;}
-    .summary-row.total{font-size:16px;font-weight:700;color:#1a1a2e;border-top:1px solid #f0e6e8;padding-top:14px;margin-top:4px;}
-    .summary-row span:last-child{font-weight:600;color:#c0415a;}
-    .summary-row.total span:last-child{font-size:18px;}
-    .btn-checkout{width:100%;padding:14px;background:#c0415a;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:background .2s;margin-top:16px;}
-    .btn-checkout:hover{background:#a33049;}
-    .btn-checkout:disabled{background:#ccc;cursor:not-allowed;}
-    .checkout-note{font-size:11px;color:#aaa;text-align:center;margin-top:10px;line-height:1.5;}
+    /* ── Summary Card — matches checkout style ── */
+    .summary-card{background:#fffafb;border:1px solid #f0e6e8;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(194,24,91,0.07);}
+    .summary-header{padding:1rem 1.4rem;border-bottom:1px solid #f0e6e8;background:#fef0f4;}
+    .summary-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;color:#1a0a10;}
+    .summary-body{padding:1.2rem 1.4rem;}
+    .summary-row{display:flex;justify-content:space-between;align-items:center;font-size:0.83rem;color:#8a6d74;margin-bottom:0.6rem;}
+    .summary-row.total{border-top:1px solid #f0e6e8;padding-top:0.75rem;margin-top:0.5rem;font-size:1rem;font-weight:600;color:#1a0a10;}
+    .summary-row .green{color:#22b573;font-weight:500;}
+    .summary-savings{background:rgba(34,181,115,0.07);border:1px solid rgba(34,181,115,0.2);border-radius:10px;padding:0.6rem 0.9rem;display:flex;align-items:center;gap:0.5rem;font-size:0.78rem;color:#22b573;margin:0.75rem 0;}
+
+    .btn-checkout{width:100%;background:linear-gradient(135deg,#c2185b,#e91e8c);color:#fff;border:none;padding:0.9rem 1.5rem;border-radius:10px;font-family:'Poppins',sans-serif;font-size:0.95rem;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-top:1rem;}
+    .btn-checkout:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(194,24,91,0.3);}
+    .btn-checkout:disabled{opacity:0.6;cursor:not-allowed;transform:none;box-shadow:none;background:#ccc;}
+    .secure-note{display:flex;align-items:center;justify-content:center;gap:0.4rem;font-size:0.72rem;color:#8a6d74;margin-top:0.6rem;}
+
     .btn-continue{display:block;text-align:center;margin-top:12px;font-size:12px;color:#c0415a;border-bottom:1px solid #c0415a;width:fit-content;margin-left:auto;margin-right:auto;padding-bottom:2px;}
 
     .empty-cart{text-align:center;padding:80px 20px;}
@@ -75,117 +80,11 @@
     .toast.error{background:#e05555;}
     .toast.warn{background:#e8a826;}
 
-    /* ── Coupon ── */
-    .coupon-section{margin-bottom:16px;}
-    .coupon-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#c0415a;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
-    .coupon-label::after{content:'';flex:1;height:1px;background:linear-gradient(to right,#f0e6e8,transparent);}
-    .coupon-input-row{display:flex;gap:0;border:1.5px solid #e8d8dc;border-radius:8px;overflow:hidden;transition:border-color 0.2s,box-shadow 0.2s;background:#fff;}
-    .coupon-input-row:focus-within{border-color:#c0415a;box-shadow:0 0 0 3px rgba(192,65,90,0.08);}
-    .coupon-input-row input{flex:1;border:none;outline:none;padding:11px 14px;font-size:13px;font-family:'Poppins',sans-serif;color:#1a1a2e;background:transparent;letter-spacing:0.5px;}
-    .coupon-input-row input::placeholder{color:#c8b0b5;font-size:12px;}
-    .coupon-apply-btn{background:#c0415a;color:#fff;border:none;padding:0 18px;font-size:12px;font-weight:700;font-family:'Poppins',sans-serif;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:background 0.2s,transform 0.1s;white-space:nowrap;}
-    .coupon-apply-btn:hover{background:#a33049;}
-    .coupon-apply-btn:active{transform:scale(0.97);}
-    .coupon-apply-btn:disabled{background:#ddd;cursor:not-allowed;}
-    .coupon-feedback{display:none;margin-top:8px;font-size:12px;font-family:'Poppins',sans-serif;padding:7px 12px;border-radius:6px;align-items:center;gap:6px;}
-    .coupon-feedback.success{display:flex;background:#f0faf4;color:#1a7a47;border:1px solid #b6e5cc;}
-    .coupon-feedback.error{display:flex;background:#fce8e8;color:#c03030;border:1px solid #f0c0c0;}
-    .coupon-applied-tag{display:none;align-items:center;justify-content:space-between;background:#f0faf4;border:1px dashed #5cb87a;border-radius:8px;padding:9px 14px;font-size:12px;color:#1a7a47;font-weight:600;font-family:'Poppins',sans-serif;}
-    .coupon-applied-tag .remove-coupon{background:none;border:none;cursor:pointer;color:#c0415a;font-size:11px;font-family:'Poppins',sans-serif;text-decoration:underline;padding:0;}
-    .coupon-divider{border:none;border-top:1px solid #f0e6e8;margin:16px 0;}
-     
-    .cart-link {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
+    .cart-link{position:relative;display:inline-flex;align-items:center;}
+    #cartCount{position:absolute;top:-8px;right:-8px;background:#c0415a;color:#ffffff;font-size:10px;font-weight:700;font-family:'Poppins',sans-serif;min-width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 4px;line-height:1;pointer-events:none;transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1),background 0.2s;}
+    #cartCount.pop{transform:scale(1.4);}
+    #cartCount[data-count="0"]{display:none;}
 
-#cartCount {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: #c0415a;
-  color: #ffffff;
-  font-size: 10px;
-  font-weight: 700;
-  font-family: 'Poppins', sans-serif;
-  min-width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 4px;
-  line-height: 1;
-  pointer-events: none;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
-              background 0.2s;
-}
-
-/* pop animation when count changes */
-#cartCount.pop {
-  transform: scale(1.4);
-}
-
-/* hide badge when count is 0 */
-#cartCount[data-count="0"] {
-  display: none;
-}
-
-/* ── Available Coupons Section ── */
-.avail-coupons-wrap { margin-top: 10px; }
-.avail-coupons-toggle {
-  display: flex; align-items: center; justify-content: space-between;
-  font-size: 11px; color: #c0415a; font-weight: 600; cursor: pointer;
-  letter-spacing: 0.5px; padding: 6px 0; border: none; background: none;
-  width: 100%; font-family: 'Poppins', sans-serif;
-}
-.avail-coupons-toggle .chevron {
-  font-size: 10px; transition: transform 0.2s;
-}
-.avail-coupons-toggle.open .chevron { transform: rotate(180deg); }
-
-.avail-coupons-list {
-  display: none; flex-direction: column; gap: 8px;
-  margin-top: 8px; max-height: 260px; overflow-y: auto;
-  padding-right: 2px;
-}
-.avail-coupons-list.open { display: flex; }
-
-.coupon-card {
-  border: 1.5px dashed #e8d8dc; border-radius: 8px;
-  padding: 10px 12px; background: #fffafb;
-  display: flex; align-items: center;
-  justify-content: space-between; gap: 8px;
-  transition: border-color 0.2s, background 0.2s;
-}
-.coupon-card:hover { border-color: #c0415a; background: #fff5f7; }
-.coupon-card.used { opacity: 0.45; pointer-events: none; }
-
-.coupon-card-left { flex: 1; min-width: 0; }
-.coupon-card-code {
-  font-size: 12px; font-weight: 700; color: #c0415a;
-  letter-spacing: 1px; margin-bottom: 2px;
-  display: flex; align-items: center; gap: 5px;
-}
-.coupon-card-code .tag-icon { font-size: 10px; }
-.coupon-card-desc { font-size: 11px; color: #888; line-height: 1.4; }
-.coupon-card-min {
-  font-size: 10px; color: #bbb; margin-top: 2px;
-}
-.btn-coupon-use {
-  background: none; border: 1.5px solid #c0415a; color: #c0415a;
-  border-radius: 5px; padding: 5px 11px; font-size: 11px;
-  font-weight: 600; font-family: 'Poppins', sans-serif;
-  cursor: pointer; white-space: nowrap; flex-shrink: 0;
-  transition: background 0.2s, color 0.2s;
-}
-.btn-coupon-use:hover { background: #c0415a; color: #fff; }
-
-.no-coupons {
-  font-size: 12px; color: #bbb; text-align: center;
-  padding: 12px 0;
-}
     @media(max-width:860px){
       .cart-wrap{flex-direction:column;padding:20px;}
       .cart-summary{width:100%;min-width:unset;position:static;}
@@ -194,14 +93,8 @@
   </style>
 </head>
 <body>
+
   <%- include('../partials/user/header') %>
-  
-   <a href="/cart" class="cart-link">
-  <!-- your existing cart SVG/icon here -->
-  <span id="cartCount" data-count="<%= cartCount %>">
-    <%= cartCount %>
-  </span>
-</a>
 
   <div class="page-header">
     <p>Blush Berry</p>
@@ -213,197 +106,138 @@
     </div>
   </div>
 
-  <% if(items.length === 0){ %>
-  <div class="empty-cart">
-    <div class="icon">🛍️</div>
-    <h3>Your cart is empty</h3>
-    <p>Looks like you haven't added anything yet.</p>
-    <a href="/products">Start Shopping</a>
-  </div>
+  <% if (items.length === 0) { %>
+
+    <div class="empty-cart">
+      <div class="icon">🛍️</div>
+      <h3>Your cart is empty</h3>
+      <p>Looks like you haven't added anything yet.</p>
+      <a href="/products">Start Shopping</a>
+    </div>
 
   <% } else { %>
-  <div class="cart-wrap">
 
-    <!-- LEFT — Items -->
-    <div class="cart-items">
+    <div class="cart-wrap">
 
-      <% if(removedNames && removedNames.length){ %>
-      <div class="alert alert-warn">
-        <span>⚠️</span>
-        <span><strong><%= removedNames.join(', ') %></strong> <%= removedNames.length > 1 ? 'were' : 'was' %> removed because <%= removedNames.length > 1 ? 'they are' : 'it is' %> no longer available.</span>
-      </div>
-      <% } %>
+      <!-- LEFT — Items -->
+      <div class="cart-items">
 
-      <% if(hasOutOfStock){ %>
-      <div class="alert alert-danger">
-        <span>🚫</span>
-        <span>Some items are out of stock. Please remove them before checkout.</span>
-      </div>
-      <% } %>
-
-      <% items.forEach(function(item){ %>
-      <div class="cart-item <%= !item.inStock ? 'out-of-stock' : '' %>" id="item-<%= item._id %>">
-        <div class="item-img" onclick="window.location='/products/<%= item.product._id %>'" style="cursor:pointer;">
-          <% if(item.product.images && item.product.images[0]){ %>
-            <img src="<%= item.product.images[0] %>" alt="<%= item.product.name %>">
-          <% } else { %>
-            <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:28px;">💄</div>
-          <% } %>
-        </div>
-
-        <div class="item-details">
-          <p class="item-brand">Blush Berry</p>
-          <p class="item-name"><%= item.product.name %></p>
-          <% if(item.shade){ %>
-          <p class="item-shade">Shade: <%= item.shade %></p>
-          <% } %>
-
-          <div class="item-price-row">
-            <span class="item-price">₹<%= item.currentPrice.toFixed(2) %></span>
-            <% if(item.product.offer > 0){ %>
-              <span class="item-orig">₹<%= (item.variant.varientPrice).toFixed(2) %></span>
-            <% } %>
-            <span class="item-subtotal">× <%= item.effectiveQty %> = ₹<%= (item.currentPrice * item.effectiveQty).toFixed(2) %></span>
+        <% if (removedNames && removedNames.length) { %>
+          <div class="alert alert-warn">
+            <span>⚠️</span>
+            <span><strong><%= removedNames.join(', ') %></strong> <%= removedNames.length > 1 ? 'were' : 'was' %> removed because <%= removedNames.length > 1 ? 'they are' : 'it is' %> no longer available.</span>
           </div>
-
-          <% if(!item.inStock){ %>
-            <span class="item-out-tag">Out of Stock</span>
-          <% } else if(item.qtyExceedsStock){ %>
-            <p class="item-stock-warn">⚠ Only <%= item.stockAvailable %> available — quantity adjusted</p>
-          <% } else if(item.qtyExceedsMax){ %>
-            <p class="item-stock-warn">⚠ Maximum <%= maxQty %> units per item</p>
-          <% } else if(item.stockAvailable <= 5){ %>
-            <p class="item-stock-warn">⚠ Only <%= item.stockAvailable %> left in stock</p>
-          <% } %>
-
-          <div class="qty-row">
-            <% if(item.inStock){ %>
-            <div class="qty-wrap">
-              <button class="qty-btn" onclick="updateQty('<%= item._id %>', 'decrement')">−</button>
-              <div class="qty-num" id="qty-<%= item._id %>"><%= item.effectiveQty %></div>
-              <button class="qty-btn"
-                onclick="updateQty('<%= item._id %>', 'increment')"
-                <%= (item.effectiveQty >= maxQty || item.effectiveQty >= item.stockAvailable) ? 'disabled' : '' %>>+</button>
-            </div>
-            <% } %>
-            <button class="btn-remove" onclick="removeItem('<%= item._id %>')">🗑 Remove</button>
-          </div>
-        </div>
-      </div>
-      <% }) %>
-
-    </div>
-
-    <!-- RIGHT — Summary -->
-    <div class="cart-summary">
-      <div class="summary-card">
-        <h3 class="summary-title">Order Summary</h3>
-
-        <!-- COUPON — above price rows -->
-        <div class="coupon-section">
-          <p class="coupon-label">🏷 Have a coupon?</p>
-
-          <!-- Applied tag (shown after coupon is applied) -->
-          <div class="coupon-applied-tag" id="couponAppliedTag">
-            <span id="couponAppliedText">🎉 Coupon applied!</span>
-            <button class="remove-coupon" onclick="removeCoupon()">Remove</button>
-          </div>
-
-          <!-- Input row (shown by default) -->
-          <div class="coupon-input-row" id="couponInputRow">
-            <input type="text" id="couponCodeInput"
-              placeholder="Enter code e.g. SAVE10"
-              maxlength="20" autocomplete="off" />
-            <button class="coupon-apply-btn" id="couponApplyBtn"
-              onclick="applyCoupon()">Apply</button>
-          </div>
-
-          <div class="coupon-feedback success" id="couponSuccess" style="display:none;">
-            <span>✓</span><span id="couponSuccessMsg">Coupon applied!</span>
-          </div>
-          <div class="coupon-feedback error" id="couponError" style="display:none;">
-            <span>✗</span><span id="couponErrorMsg">Invalid coupon code</span>
-          </div>
-
-          <!-- ── Available Coupons ── -->
-          <% if (coupons && coupons.length > 0) { %>
-          <div class="avail-coupons-wrap">
-            <button class="avail-coupons-toggle" id="couponsToggleBtn"
-              onclick="toggleCouponList()">
-              <span>🎁 View <%= coupons.length %> available coupon<%= coupons.length > 1 ? 's' : '' %></span>
-              <span class="chevron">▼</span>
-            </button>
-
-            <div class="avail-coupons-list" id="couponsList">
-              <% coupons.forEach(function(c) { %>
-                <div class="coupon-card" id="coupon-card-<%= c.code %>">
-                  <div class="coupon-card-left">
-                    <div class="coupon-card-code">
-                      <span class="tag-icon">🏷</span>
-                      <%= c.code %>
-                    </div>
-                    <div class="coupon-card-desc">
-                      Save ₹<%= c.discountAmount %> on your order
-                    </div>
-                    <% if (c.minOrderAmount > 0) { %>
-                      <div class="coupon-card-min">
-                        Min. order: ₹<%= c.minOrderAmount %>
-                      </div>
-                    <% } %>
-                    <% if (c.expiresAt) { %>
-                      <div class="coupon-card-min">
-                        Expires: <%= new Date(c.expiresAt).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}) %>
-                      </div>
-                    <% } %>
-                  </div>
-                  <button class="btn-coupon-use"
-                    onclick="useCoupon('<%= c.code %>')">
-                    USE
-                  </button>
-                </div>
-              <% }) %>
-            </div>
-          </div>
-          <% } %>
-        </div>
-
-        <!-- ── DISCOUNT ROW (hidden until coupon applied) ── -->
-        <div class="summary-row" id="discountRow" style="display:none;">
-          <span>Coupon discount</span>
-          <span id="discountAmt" style="color:#1a7a47;font-weight:600;">−₹0.00</span>
-        </div>
-
-        <!-- TOTAL -->
-        <div class="summary-row total">
-          <span>Total</span>
-          <span id="cartTotal">₹<%= subtotal.toFixed(2) %></span>
-        </div>
-
-        <% if(canCheckout){ %>
-        <button class="btn-checkout" onclick="window.location='/checkout'">
-          Proceed to Checkout →
-        </button>
-        <% } else { %>
-        <button class="btn-checkout" disabled>
-          <% if(hasOutOfStock){ %>Remove Out-of-Stock Items First
-          <% } else if(items.length === 0){ %>Cart is Empty
-          <% } else { %>Fix Cart Issues First<% } %>
-        </button>
         <% } %>
 
-        <p class="checkout-note">
-          <% if(!canCheckout && hasOutOfStock){ %>
-            Remove out-of-stock items to continue.
-          <% } else { %>
-            Easy 30-day returns. Secure checkout.
-          <% } %>
-        </p>
+        <% if (hasOutOfStock) { %>
+          <div class="alert alert-danger">
+            <span>🚫</span>
+            <span>Some items are out of stock. Please remove them before checkout.</span>
+          </div>
+        <% } %>
 
-        <a href="/products" class="btn-continue">← Continue Shopping</a>
-      </div>
-    </div>
+        <% items.forEach(function(item) { %>
+          <div class="cart-item <%= !item.inStock ? 'out-of-stock' : '' %>" id="item-<%= item._id %>">
+            <div class="item-img" onclick="window.location='/products/<%= item.product._id %>'" style="cursor:pointer;">
+              <% if (item.product.images && item.product.images[0]) { %>
+                <img src="<%= item.product.images[0] %>" alt="<%= item.product.name %>">
+              <% } else { %>
+                <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:28px;">💄</div>
+              <% } %>
+            </div>
 
-  </div>
+            <div class="item-details">
+              <p class="item-brand">Blush Berry</p>
+              <p class="item-name"><%= item.product.name %></p>
+              <% if (item.shade) { %>
+                <p class="item-shade">Shade: <%= item.shade %></p>
+              <% } %>
+
+              <div class="item-price-row">
+                <span class="item-price">₹<%= item.currentPrice.toFixed(2) %></span>
+                <% if (item.product.offer > 0) { %>
+                  <span class="item-orig">₹<%= (item.variant.varientPrice).toFixed(2) %></span>
+                <% } %>
+                <span class="item-subtotal">× <%= item.effectiveQty %> = ₹<%= (item.currentPrice * item.effectiveQty).toFixed(2) %></span>
+              </div>
+
+              <% if (!item.inStock) { %>
+                <span class="item-out-tag">Out of Stock</span>
+              <% } else if (item.qtyExceedsStock) { %>
+                <p class="item-stock-warn">⚠ Only <%= item.stockAvailable %> available — quantity adjusted</p>
+              <% } else if (item.qtyExceedsMax) { %>
+                <p class="item-stock-warn">⚠ Maximum <%= maxQty %> units per item</p>
+              <% } else if (item.stockAvailable <= 5) { %>
+                <p class="item-stock-warn">⚠ Only <%= item.stockAvailable %> left in stock</p>
+              <% } %>
+
+              <div class="qty-row">
+                <% if (item.inStock) { %>
+                  <div class="qty-wrap">
+                    <button class="qty-btn" onclick="updateQty('<%= item._id %>', 'decrement')">−</button>
+                    <div class="qty-num" id="qty-<%= item._id %>"><%= item.effectiveQty %></div>
+                    <button class="qty-btn"
+                      onclick="updateQty('<%= item._id %>', 'increment')"
+                      <%= (item.effectiveQty >= maxQty || item.effectiveQty >= item.stockAvailable) ? 'disabled' : '' %>>+</button>
+                  </div>
+                <% } %>
+                <button class="btn-remove" onclick="removeItem('<%= item._id %>')">🗑 Remove</button>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+
+      </div><!-- /cart-items -->
+
+      <!-- RIGHT — Summary -->
+      <div class="cart-summary">
+        <div class="summary-card">
+          <div class="summary-header">
+            <div class="summary-title">Order Summary</div>
+          </div>
+          <div class="summary-body">
+
+            <div class="summary-row">
+              <span>Subtotal (<%= items.length %> item<%= items.length !== 1 ? 's' : '' %>)</span>
+              <span>₹<%= subtotal.toLocaleString('en-IN') %></span>
+            </div>
+
+            <div class="summary-row total">
+              <span>Total</span>
+              <span>₹<%= subtotal.toLocaleString('en-IN') %></span>
+            </div>
+
+            <% if (totalItemDiscount > 0) { %>
+              <div class="summary-savings">
+                <i>🏷</i> You're saving
+                <strong>₹<%= totalItemDiscount.toLocaleString('en-IN') %></strong> on this order!
+              </div>
+            <% } %>
+
+            <% if (canCheckout) { %>
+              <button class="btn-checkout" onclick="window.location='/checkout'">
+                🔒 Proceed to Checkout
+              </button>
+            <% } else { %>
+              <button class="btn-checkout" disabled>
+                <% if (hasOutOfStock) { %>Remove Out-of-Stock Items First
+                <% } else if (items.length === 0) { %>Cart is Empty
+                <% } else { %>Fix Cart Issues First<% } %>
+              </button>
+            <% } %>
+
+            <div class="secure-note">
+              🛡 Safe &amp; secure checkout
+            </div>
+
+            <a href="/products" class="btn-continue">← Continue Shopping</a>
+
+          </div>
+        </div>
+      </div><!-- /cart-summary -->
+
+    </div><!-- /cart-wrap -->
+
   <% } %>
 
   <div class="toast" id="toast"></div>
@@ -411,27 +245,6 @@
   <%- include('../partials/user/footer') %>
 
   <script>
-    var subtotalBase = <%= subtotal %>;
-
-    // ── Restore coupon UI if one is already applied in session ──
-    // Pass appliedCoupon from your controller: res.render('cart', { ..., appliedCoupon: req.session.coupon || null })
-    var appliedCoupon = <%- JSON.stringify(typeof appliedCoupon !== 'undefined' ? appliedCoupon : null) %>;
-    if (appliedCoupon && appliedCoupon.code && appliedCoupon.discount) {
-      showAppliedCouponUI(appliedCoupon.code, appliedCoupon.discount);
-    }
-
-    function showAppliedCouponUI(code, discount) {
-      document.getElementById('couponInputRow').style.display = 'none';
-      document.getElementById('couponError').style.display = 'none';
-      document.getElementById('couponSuccess').style.display = 'none';
-      var tag = document.getElementById('couponAppliedTag');
-      tag.style.display = 'flex';
-      document.getElementById('couponAppliedText').textContent = '🎉 "' + code + '" — ₹' + parseFloat(discount).toFixed(2) + ' off';
-      document.getElementById('discountRow').style.display = 'flex';
-      document.getElementById('discountAmt').textContent = '−₹' + parseFloat(discount).toFixed(2);
-      document.getElementById('cartTotal').textContent = '₹' + (subtotalBase - parseFloat(discount)).toFixed(2);
-    }
-
     function showToast(msg, type) {
       type = type || 'success';
       var t = document.getElementById('toast');
@@ -500,66 +313,6 @@
       }
     }
 
-    function applyCoupon() {
-      var code = document.getElementById('couponCodeInput').value.trim().toUpperCase();
-      if (!code) { showCouponError('Please enter a coupon code.'); return; }
-
-      var btn = document.getElementById('couponApplyBtn');
-      btn.disabled = true;
-      btn.textContent = '...';
-
-      fetch('/cart/apply-coupon', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: code })
-      })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        btn.disabled = false;
-        btn.textContent = 'Apply';
-        if (data.success) {
-          showAppliedCouponUI(code, data.discount);
-        } else {
-          showCouponError(data.message || 'Invalid coupon code');
-        }
-      })
-      .catch(function() {
-        btn.disabled = false;
-        btn.textContent = 'Apply';
-        showCouponError('Something went wrong. Try again.');
-      });
-    }
-
-    function removeCoupon() {
-  var btn = document.querySelector('.remove-coupon');
-  if (btn) { btn.disabled = true; btn.textContent = '...'; }
-
-  fetch('/cart/remove-coupon', { method: 'DELETE' })
-    .then(function(r) { return r.json(); })
-    .then(function() {
-      document.getElementById('couponAppliedTag').style.display = 'none';
-      document.getElementById('couponInputRow').style.display = 'flex';
-      document.getElementById('couponCodeInput').value = '';
-      document.getElementById('discountRow').style.display = 'none';
-      document.getElementById('cartTotal').textContent = '₹' + subtotalBase.toFixed(2);
-      showToast('Coupon removed', 'warn');
-      if (btn) { btn.disabled = false; btn.textContent = 'Remove'; }
-    })
-    .catch(function() {
-      showToast('Could not remove coupon. Try again.', 'error');
-      if (btn) { btn.disabled = false; btn.textContent = 'Remove'; }
-    });
-}
-  
-
-    function showCouponError(msg) {
-      document.getElementById('couponSuccess').style.display = 'none';
-      var el = document.getElementById('couponError');
-      document.getElementById('couponErrorMsg').textContent = msg;
-      el.style.display = 'flex';
-      setTimeout(function() { el.style.display = 'none'; }, 4000);
-    }
-
     function updateCartBadge(count) {
       var badge = document.getElementById('cartCount');
       if (!badge) return;
@@ -568,31 +321,9 @@
       badge.classList.remove('pop');
       void badge.offsetWidth;
       badge.classList.add('pop');
-      setTimeout(function () { badge.classList.remove('pop'); }, 300);
-    }
-
-    document.getElementById('couponCodeInput') && document.getElementById('couponCodeInput').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') applyCoupon();
-    });
-
-    function toggleCouponList() {
-      var list = document.getElementById('couponsList');
-      var btn  = document.getElementById('couponsToggleBtn');
-      list.classList.toggle('open');
-      btn.classList.toggle('open');
-    }
-
-    function useCoupon(code) {
-      var input = document.getElementById('couponCodeInput');
-      if (input) {
-        input.value = code;
-        var list = document.getElementById('couponsList');
-        var btn  = document.getElementById('couponsToggleBtn');
-        if (list) list.classList.remove('open');
-        if (btn)  btn.classList.remove('open');
-        applyCoupon();
-      }
+      setTimeout(function() { badge.classList.remove('pop'); }, 300);
     }
   </script>
+
 </body>
 </html>

@@ -76,7 +76,7 @@ const loadDashboard = async (req, res) => {
     const User = require('../../models/user/userModel')
     summary.totalUsers = await User.countDocuments({ isDeleted: false })
 
-    // ── chart data ────────────────────────────────────────────────────────────
+    // ── chart data ─
     // Group format depends on filter
     let groupId
     if (filter === 'today') {
@@ -150,7 +150,7 @@ const loadDashboard = async (req, res) => {
       })
     }
 
-    // ── best selling products (top 10) ────────────────────────────────────────
+    //  best selling products (top 10) 
     const bestProducts = await Order.aggregate([
       { $match: matchStage },
       { $unwind: '$items' },
@@ -164,10 +164,10 @@ const loadDashboard = async (req, res) => {
         }
       },
       { $sort: { totalQty: -1 } },
-      { $limit: 10 }
+      { $limit: 10}
     ])
-
-    // ── best selling categories (top 10) ──────────────────────────────────────
+  
+    //  best selling categories (top 10) 
     const bestCategories = await Order.aggregate([
       { $match: matchStage },
       { $unwind: '$items' },

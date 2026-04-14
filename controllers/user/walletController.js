@@ -72,7 +72,7 @@ const getWalletBalance = async(userId) =>{
 const handleCancellationRefund = async (order,userId) =>{
     if(order.paymentMethod === 'COD' && order.paymentStatus !== 'paid') return
 
-    const refundAmount = order.totalAmount 
+    const refundAmount = order.finalAmount 
     const description = `Refund for cancelled order #${order.orderId || order._id}`
 
     await creditWallet(userId.toString(),refundAmount,description,order._id)
@@ -83,7 +83,7 @@ const handleReturnRefund = async(order) =>{
 
     if(order.paymentMethod === 'COD' && order.paymentStatus !== 'paid') return;
 
-    const refundAmount = order.totalAmount 
+    const refundAmount = order.finalAmount 
     const description = `Refund for returned order #${order.orderId || order._id}`
 
 

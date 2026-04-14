@@ -69,31 +69,25 @@ const loadCart = async (req, res) => {
     const hasOutOfStock = validItems.some(i => !i.inStock)
     const hasQtyIssues = validItems.some(i => i.qtyExceedsStock || i.qtyExceedsMax)
     const canCheckout = validItems.length > 0 && !hasOutOfStock && !hasQtyIssues
-    // fetch available coupons (active, not expired, not exhausted)
-    const now = new Date()
-    const availableCoupons = await Coupon.find({
-      isActive: true,
-      $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }],
-      $or: [{ maxUses: null }, { $expr: { $lt: [{ $size: '$usedBy' }, '$maxUses'] } }]
-    }).lean()
 
-    // filter out coupons already used by this user
-    const coupons = availableCoupons.filter(c =>
-      !c.usedBy.some(id => id.toString() === userId.toString())
-    )
-   
-    const appliedCoupon = req.session.coupon || null
+    const totalItemDiscount = validItems.reduce((sum, item) => {
+      const original = item.variant?.varientPrice || 0
+      const current = item.currentPrice || 0
+      return sum + ((original - current) * item.effectiveQty)
+    }, 0)
+
+
     res.render('user/cart', {
       items: validItems,
       subtotal,
+      totalItemDiscount,
       removedNames,
       hasOutOfStock,
       hasQtyIssues,
       canCheckout,
       maxQty: MAX_QTY_PER_ITEM,
       user: req.session.user || null,
-      coupons,
-      appliedCoupon
+
     })
 
   } catch (error) {
@@ -357,7 +351,6 @@ const applyCoupon = async (req, res) => {
       return res.json({ success: false, message: 'Please enter a coupon code.' })
     }
 
-    // ── Bug 1: was using cartTotal from body (unreliable), compute from DB instead ──
     const cart = await Cart.findOne({ userId }).populate({
       path: 'items.productId',
       select: 'variants offer isDeleted isListed'
@@ -378,7 +371,6 @@ const applyCoupon = async (req, res) => {
       return sum + price * item.quantity
     }, 0)
 
-    // ── Bug 2: was checking req.session.coupon (wrong key), prevent double apply ──
     if (req.session.coupon) {
       return res.json({ success: false, message: 'A coupon is already applied. Remove it first.' })
     }
@@ -392,7 +384,6 @@ const applyCoupon = async (req, res) => {
       return res.json({ success: false, message: 'This coupon has expired.' })
     }
 
-    // ── Bug 3: was using userId (undefined) instead of userId ──
     if (coupon.usedBy.some(id => id.toString() === userId.toString())) {
       return res.json({ success: false, message: 'You have already used this coupon.' })
     }
@@ -408,17 +399,37 @@ const applyCoupon = async (req, res) => {
       })
     }
 
-   
+    // ── Calculate discount based on type ─────────────────────────────────
+    let discount = 0
+
+    if (coupon.discountType === 'percentage') {
+      discount = Math.round((cartTotal * coupon.discountAmount) / 100)
+      // cap at maxDiscount if set
+      if (coupon.maxDiscount && discount > coupon.maxDiscount) {
+        discount = coupon.maxDiscount
+      }
+    } else {
+      // flat
+      discount = coupon.discountAmount
+    }
+
+    // discount can never exceed cart total
+    discount = Math.min(discount, cartTotal)
+
     req.session.coupon = {
-      code: coupon.code,
-      discount: coupon.discountAmount,
+      code:     coupon.code,
+      discount: discount,
       couponId: coupon._id
     }
 
+    const label = coupon.discountType === 'percentage'
+      ? `${coupon.discountAmount}% off`
+      : `₹${discount} off`
+
     return res.json({
-      success: true,
-      discount: coupon.discountAmount,
-      message: `Coupon applied! ₹${coupon.discountAmount} off`
+      success:  true,
+      discount: discount,
+      message:  `Coupon applied! ${label}`
     })
 
   } catch (err) {

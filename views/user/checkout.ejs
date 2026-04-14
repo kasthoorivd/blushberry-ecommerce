@@ -48,7 +48,6 @@
       min-height: 100vh;
     }
 
-    /* NAV */
     .nav {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -79,49 +78,18 @@
       color: var(--muted);
     }
 
-    .nav-step {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-
-    .nav-step.active {
-      color: var(--accent);
-      font-weight: 500;
-    }
-
-    .nav-step.done {
-      color: var(--success);
-    }
-
+    .nav-step { display: flex; align-items: center; gap: 0.3rem; }
+    .nav-step.active { color: var(--accent); font-weight: 500; }
+    .nav-step.done { color: var(--success); }
     .nav-step-dot {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.6rem;
-      background: var(--border);
-      color: var(--muted);
+      width: 18px; height: 18px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; background: var(--border); color: var(--muted);
     }
+    .nav-step.active .nav-step-dot { background: var(--accent); color: #fff; }
+    .nav-step.done .nav-step-dot { background: var(--success); color: #fff; }
+    .nav-step-sep { color: var(--border); font-size: 0.7rem; }
 
-    .nav-step.active .nav-step-dot {
-      background: var(--accent);
-      color: #fff;
-    }
-
-    .nav-step.done .nav-step-dot {
-      background: var(--success);
-      color: #fff;
-    }
-
-    .nav-step-sep {
-      color: var(--border);
-      font-size: 0.7rem;
-    }
-
-    /* LAYOUT */
     .checkout-wrap {
       max-width: 1100px;
       margin: 0 auto;
@@ -132,7 +100,6 @@
       align-items: start;
     }
 
-    /* SECTION CARD */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -151,43 +118,21 @@
       justify-content: space-between;
     }
 
-    .card-header-left {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
+    .card-header-left { display: flex; align-items: center; gap: 0.6rem; }
 
     .card-icon {
-      width: 32px;
-      height: 32px;
+      width: 32px; height: 32px;
       background: var(--accent-soft);
       border: 1px solid rgba(194, 24, 91, 0.15);
       border-radius: var(--radius);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent);
-      font-size: 0.8rem;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent); font-size: 0.8rem; flex-shrink: 0;
     }
 
-    .card-title {
-      font-family: var(--display);
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--text);
-    }
+    .card-title { font-family: var(--display); font-size: 1rem; font-weight: 600; color: var(--text); }
+    .card-body { padding: 1.4rem; }
 
-    .card-body {
-      padding: 1.4rem;
-    }
-
-    /* ADDRESSES */
-    .address-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.85rem;
-    }
+    .address-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
 
     .address-card {
       border: 2px solid var(--border);
@@ -198,238 +143,76 @@
       position: relative;
     }
 
-    .address-card:hover {
-      border-color: rgba(194, 24, 91, 0.3);
-      background: var(--accent-soft);
-    }
+    .address-card:hover { border-color: rgba(194, 24, 91, 0.3); background: var(--accent-soft); }
+    .address-card.selected { border-color: var(--accent); background: rgba(194, 24, 91, 0.04); }
+    .address-card input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
 
-    .address-card.selected {
-      border-color: var(--accent);
-      background: rgba(194, 24, 91, 0.04);
-    }
-
-    .address-card input[type="radio"] {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .address-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 0.5rem;
-    }
-
-    .address-name {
-      font-weight: 500;
-      font-size: 0.88rem;
-      color: var(--text);
-    }
-
+    .address-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.5rem; }
+    .address-name { font-weight: 500; font-size: 0.88rem; color: var(--text); }
     .address-type-badge {
-      font-size: 0.62rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      background: var(--accent-soft);
-      color: var(--accent);
-      padding: 0.15rem 0.5rem;
-      border-radius: 999px;
-      font-weight: 500;
+      font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
+      background: var(--accent-soft); color: var(--accent);
+      padding: 0.15rem 0.5rem; border-radius: 999px; font-weight: 500;
     }
-
     .address-default-badge {
-      font-size: 0.62rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      background: rgba(34, 181, 115, 0.1);
-      color: var(--success);
-      padding: 0.15rem 0.5rem;
-      border-radius: 999px;
-      font-weight: 500;
-      margin-left: 0.3rem;
+      font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
+      background: rgba(34, 181, 115, 0.1); color: var(--success);
+      padding: 0.15rem 0.5rem; border-radius: 999px; font-weight: 500; margin-left: 0.3rem;
     }
-
-    .address-line {
-      font-size: 0.8rem;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .address-mobile {
-      font-size: 0.78rem;
-      color: var(--muted);
-      margin-top: 0.3rem;
-    }
+    .address-line { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+    .address-mobile { font-size: 0.78rem; color: var(--muted); margin-top: 0.3rem; }
 
     .address-select-indicator {
-      position: absolute;
-      top: 0.75rem;
-      right: 0.75rem;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: 2px solid var(--border);
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: absolute; top: 0.75rem; right: 0.75rem;
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--border); transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
     }
-
-    .address-card.selected .address-select-indicator {
-      border-color: var(--accent);
-      background: var(--accent);
-    }
-
+    .address-card.selected .address-select-indicator { border-color: var(--accent); background: var(--accent); }
     .address-card.selected .address-select-indicator::after {
-      content: '';
-      width: 6px;
-      height: 6px;
-      background: #fff;
-      border-radius: 50%;
-      display: block;
+      content: ''; width: 6px; height: 6px; background: #fff; border-radius: 50%; display: block;
     }
 
-    .address-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.65rem;
-    }
+    .address-actions { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.65rem; }
+    .btn-addr-edit { font-size: 0.72rem; color: var(--accent); background: none; border: none; cursor: pointer; padding: 0; text-decoration: underline; }
 
-    .btn-addr-edit {
-      font-size: 0.72rem;
-      color: var(--accent);
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      text-decoration: underline;
-    }
-
-    .no-address {
-      text-align: center;
-      padding: 2rem;
-      color: var(--muted);
-      font-size: 0.88rem;
-    }
+    .no-address { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.88rem; }
 
     .btn-add-address {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: transparent;
-      border: 1px dashed rgba(194, 24, 91, 0.4);
-      color: var(--accent);
-      padding: 0.55rem 1rem;
-      border-radius: var(--radius);
-      font-family: var(--body);
-      font-size: 0.82rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: transparent; border: 1px dashed rgba(194, 24, 91, 0.4);
+      color: var(--accent); padding: 0.55rem 1rem; border-radius: var(--radius);
+      font-family: var(--body); font-size: 0.82rem; cursor: pointer; transition: all 0.2s; text-decoration: none;
     }
+    .btn-add-address:hover { background: var(--accent-soft); border-style: solid; }
 
-    .btn-add-address:hover {
-      background: var(--accent-soft);
-      border-style: solid;
-    }
-
-    /* OOS */
     .oos-banner {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.6rem;
-      background: rgba(224, 108, 108, 0.08);
-      border: 1px solid rgba(224, 108, 108, 0.25);
-      border-radius: var(--radius);
-      padding: 0.75rem 1rem;
-      margin-bottom: 1rem;
-      font-size: 0.78rem;
-      color: #c0392b;
+      display: flex; align-items: flex-start; gap: 0.6rem;
+      background: rgba(224, 108, 108, 0.08); border: 1px solid rgba(224, 108, 108, 0.25);
+      border-radius: var(--radius); padding: 0.75rem 1rem; margin-bottom: 1rem;
+      font-size: 0.78rem; color: #c0392b;
     }
 
-    .oos-banner i {
-      margin-top: 0.1rem;
-      flex-shrink: 0;
-    }
-
-    /* ORDER ITEMS */
     .order-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      padding: 1rem 0;
-      border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 1rem;
+      padding: 1rem 0; border-bottom: 1px solid var(--border);
     }
-
-    .order-item:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-
-    .order-item:first-child {
-      padding-top: 0;
-    }
+    .order-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .order-item:first-child { padding-top: 0; }
 
     .item-img {
-      width: 72px;
-      height: 72px;
-      border-radius: var(--radius);
-      object-fit: cover;
-      border: 1px solid var(--border);
-      flex-shrink: 0;
-      background: var(--surface2);
+      width: 72px; height: 72px; border-radius: var(--radius);
+      object-fit: cover; border: 1px solid var(--border);
+      flex-shrink: 0; background: var(--surface2);
     }
-
-    .item-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .item-name {
-      font-size: 0.88rem;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 0.2rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .item-shade {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-bottom: 0.3rem;
-    }
-
-    .item-qty {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-
-    .item-pricing {
-      text-align: right;
-      flex-shrink: 0;
-    }
-
-    .item-price-final {
-      font-size: 0.92rem;
-      font-weight: 500;
-      color: var(--text);
-    }
-
-    .item-price-original {
-      font-size: 0.72rem;
-      color: var(--muted);
-      text-decoration: line-through;
-    }
-
-    .item-discount-tag {
-      font-size: 0.68rem;
-      color: var(--success);
-      font-weight: 500;
-    }
+    .item-info { flex: 1; min-width: 0; }
+    .item-name { font-size: 0.88rem; font-weight: 500; color: var(--text); margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-shade { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.3rem; }
+    .item-qty { font-size: 0.75rem; color: var(--muted); }
+    .item-pricing { text-align: right; flex-shrink: 0; }
+    .item-price-final { font-size: 0.92rem; font-weight: 500; color: var(--text); }
+    .item-price-original { font-size: 0.72rem; color: var(--muted); text-decoration: line-through; }
+    .item-discount-tag { font-size: 0.68rem; color: var(--success); font-weight: 500; }
 
     /* SUMMARY */
     .summary-card {
@@ -442,489 +225,226 @@
       top: 90px;
     }
 
-    .summary-header {
-      padding: 1rem 1.4rem;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface2);
-    }
-
-    .summary-title {
-      font-family: var(--display);
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .summary-body {
-      padding: 1.2rem 1.4rem;
-    }
+    .summary-header { padding: 1rem 1.4rem; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .summary-title { font-family: var(--display); font-size: 1rem; font-weight: 600; color: var(--text); }
+    .summary-body { padding: 1.2rem 1.4rem; }
 
     .summary-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 0.83rem;
-      color: var(--muted);
-      margin-bottom: 0.6rem;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 0.83rem; color: var(--muted); margin-bottom: 0.6rem;
     }
-
     .summary-row.total {
-      border-top: 1px solid var(--border);
-      padding-top: 0.75rem;
-      margin-top: 0.5rem;
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--text);
+      border-top: 1px solid var(--border); padding-top: 0.75rem; margin-top: 0.5rem;
+      font-size: 1rem; font-weight: 600; color: var(--text);
     }
-
-    .summary-row .green {
-      color: var(--success);
-      font-weight: 500;
-    }
+    .summary-row .green { color: var(--success); font-weight: 500; }
 
     .summary-savings {
       background: rgba(34, 181, 115, 0.07);
       border: 1px solid rgba(34, 181, 115, 0.2);
       border-radius: var(--radius);
       padding: 0.6rem 0.9rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.78rem;
-      color: var(--success);
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.78rem; color: var(--success);
       margin: 0.75rem 0;
     }
 
-    .free-shipping-bar {
-      margin: 0.75rem 0;
-    }
+    .free-shipping-bar { margin: 0.75rem 0; }
+    .free-shipping-text { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; }
+    .free-shipping-text strong { color: var(--accent); }
+    .progress-bar { height: 4px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-dim)); border-radius: 999px; }
 
-    .free-shipping-text {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-bottom: 0.4rem;
+    /* ── COUPON ── */
+    .coupon-wrap { margin-bottom: 0.85rem; }
+    .coupon-label {
+      font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent); font-weight: 500; margin-bottom: 0.5rem;
+      display: flex; align-items: center; gap: 6px;
     }
-
-    .free-shipping-text strong {
-      color: var(--accent);
+    .coupon-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, var(--border), transparent); }
+    .coupon-input-row {
+      display: flex; border: 1.5px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; background: var(--surface);
     }
-
-    .progress-bar {
-      height: 4px;
-      background: var(--border);
-      border-radius: 999px;
-      overflow: hidden;
+    .coupon-input-row:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(194,24,91,0.08); }
+    .coupon-input-row input {
+      flex: 1; border: none; outline: none; padding: 0.6rem 0.85rem;
+      font-size: 0.82rem; font-family: var(--body); color: var(--text);
+      background: transparent; letter-spacing: 0.5px;
     }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent-dim));
-      border-radius: 999px;
+    .coupon-input-row input::placeholder { color: var(--muted); font-size: 0.78rem; }
+    .coupon-apply-btn {
+      background: var(--accent); color: #fff; border: none;
+      padding: 0 1rem; font-size: 0.75rem; font-weight: 500;
+      font-family: var(--body); letter-spacing: 0.08em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s; white-space: nowrap;
     }
-
+    .coupon-apply-btn:hover { background: #a3154e; }
+    .coupon-apply-btn:disabled { background: #ddd; cursor: not-allowed; }
+    .coupon-feedback {
+      display: none; margin-top: 0.45rem; font-size: 0.75rem;
+      padding: 0.4rem 0.75rem; border-radius: 6px; align-items: center; gap: 6px;
+    }
+    .coupon-feedback.success { display: flex; background: #f0faf4; color: #1a7a47; border: 1px solid #b6e5cc; }
+    .coupon-feedback.error { display: flex; background: #fce8e8; color: #c03030; border: 1px solid #f0c0c0; }
+    .coupon-applied-tag {
+      display: none; align-items: center; justify-content: space-between;
+      background: #f0faf4; border: 1px dashed #5cb87a; border-radius: 8px;
+      padding: 0.5rem 0.85rem; font-size: 0.78rem; color: #1a7a47; font-weight: 500;
+    }
+    .coupon-applied-tag .remove-coupon {
+      background: none; border: none; cursor: pointer; color: var(--accent);
+      font-size: 0.72rem; font-family: var(--body); text-decoration: underline; padding: 0;
+    }
+ /* ── COUPON DROPDOWN ── */
+.coupon-dropdown {
+  margin-top: 0.5rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+}
+.coupon-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+.coupon-dropdown-header:hover { background: var(--accent-soft); }
+#couponChevron { transition: transform 0.25s; font-size: 0.65rem; }
+#couponChevron.open { transform: rotate(180deg); }
+.coupon-dropdown-list {
+  display: none;
+  border-top: 1px solid var(--border);
+  max-height: 210px;
+  overflow-y: auto;
+}
+.coupon-dropdown-list.open { display: block; }
+.coupon-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.coupon-option:last-child { border-bottom: none; }
+.coupon-option:hover { background: var(--accent-soft); }
+.coupon-option-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.coupon-option-code {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.5px;
+}
+.coupon-option-desc {
+  font-size: 0.73rem;
+  color: var(--success);
+  font-weight: 600;
+}
+.coupon-option-min {
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+.coupon-option-apply-btn {
+  flex-shrink: 0;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid rgba(194,24,91,0.2);
+  border-radius: 6px;
+  padding: 0.28rem 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-family: var(--body);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.coupon-option-apply-btn:hover { background: var(--accent); color: #fff; }
     /* PAYMENT */
-    .payment-options {
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-    }
-
+    .payment-options { display: flex; flex-direction: column; gap: 0.65rem; }
     .payment-option {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      border: 2px solid var(--border);
-      border-radius: var(--radius);
-      padding: 0.85rem 1rem;
-      cursor: pointer;
-      transition: all 0.2s;
+      display: flex; align-items: center; gap: 0.75rem;
+      border: 2px solid var(--border); border-radius: var(--radius);
+      padding: 0.85rem 1rem; cursor: pointer; transition: all 0.2s;
     }
+    .payment-option:hover { border-color: rgba(194, 24, 91, 0.3); }
+    .payment-option.selected { border-color: var(--accent); background: var(--accent-soft); }
+    .payment-option.disabled-option { opacity: 0.55; cursor: not-allowed; }
+    .payment-option.disabled-option:hover { border-color: var(--border); }
+    .payment-option input[type="radio"] { accent-color: var(--accent); width: 16px; height: 16px; flex-shrink: 0; }
+    .payment-option-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; background: var(--surface2); flex-shrink: 0; }
+    .payment-option-info { flex: 1; }
+    .payment-option-label { font-size: 0.86rem; font-weight: 500; color: var(--text); }
+    .payment-option-sub { font-size: 0.72rem; color: var(--muted); }
+    .badge-low { font-size: 0.65rem; background: rgba(224, 108, 108, 0.1); color: #c0392b; padding: 0.15rem 0.45rem; border-radius: 999px; white-space: nowrap; flex-shrink: 0; }
 
-    .payment-option:hover {
-      border-color: rgba(194, 24, 91, 0.3);
-    }
-
-    .payment-option.selected {
-      border-color: var(--accent);
-      background: var(--accent-soft);
-    }
-
-    .payment-option.disabled-option {
-      opacity: 0.55;
-      cursor: not-allowed;
-    }
-
-    .payment-option.disabled-option:hover {
-      border-color: var(--border);
-    }
-
-    .payment-option input[type="radio"] {
-      accent-color: var(--accent);
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-    }
-
-    .payment-option-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      background: var(--surface2);
-      flex-shrink: 0;
-    }
-
-    .payment-option-info {
-      flex: 1;
-    }
-
-    .payment-option-label {
-      font-size: 0.86rem;
-      font-weight: 500;
-      color: var(--text);
-    }
-
-    .payment-option-sub {
-      font-size: 0.72rem;
-      color: var(--muted);
-    }
-
-    .badge-low {
-      font-size: 0.65rem;
-      background: rgba(224, 108, 108, 0.1);
-      color: #c0392b;
-      padding: 0.15rem 0.45rem;
-      border-radius: 999px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    /* PLACE ORDER */
     .btn-place-order {
-      width: 100%;
-      background: linear-gradient(135deg, var(--accent), #e91e8c);
-      color: #fff;
-      border: none;
-      padding: 0.9rem 1.5rem;
-      border-radius: var(--radius);
-      font-family: var(--body);
-      font-size: 0.95rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      margin-top: 1rem;
+      width: 100%; background: linear-gradient(135deg, var(--accent), #e91e8c);
+      color: #fff; border: none; padding: 0.9rem 1.5rem; border-radius: var(--radius);
+      font-family: var(--body); font-size: 0.95rem; font-weight: 500; cursor: pointer;
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+      gap: 0.5rem; margin-top: 1rem;
     }
+    .btn-place-order:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(194, 24, 91, 0.3); }
+    .btn-place-order:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 
-    .btn-place-order:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 20px rgba(194, 24, 91, 0.3);
-    }
+    .secure-note { display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.72rem; color: var(--muted); margin-top: 0.6rem; }
 
-    .btn-place-order:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    .secure-note {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.4rem;
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-top: 0.6rem;
-    }
-
-    /* BREADCRUMB */
-    .breadcrumb {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-bottom: 1.5rem;
-    }
-
-    .breadcrumb a {
-      color: var(--muted);
-      text-decoration: none;
-    }
-
-    .breadcrumb a:hover {
-      color: var(--accent);
-    }
-
-    .breadcrumb-sep {
-      font-size: 0.6rem;
-      opacity: 0.4;
-    }
+    .breadcrumb { display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: var(--muted); margin-bottom: 1.5rem; }
+    .breadcrumb a { color: var(--muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--accent); }
+    .breadcrumb-sep { font-size: 0.6rem; opacity: 0.4; }
 
     /* MODAL */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(26, 10, 16, 0.55);
-      backdrop-filter: blur(3px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-
-    .modal-overlay.open {
-      display: flex;
-    }
-
-    .modal-box {
-      background: #fff;
-      border-radius: 18px;
-      width: 100%;
-      max-width: 620px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 24px 64px rgba(194, 24, 91, 0.18);
-      animation: modalIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    @keyframes modalIn {
-      from { opacity: 0; transform: scale(0.93) translateY(16px); }
-      to   { opacity: 1; transform: scale(1) translateY(0); }
-    }
-
-    .modal-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.2rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface2);
-      border-radius: 18px 18px 0 0;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-
-    .modal-head-title {
-      font-family: var(--display);
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .modal-close {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      border: none;
-      background: var(--border);
-      color: var(--muted);
-      font-size: 0.85rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .modal-close:hover {
-      background: #f0c0c8;
-      color: var(--accent);
-    }
-
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(26, 10, 16, 0.55); backdrop-filter: blur(3px); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: #fff; border-radius: 18px; width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(194, 24, 91, 0.18); animation: modalIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.93) translateY(16px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); background: var(--surface2); border-radius: 18px 18px 0 0; position: sticky; top: 0; z-index: 1; }
+    .modal-head-title { font-family: var(--display); font-size: 1.05rem; font-weight: 700; color: var(--text); }
+    .modal-close { width: 30px; height: 30px; border-radius: 50%; border: none; background: var(--border); color: var(--muted); font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .modal-close:hover { background: #f0c0c8; color: var(--accent); }
     .modal-body { padding: 1.5rem; }
-
-    .modal-alert-error {
-      background: #fce8e8;
-      border: 1px solid #f0c0c0;
-      color: #c03030;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      margin-bottom: 16px;
-      display: none;
-      align-items: center;
-      gap: 8px;
-    }
-
+    .modal-alert-error { background: #fce8e8; border: 1px solid #f0c0c0; color: #c03030; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none; align-items: center; gap: 8px; }
     .modal-alert-error.show { display: flex; }
-
-    .modal-section-label {
-      font-size: 10px;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      color: var(--accent);
-      font-weight: 600;
-      margin: 20px 0 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .modal-section-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(to right, var(--border), transparent);
-    }
-
-    .modal-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
-    .modal-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
+    .modal-section-label { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent); font-weight: 600; margin: 20px 0 12px; display: flex; align-items: center; gap: 8px; }
+    .modal-section-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, var(--border), transparent); }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .modal-group { display: flex; flex-direction: column; gap: 4px; }
     .modal-group.full { grid-column: 1 / -1; }
-
-    .modal-group label {
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--muted);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
+    .modal-group label { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
     .modal-group label span { color: var(--accent); }
-
-    .modal-group input,
-    .modal-group select,
-    .modal-group textarea {
-      width: 100%;
-      padding: 10px 13px;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      font-size: 13px;
-      font-family: var(--body);
-      color: var(--text);
-      background: #fffafb;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    .modal-group input:focus,
-    .modal-group select:focus,
-    .modal-group textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(194, 24, 91, 0.08);
-      background: #fff;
-    }
-
-    .modal-group input::placeholder,
-    .modal-group textarea::placeholder {
-      color: #c8b0b5;
-      font-size: 12px;
-    }
-
-    .modal-group textarea {
-      resize: vertical;
-      min-height: 68px;
-    }
-
-    .modal-group select {
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c2185b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 13px center;
-    }
-
-    .type-group {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
+    .modal-group input, .modal-group select, .modal-group textarea { width: 100%; padding: 10px 13px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; font-family: var(--body); color: var(--text); background: #fffafb; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    .modal-group input:focus, .modal-group select:focus, .modal-group textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(194, 24, 91, 0.08); background: #fff; }
+    .modal-group input::placeholder, .modal-group textarea::placeholder { color: #c8b0b5; font-size: 12px; }
+    .modal-group textarea { resize: vertical; min-height: 68px; }
+    .modal-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c2185b' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 13px center; }
+    .type-group { display: flex; gap: 8px; flex-wrap: wrap; }
     .type-pill input[type=radio] { display: none; }
-
-    .type-pill label {
-      display: inline-block;
-      padding: 7px 18px;
-      border: 1.5px solid var(--border);
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: var(--body);
-    }
-
-    .type-pill input[type=radio]:checked + label {
-      border-color: var(--accent);
-      background: rgba(194, 24, 91, 0.08);
-      color: var(--accent);
-    }
-
-    .modal-btn-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 24px;
-    }
-
-    .modal-btn-cancel {
-      padding: 12px 20px;
-      background: none;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      font-family: var(--body);
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .modal-btn-cancel:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .modal-btn-save {
-      flex: 1;
-      padding: 12px;
-      background: linear-gradient(135deg, var(--accent), #e91e8c);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      font-family: var(--body);
-      letter-spacing: 0.5px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .modal-btn-save:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 16px rgba(194, 24, 91, 0.25);
-    }
-
-    .modal-btn-save:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
+    .type-pill label { display: inline-block; padding: 7px 18px; border: 1.5px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.2s; font-family: var(--body); }
+    .type-pill input[type=radio]:checked+label { border-color: var(--accent); background: rgba(194, 24, 91, 0.08); color: var(--accent); }
+    .modal-btn-row { display: flex; gap: 10px; margin-top: 24px; }
+    .modal-btn-cancel { padding: 12px 20px; background: none; border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; font-weight: 500; font-family: var(--body); color: var(--muted); cursor: pointer; transition: all 0.2s; }
+    .modal-btn-cancel:hover { border-color: var(--accent); color: var(--accent); }
+    .modal-btn-save { flex: 1; padding: 12px; background: linear-gradient(135deg, var(--accent), #e91e8c); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: var(--body); letter-spacing: 0.5px; cursor: pointer; transition: all 0.2s; }
+    .modal-btn-save:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(194, 24, 91, 0.25); }
+    .modal-btn-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 
     @media (max-width: 768px) {
-      .checkout-wrap {
-        grid-template-columns: 1fr;
-        padding: 1rem;
-      }
+      .checkout-wrap { grid-template-columns: 1fr; padding: 1rem; }
       .address-grid { grid-template-columns: 1fr; }
       .summary-card { position: static; }
       .modal-grid { grid-template-columns: 1fr; }
@@ -1048,11 +568,9 @@
               <% }) %>
             <% } else { %>
               <div class="no-address" id="noAddressMsg">
-                <i class="fas fa-map-marker-alt"
-                  style="font-size:2rem;color:var(--border);display:block;margin-bottom:0.75rem;"></i>
+                <i class="fas fa-map-marker-alt" style="font-size:2rem;color:var(--border);display:block;margin-bottom:0.75rem;"></i>
                 No addresses saved yet.<br />
-                <button type="button" class="btn-add-address" style="margin-top:0.75rem;"
-                  onclick="openAddressModal()">
+                <button type="button" class="btn-add-address" style="margin-top:0.75rem;" onclick="openAddressModal()">
                   <i class="fas fa-plus"></i> Add Address
                 </button>
               </div>
@@ -1116,7 +634,6 @@
         <div class="card-body">
           <div class="payment-options">
 
-            <!-- COD -->
             <label class="payment-option selected" id="pmCOD" onclick="selectPayment('COD', this)">
               <input type="radio" name="paymentMethod" value="COD" checked />
               <div class="payment-option-icon">💵</div>
@@ -1126,7 +643,6 @@
               </div>
             </label>
 
-            <!-- ONLINE -->
             <label class="payment-option" id="pmOnline" onclick="selectPayment('Online', this)">
               <input type="radio" name="paymentMethod" value="Online" />
               <div class="payment-option-icon">💳</div>
@@ -1136,14 +652,12 @@
               </div>
             </label>
 
-            <!-- WALLET -->
             <%
               var wb = walletBalance || 0;
               var hasEnough = wb >= totals.finalAmount;
             %>
             <label class="payment-option <%= !hasEnough ? 'disabled-option' : '' %>"
-              id="pmWallet"
-              onclick="selectPayment('Wallet', this)">
+              id="pmWallet" onclick="selectPayment('Wallet', this)">
               <input type="radio" name="paymentMethod" value="Wallet" <%= !hasEnough ? 'disabled' : '' %> />
               <div class="payment-option-icon">👛</div>
               <div class="payment-option-info">
@@ -1191,17 +705,73 @@
             </div>
           <% } %>
 
+           <!-- ── COUPON SECTION ── -->
+<div class="coupon-wrap">
+  <p class="coupon-label">🏷 Have a coupon?</p>
+
+  <div class="coupon-applied-tag" id="couponAppliedTag">
+    <span id="couponAppliedText">🎉 Coupon applied!</span>
+    <button class="remove-coupon" onclick="removeCoupon()">Remove</button>
+  </div>
+
+  <div id="couponInputRow">
+    <div class="coupon-input-row">
+      <input type="text" id="couponCodeInput" placeholder="Enter code e.g. SAVE100"
+        maxlength="20" autocomplete="off" />
+      <button class="coupon-apply-btn" id="couponApplyBtn" onclick="applyCoupon()">Apply</button>
+    </div>
+
+    <% if (availableCoupons && availableCoupons.length > 0) { %>
+      <div class="coupon-dropdown">
+        <div class="coupon-dropdown-header" onclick="toggleCouponDropdown()">
+          <span><i class="fas fa-tags"></i> <%= availableCoupons.length %> coupon<%= availableCoupons.length > 1 ? 's' : '' %> available</span>
+          <i class="fas fa-chevron-down" id="couponChevron"></i>
+        </div>
+        <div class="coupon-dropdown-list" id="couponDropdownList">
+          <% availableCoupons.forEach(function(c) { %>
+            <div class="coupon-option" onclick="selectCoupon('<%= c.code %>')">
+              <div class="coupon-option-left">
+                <span class="coupon-option-code"><%= c.code %></span>
+                <span class="coupon-option-desc">
+  <% if (c.discountType === 'percentage') { %>
+    <%= c.discountAmount %>% off
+    <% if (c.maxDiscount) { %>(max ₹<%= c.maxDiscount %>)<% } %>
+  <% } else { %>
+    ₹<%= c.discountAmount %> off
+  <% } %>
+</span>
+                <% if (c.minOrderAmount > 0) { %>
+                  <span class="coupon-option-min">Min order ₹<%= c.minOrderAmount.toLocaleString('en-IN') %></span>
+                <% } %>
+                <% if (c.expiresAt) { %>
+                  <span class="coupon-option-min">
+                    Expires <%= new Date(c.expiresAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) %>
+                  </span>
+                <% } %>
+              </div>
+              <button class="coupon-option-apply-btn" onclick="event.stopPropagation(); selectCoupon('<%= c.code %>')">
+                Apply
+              </button>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="coupon-feedback success" id="couponSuccess" style="display:none;">
+    <span>✓</span><span id="couponSuccessMsg"></span>
+  </div>
+  <div class="coupon-feedback error" id="couponError" style="display:none;">
+    <span>✗</span><span id="couponErrorMsg"></span>
+  </div>
+</div>
+<!-- ── END COUPON ── -->
+
           <div class="summary-row">
             <span>Subtotal (<%= lines.length %> items)</span>
-            <span>₹<%= totals.subtotal.toLocaleString('en-IN') %></span>
+            <span>₹<%= (totals.subtotal - totals.itemDiscounts).toLocaleString('en-IN') %></span>
           </div>
-
-          <% if (totals.itemDiscounts > 0) { %>
-            <div class="summary-row">
-              <span>Item Discounts</span>
-              <span class="green">−₹<%= totals.itemDiscounts.toLocaleString('en-IN') %></span>
-            </div>
-          <% } %>
 
           <% if (totals.couponDiscount > 0) { %>
             <div class="summary-row">
@@ -1237,7 +807,7 @@
             Place Order · ₹<%= totals.finalAmount.toLocaleString('en-IN') %>
           </button>
           <div class="secure-note">
-            <i class="fas fa-shield-alt"></i> Safe & secure checkout
+            <i class="fas fa-shield-alt"></i> Safe &amp; secure checkout
           </div>
 
         </div>
@@ -1282,8 +852,7 @@
           <div class="modal-grid">
             <div class="modal-group full">
               <label>Address (House No, Street, Area) <span>*</span></label>
-              <textarea name="address" placeholder="e.g. Kulirma Lane, Niravath Rd, Kundannoor"
-                required maxlength="200"></textarea>
+              <textarea name="address" placeholder="e.g. Kulirma Lane, Niravath Rd, Kundannoor" required maxlength="200"></textarea>
             </div>
             <div class="modal-group">
               <label>Landmark</label>
@@ -1323,18 +892,9 @@
           </div>
           <p class="modal-section-label">🏷 Address Type</p>
           <div class="type-group">
-            <div class="type-pill">
-              <input type="radio" name="addressType" id="mTypeHome" value="Home" checked />
-              <label for="mTypeHome">🏠 Home</label>
-            </div>
-            <div class="type-pill">
-              <input type="radio" name="addressType" id="mTypeWork" value="Work" />
-              <label for="mTypeWork">💼 Work</label>
-            </div>
-            <div class="type-pill">
-              <input type="radio" name="addressType" id="mTypeOther" value="Other" />
-              <label for="mTypeOther">📦 Other</label>
-            </div>
+            <div class="type-pill"><input type="radio" name="addressType" id="mTypeHome" value="Home" checked /><label for="mTypeHome">🏠 Home</label></div>
+            <div class="type-pill"><input type="radio" name="addressType" id="mTypeWork" value="Work" /><label for="mTypeWork">💼 Work</label></div>
+            <div class="type-pill"><input type="radio" name="addressType" id="mTypeOther" value="Other" /><label for="mTypeOther">📦 Other</label></div>
           </div>
           <div class="modal-btn-row">
             <button type="button" class="modal-btn-cancel" onclick="closeAddressModal()">Cancel</button>
@@ -1346,7 +906,6 @@
       </div>
     </div>
   </div>
-
 
   <!-- EDIT ADDRESS MODAL -->
   <div class="modal-overlay" id="editAddressModal" onclick="if(event.target===this)closeEditModal()">
@@ -1363,37 +922,16 @@
           <input type="hidden" id="editAddressId" />
           <p class="modal-section-label">📋 Contact Info</p>
           <div class="modal-grid">
-            <div class="modal-group">
-              <label>Full Name <span>*</span></label>
-              <input type="text" id="editName" placeholder="Full name" maxlength="60" />
-            </div>
-            <div class="modal-group">
-              <label>Mobile Number <span>*</span></label>
-              <input type="tel" id="editMobile" placeholder="10-digit number" maxlength="10" />
-            </div>
-            <div class="modal-group">
-              <label>Email <span>*</span></label>
-              <input type="email" id="editEmail" placeholder="you@email.com" maxlength="80" />
-            </div>
-            <div class="modal-group">
-              <label>Alternate Number</label>
-              <input type="tel" id="editAlternate" placeholder="Optional" maxlength="10" />
-            </div>
+            <div class="modal-group"><label>Full Name <span>*</span></label><input type="text" id="editName" placeholder="Full name" maxlength="60" /></div>
+            <div class="modal-group"><label>Mobile Number <span>*</span></label><input type="tel" id="editMobile" placeholder="10-digit number" maxlength="10" /></div>
+            <div class="modal-group"><label>Email <span>*</span></label><input type="email" id="editEmail" placeholder="you@email.com" maxlength="80" /></div>
+            <div class="modal-group"><label>Alternate Number</label><input type="tel" id="editAlternate" placeholder="Optional" maxlength="10" /></div>
           </div>
           <p class="modal-section-label">📍 Address Details</p>
           <div class="modal-grid">
-            <div class="modal-group full">
-              <label>Address <span>*</span></label>
-              <textarea id="editAddr" maxlength="200"></textarea>
-            </div>
-            <div class="modal-group">
-              <label>Landmark</label>
-              <input type="text" id="editLandmark" maxlength="100" />
-            </div>
-            <div class="modal-group">
-              <label>City / Town</label>
-              <input type="text" id="editCity" maxlength="60" />
-            </div>
+            <div class="modal-group full"><label>Address <span>*</span></label><textarea id="editAddr" maxlength="200"></textarea></div>
+            <div class="modal-group"><label>Landmark</label><input type="text" id="editLandmark" maxlength="100" /></div>
+            <div class="modal-group"><label>City / Town</label><input type="text" id="editCity" maxlength="60" /></div>
             <div class="modal-group">
               <label>State <span>*</span></label>
               <select id="editState">
@@ -1411,31 +949,14 @@
                 <option>Ladakh</option><option>Puducherry</option><option>Chandigarh</option>
               </select>
             </div>
-            <div class="modal-group">
-              <label>Pincode <span>*</span></label>
-              <input type="text" id="editPincode" maxlength="6" />
-            </div>
-            <div class="modal-group">
-              <label>Country <span>*</span></label>
-              <select id="editCountry">
-                <option value="India" selected>India</option>
-              </select>
-            </div>
+            <div class="modal-group"><label>Pincode <span>*</span></label><input type="text" id="editPincode" maxlength="6" /></div>
+            <div class="modal-group"><label>Country <span>*</span></label><select id="editCountry"><option value="India" selected>India</option></select></div>
           </div>
           <p class="modal-section-label">🏷 Address Type</p>
           <div class="type-group">
-            <div class="type-pill">
-              <input type="radio" name="editType" id="eHome" value="Home" checked />
-              <label for="eHome">🏠 Home</label>
-            </div>
-            <div class="type-pill">
-              <input type="radio" name="editType" id="eWork" value="Work" />
-              <label for="eWork">💼 Work</label>
-            </div>
-            <div class="type-pill">
-              <input type="radio" name="editType" id="eOther" value="Other" />
-              <label for="eOther">📦 Other</label>
-            </div>
+            <div class="type-pill"><input type="radio" name="editType" id="eHome" value="Home" checked /><label for="eHome">🏠 Home</label></div>
+            <div class="type-pill"><input type="radio" name="editType" id="eWork" value="Work" /><label for="eWork">💼 Work</label></div>
+            <div class="type-pill"><input type="radio" name="editType" id="eOther" value="Other" /><label for="eOther">📦 Other</label></div>
           </div>
           <div class="modal-btn-row">
             <button type="button" class="modal-btn-cancel" onclick="closeEditModal()">Cancel</button>
@@ -1448,49 +969,144 @@
     </div>
   </div>
 
-
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
   <script>
-    // ── State ──────────────────────────────────────────────────────────────
     var selectedAddressId = '<%= addresses && addresses.length > 0 ? addresses[0]._id : "" %>';
     var selectedPayment   = 'COD';
     var WALLET_BALANCE    = <%= walletBalance || 0 %>;
     var ORDER_TOTAL       = <%= totals.finalAmount %>;
     var FINAL_AMOUNT_STR  = '₹<%= totals.finalAmount.toLocaleString("en-IN") %>';
+    var COD_LIMIT = 1500;
 
-    // ── Address selection ──────────────────────────────────────────────────
+    // ── Restore coupon UI if already applied in session ──
+    var _appliedCode     = <%- JSON.stringify(couponCode || null) %>;
+    var _appliedDiscount = <%= totals.couponDiscount || 0 %>;
+    if (_appliedCode && _appliedDiscount > 0) {
+      showAppliedCouponUI(_appliedCode, _appliedDiscount);
+    }
+
+    // ── Coupon functions ──────────────────────────────────────────────────
+   // ── Updated: hides input row (which also hides dropdown) ──
+function showAppliedCouponUI(code, discount) {
+  document.getElementById('couponInputRow').style.display  = 'none';
+  document.getElementById('couponSuccess').style.display   = 'none';
+  document.getElementById('couponError').style.display     = 'none';
+  var tag = document.getElementById('couponAppliedTag');
+  tag.style.display = 'flex';
+  document.getElementById('couponAppliedText').textContent =
+    '🎉 "' + code + '" — ₹' + parseFloat(discount).toFixed(2) + ' off';
+}
+
+// ── New: toggle dropdown ──
+function toggleCouponDropdown() {
+  var list    = document.getElementById('couponDropdownList');
+  var chevron = document.getElementById('couponChevron');
+  list.classList.toggle('open');
+  chevron.classList.toggle('open');
+}
+
+// ── New: click a coupon row → fill input & auto-apply ──
+function selectCoupon(code) {
+  document.getElementById('couponCodeInput').value = code;
+  var list    = document.getElementById('couponDropdownList');
+  var chevron = document.getElementById('couponChevron');
+  list.classList.remove('open');
+  chevron.classList.remove('open');
+  applyCoupon();
+}
+    async function applyCoupon() {
+      var code = document.getElementById('couponCodeInput').value.trim().toUpperCase();
+      if (!code) { showCouponError('Please enter a coupon code.'); return; }
+
+      var btn = document.getElementById('couponApplyBtn');
+      btn.disabled = true; btn.textContent = '...';
+
+      try {
+        var res    = await fetch('/cart/apply-coupon', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: code })
+        });
+        var result = await res.json();
+        btn.disabled = false; btn.textContent = 'Apply';
+
+        if (result.success) {
+          showAppliedCouponUI(code, result.discount);
+          setTimeout(function() { location.reload(); }, 500);
+        } else {
+          showCouponError(result.message || 'Invalid coupon code.');
+        }
+      } catch(e) {
+        btn.disabled = false; btn.textContent = 'Apply';
+        showCouponError('Something went wrong. Try again.');
+      }
+    }
+
+    async function removeCoupon() {
+      var btn = document.querySelector('.remove-coupon');
+      if (btn) { btn.disabled = true; btn.textContent = '...'; }
+      try {
+        await fetch('/cart/remove-coupon', { method: 'DELETE' });
+        location.reload();
+      } catch(e) {
+        if (btn) { btn.disabled = false; btn.textContent = 'Remove'; }
+      }
+    }
+
+    function showCouponError(msg) {
+      document.getElementById('couponSuccess').style.display = 'none';
+      var el = document.getElementById('couponError');
+      document.getElementById('couponErrorMsg').textContent = msg;
+      el.style.display = 'flex';
+      setTimeout(function() { el.style.display = 'none'; }, 4000);
+    }
+
+    document.getElementById('couponCodeInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') applyCoupon();
+    });
+
+    // ── Address selection ─────────────────────────────────────────────────
     function selectAddress(id, el) {
       selectedAddressId = id;
-      document.querySelectorAll('.address-card').forEach(function(c) {
-        c.classList.remove('selected');
-      });
+      document.querySelectorAll('.address-card').forEach(function(c) { c.classList.remove('selected'); });
       el.classList.add('selected');
       el.querySelector('input[type="radio"]').checked = true;
     }
 
-    // ── Payment selection (single definition — with wallet guard) ──────────
-    function selectPayment(method, el) {
-      if (method === 'Wallet') {
-        if (WALLET_BALANCE < ORDER_TOTAL) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Insufficient Wallet Balance',
-            text: 'Your wallet balance of ₹' + WALLET_BALANCE.toLocaleString('en-IN') +
-                  ' is not enough to cover this order of ₹' + ORDER_TOTAL.toLocaleString('en-IN') + '.',
-            confirmButtonColor: '#c2185b'
-          });
-          return;
-        }
-      }
-      selectedPayment = method;
-      document.querySelectorAll('.payment-option').forEach(function(c) {
-        c.classList.remove('selected');
-      });
-      el.classList.add('selected');
-      el.querySelector('input[type="radio"]').checked = true;
-    }
+    // ── Payment selection ─────────────────────────────────────────────────
+   function selectPayment(method, el) {
+  if (el.classList.contains('disabled-option')) return;
 
-    // ── Add address modal ──────────────────────────────────────────────────
+  if (method === 'Wallet') {
+    if (WALLET_BALANCE < ORDER_TOTAL) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Insufficient Wallet Balance',
+        text: 'Your wallet balance of ₹' + WALLET_BALANCE.toLocaleString('en-IN') +
+          ' is not enough to cover this order of ₹' + ORDER_TOTAL.toLocaleString('en-IN') + '.',
+        confirmButtonColor: '#c2185b'
+      });
+      return;
+    }
+  }
+
+  if (method === 'COD' && ORDER_TOTAL > COD_LIMIT) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'COD Not Available',
+      text: 'Cash on Delivery is not available for orders above ₹1,500. Please choose Online Payment or Wallet.',
+      confirmButtonColor: '#c2185b'
+    });
+    return;
+  }
+
+  selectedPayment = method;
+  document.querySelectorAll('.payment-option').forEach(function(c) { c.classList.remove('selected'); });
+  el.classList.add('selected');
+  el.querySelector('input[type="radio"]').checked = true;
+}
+
+    // ── Add address modal ─────────────────────────────────────────────────
     function openAddressModal() {
       document.getElementById('addressModal').classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -1508,10 +1124,7 @@
     }
 
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        closeAddressModal();
-        closeEditModal();
-      }
+      if (e.key === 'Escape') { closeAddressModal(); closeEditModal(); }
     });
 
     function showModalError(msg) {
@@ -1526,29 +1139,16 @@
       var data   = {};
       var inputs = form.querySelectorAll('input, select, textarea');
       inputs.forEach(function(el) {
-        if (el.type === 'radio') {
-          if (el.checked) data[el.name] = el.value;
-        } else {
-          data[el.name] = el.value.trim();
-        }
+        if (el.type === 'radio') { if (el.checked) data[el.name] = el.value; }
+        else { data[el.name] = el.value.trim(); }
       });
 
       if (!data.name || !data.mobile || !data.email || !data.address || !data.state || !data.pincode) {
-        showModalError('Please fill in all required fields.');
-        return;
+        showModalError('Please fill in all required fields.'); return;
       }
-      if (!/^\d{10}$/.test(data.mobile)) {
-        showModalError('Mobile number must be exactly 10 digits.');
-        return;
-      }
-      if (!/^\d{6}$/.test(data.pincode)) {
-        showModalError('Pincode must be exactly 6 digits.');
-        return;
-      }
-      if (data.alternateNumber && !/^\d{10}$/.test(data.alternateNumber)) {
-        showModalError('Alternate number must be exactly 10 digits.');
-        return;
-      }
+      if (!/^\d{10}$/.test(data.mobile)) { showModalError('Mobile number must be exactly 10 digits.'); return; }
+      if (!/^\d{6}$/.test(data.pincode)) { showModalError('Pincode must be exactly 6 digits.'); return; }
+      if (data.alternateNumber && !/^\d{10}$/.test(data.alternateNumber)) { showModalError('Alternate number must be exactly 10 digits.'); return; }
 
       var btn = document.getElementById('modalSaveBtn');
       btn.disabled = true;
@@ -1559,29 +1159,21 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       })
-        .then(function(r) {
-          if (r.redirected || r.ok) return { success: true };
-          return r.json();
-        })
+        .then(function(r) { if (r.redirected || r.ok) return { success: true }; return r.json(); })
         .then(function(result) {
           btn.disabled = false;
           btn.innerHTML = '<i class="fas fa-check"></i> Save Address';
-          if (result.success) {
-            closeAddressModal();
-            window.location.reload();
-          } else {
-            showModalError(result.message || 'Something went wrong.');
-          }
+          if (result.success) { closeAddressModal(); window.location.reload(); }
+          else { showModalError(result.message || 'Something went wrong.'); }
         })
         .catch(function() {
           btn.disabled = false;
           btn.innerHTML = '<i class="fas fa-check"></i> Save Address';
-          closeAddressModal();
-          window.location.reload();
+          closeAddressModal(); window.location.reload();
         });
     }
 
-    // ── Edit address modal ─────────────────────────────────────────────────
+    // ── Edit address modal ────────────────────────────────────────────────
     function openEditFromBtn(btn) {
       var d = btn.dataset;
       document.getElementById('editAddressId').value = d.id;
@@ -1599,11 +1191,7 @@
       for (var i = 0; i < sel.options.length; i++) {
         if (sel.options[i].value === d.state) { sel.selectedIndex = i; break; }
       }
-
-      document.querySelectorAll('input[name="editType"]').forEach(function(r) {
-        r.checked = r.value === d.type;
-      });
-
+      document.querySelectorAll('input[name="editType"]').forEach(function(r) { r.checked = r.value === d.type; });
       document.getElementById('editModalError').classList.remove('show');
       document.getElementById('editAddressModal').classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -1637,15 +1225,9 @@
         addressType:     document.querySelector('input[name="editType"]:checked').value,
       };
 
-      if (!data.name || !data.mobile || !data.email || !data.address || !data.state || !data.pincode) {
-        showEditError('Please fill in all required fields.'); return;
-      }
-      if (!/^\d{10}$/.test(data.mobile)) {
-        showEditError('Mobile must be exactly 10 digits.'); return;
-      }
-      if (!/^\d{6}$/.test(data.pincode)) {
-        showEditError('Pincode must be exactly 6 digits.'); return;
-      }
+      if (!data.name || !data.mobile || !data.email || !data.address || !data.state || !data.pincode) { showEditError('Please fill in all required fields.'); return; }
+      if (!/^\d{10}$/.test(data.mobile)) { showEditError('Mobile must be exactly 10 digits.'); return; }
+      if (!/^\d{6}$/.test(data.pincode)) { showEditError('Pincode must be exactly 6 digits.'); return; }
 
       var btn = document.getElementById('editSaveBtn');
       btn.disabled = true;
@@ -1660,12 +1242,8 @@
         .then(function(result) {
           btn.disabled = false;
           btn.innerHTML = '<i class="fas fa-check"></i> Save Changes';
-          if (result.success) {
-            closeEditModal();
-            window.location.reload();
-          } else {
-            showEditError(result.message || 'Something went wrong.');
-          }
+          if (result.success) { closeEditModal(); window.location.reload(); }
+          else { showEditError(result.message || 'Something went wrong.'); }
         })
         .catch(function() {
           btn.disabled = false;
@@ -1674,15 +1252,10 @@
         });
     }
 
-    // ── Place order ────────────────────────────────────────────────────────
+    // ── Place order ───────────────────────────────────────────────────────
     async function placeOrder() {
       if (!selectedAddressId) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'No address selected',
-          text: 'Please select a delivery address.',
-          confirmButtonColor: '#c2185b'
-        });
+        Swal.fire({ icon: 'warning', title: 'No address selected', text: 'Please select a delivery address.', confirmButtonColor: '#c2185b' });
         return;
       }
 
@@ -1691,121 +1264,83 @@
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…';
 
       try {
-
-        // ── COD ────────────────────────────────────────────────────────────
         if (selectedPayment === 'COD') {
-          var codRes  = await fetch('/checkout/place-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ addressId: selectedAddressId, paymentMethod: 'COD' })
-          });
+          var codRes  = await fetch('/checkout/place-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ addressId: selectedAddressId, paymentMethod: 'COD' }) });
           var codData = await codRes.json();
-          if (codData.success) {
-            window.location.href = '/order-success/' + codData.dbId;
-          } else {
-            throw new Error(codData.message || 'Order failed');
-          }
+          if (codData.success) { window.location.href = '/order-success/' + codData.dbId; }
+          else { throw new Error(codData.message || 'Order failed'); }
 
-        // ── WALLET ─────────────────────────────────────────────────────────
         } else if (selectedPayment === 'Wallet') {
-          var walletRes  = await fetch('/checkout/place-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ addressId: selectedAddressId, paymentMethod: 'Wallet' })
-          });
+          var walletRes  = await fetch('/checkout/place-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ addressId: selectedAddressId, paymentMethod: 'Wallet' }) });
           var walletData = await walletRes.json();
-          if (walletData.success) {
-            window.location.href = '/order-success/' + walletData.dbId;
-          } else {
-            throw new Error(walletData.message || 'Wallet payment failed');
-          }
+          if (walletData.success) { window.location.href = '/order-success/' + walletData.dbId; }
+          else { throw new Error(walletData.message || 'Wallet payment failed'); }
 
-        // ── RAZORPAY ONLINE ────────────────────────────────────────────────
         } else {
-          // Step 1: create order on server
-          var rpRes  = await fetch('/checkout/create-razorpay-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ addressId: selectedAddressId })
-          });
+          var rpRes  = await fetch('/checkout/create-razorpay-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ addressId: selectedAddressId }) });
           var rpData = await rpRes.json();
           if (!rpData.success) throw new Error(rpData.message || 'Could not initiate payment');
 
-          // Step 2: open Razorpay modal
           var options = {
-            key:         rpData.razorpayKeyId,
-            amount:      rpData.amount,
-            currency:    'INR',
-            name:        'Blushberry',
-            description: 'Order Payment',
-            order_id:    rpData.razorpayOrderId,
-            prefill: {
-              name:    rpData.customerName,
-              email:   rpData.customerEmail,
-              contact: rpData.customerPhone
-            },
+            key: rpData.razorpayKeyId, amount: rpData.amount, currency: 'INR',
+            name: 'Blushberry', description: 'Order Payment', order_id: rpData.razorpayOrderId,
+            prefill: { name: rpData.customerName, email: rpData.customerEmail, contact: rpData.customerPhone },
             theme: { color: '#c2185b' },
-
             handler: async function(response) {
-              // Step 3: verify + save order
               btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming…';
               try {
-                var verifyRes  = await fetch('/checkout/verify-payment', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    razorpay_order_id:   response.razorpay_order_id,
-                    razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_signature:  response.razorpay_signature,
-                    addressId:           selectedAddressId
-                  })
-                });
+                var verifyRes  = await fetch('/checkout/verify-payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ razorpay_order_id: response.razorpay_order_id, razorpay_payment_id: response.razorpay_payment_id, razorpay_signature: response.razorpay_signature, addressId: selectedAddressId }) });
                 var verifyData = await verifyRes.json();
-                if (verifyData.success) {
-                  window.location.href = '/order-success/' + verifyData.dbId;
-                } else {
-                  window.location.href = '/order-failure?reason=' +
-                    encodeURIComponent(verifyData.message || 'Payment verification failed');
-                }
-              } catch(e) {
-                window.location.href = '/order-failure?reason=verification_error';
-              }
+                if (verifyData.success) { window.location.href = '/order-success/' + verifyData.dbId; }
+                else { window.location.href = '/order-failure?reason=' + encodeURIComponent(verifyData.message || 'Payment verification failed'); }
+              } catch(e) { window.location.href = '/order-failure?reason=verification_error'; }
             },
-
             modal: {
               ondismiss: function() {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-lock"></i> Place Order · ' + FINAL_AMOUNT_STR;
-                Swal.fire({
-                  icon: 'info',
-                  title: 'Payment Cancelled',
-                  text: 'You closed the payment window. No charge was made.',
-                  confirmButtonColor: '#c2185b'
-                });
+                Swal.fire({ icon: 'info', title: 'Payment Cancelled', text: 'You closed the payment window. No charge was made.', confirmButtonColor: '#c2185b' });
               }
             }
           };
 
           var rzp = new Razorpay(options);
-          rzp.on('payment.failed', function(response) {
-            window.location.href = '/order-failure?reason=' +
-              encodeURIComponent(response.error.description);
-          });
+          rzp.on('payment.failed', function(response) { window.location.href = '/order-failure?reason=' + encodeURIComponent(response.error.description); });
           rzp.open();
-          return; // keep button disabled while Razorpay modal is open
+          return;
         }
 
       } catch (err) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Something went wrong',
-          text: err.message || 'Please try again.',
-          confirmButtonColor: '#c2185b'
-        });
+        Swal.fire({ icon: 'error', title: 'Something went wrong', text: err.message || 'Please try again.', confirmButtonColor: '#c2185b' });
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-lock"></i> Place Order · ' + FINAL_AMOUNT_STR;
       }
     }
+
+    // ── Disable COD on page load if order total exceeds limit ─────────────
+(function() {
+  if (ORDER_TOTAL > COD_LIMIT) {
+    var codOption = document.getElementById('pmCOD');
+    if (codOption) {
+      codOption.classList.add('disabled-option');
+      codOption.classList.remove('selected');
+      codOption.querySelector('input[type="radio"]').checked = false;
+
+      // add a "Not available" badge
+      var info = codOption.querySelector('.payment-option-sub');
+      if (info) info.textContent = 'Not available for orders above ₹1,500';
+    }
+
+    // auto-select Online
+    var onlineOption = document.getElementById('pmOnline');
+    if (onlineOption) {
+      onlineOption.classList.add('selected');
+      onlineOption.querySelector('input[type="radio"]').checked = true;
+      selectedPayment = 'Online';
+    }
+  }
+})();
+
   </script>
 
 </body>

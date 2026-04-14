@@ -48,7 +48,8 @@ const loadOrders = async (req, res) => {
       .sort(sortObj)
       .skip((page - 1) * LIMIT)
       .limit(LIMIT)
-
+    
+    
     res.render('admin/orders', {
       orders,
       currentPage: page,
@@ -254,7 +255,6 @@ const cancelItem = async (req, res) => {
   }
 }
 
-
 const updateReturnStatus = async (req, res) => {
   try {
     const { returnStatus, itemId } = req.body
@@ -269,7 +269,29 @@ const updateReturnStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found.' })
     }
 
-   
+    const isPaid = order.paymentMethod !== 'COD' || order.paymentStatus === 'Paid'
+
+    // Helper: total of all items' salePrice * qty (used for coupon proportioning)
+    const orderItemsTotal = order.items.reduce(
+      (sum, i) => sum + i.salePrice * i.quantity, 0
+    )
+
+    // Helper: calculate proportional refund for a single item
+    const calcItemRefund = (item) => {
+      const itemBase = item.salePrice * item.quantity
+
+      const couponShare = orderItemsTotal > 0
+        ? Math.round((itemBase / orderItemsTotal) * (order.couponDiscount || 0))
+        : 0
+
+      const shippingShare = orderItemsTotal > 0
+        ? Math.round((itemBase / orderItemsTotal) * (order.shippingCharge || 0))
+        : 0
+
+      return itemBase - couponShare + shippingShare
+    }
+
+    // ── SINGLE ITEM RETURN ──────────────────────────────────────────────
     if (itemId) {
       const itemStatus = order.itemStatuses.find(
         s => s.itemId && s.itemId.toString() === itemId.toString()
@@ -282,7 +304,6 @@ const updateReturnStatus = async (req, res) => {
       const wasAlreadyApproved = ['Approved', 'Completed'].includes(itemStatus.returnStatus)
       itemStatus.returnStatus = returnStatus
 
-  
       if (['Approved', 'Completed'].includes(returnStatus) && !wasAlreadyApproved) {
         const item = order.items.find(i => i._id.toString() === itemId.toString())
         if (item) {
@@ -291,10 +312,8 @@ const updateReturnStatus = async (req, res) => {
             { $inc: { 'variants.$.stock': item.quantity } }
           )
 
-         
-          const isPaid = order.paymentMethod !== 'COD' || order.paymentStatus === 'Paid'
           if (isPaid) {
-            const refundAmount = item.salePrice * item.quantity
+            const refundAmount = calcItemRefund(item)
             await creditWallet(
               order.userId,
               refundAmount,
@@ -309,7 +328,7 @@ const updateReturnStatus = async (req, res) => {
       return res.json({ success: true, message: `Item return marked as ${returnStatus}.` })
     }
 
-    
+    // ── FULL ORDER RETURN ───────────────────────────────────────────────
     if (!order.returnStatus || order.returnStatus === 'None') {
       return res.status(400).json({ success: false, message: 'No return request found for this order.' })
     }
@@ -317,33 +336,44 @@ const updateReturnStatus = async (req, res) => {
     const wasAlreadyApproved = ['Approved', 'Completed'].includes(order.returnStatus)
     order.returnStatus = returnStatus
 
-    
     if (['Approved', 'Completed'].includes(returnStatus) && !wasAlreadyApproved) {
-      let totalRefund = 0
-
-      for (const item of order.items) {
+      // Collect returned items
+      const returnedItems = order.items.filter(item => {
         const s = order.itemStatuses.find(
           st => st.itemId && st.itemId.toString() === item._id.toString()
         )
+        return s && s.status === 'Returned'
+      })
 
-        if (s && s.status === 'Returned') {
-          await Product.updateOne(
-            { _id: item.productId, 'variants.shade': item.shade },
-            { $inc: { 'variants.$.stock': item.quantity } }
-          )
-          totalRefund += item.salePrice * item.quantity
-        }
+      // Restock
+      for (const item of returnedItems) {
+        await Product.updateOne(
+          { _id: item.productId, 'variants.shade': item.shade },
+          { $inc: { 'variants.$.stock': item.quantity } }
+        )
       }
 
-   
-      const isPaid = order.paymentMethod !== 'COD' || order.paymentStatus === 'Paid'
-      if (isPaid && totalRefund > 0) {
-        await creditWallet(
-          order.userId,
-          totalRefund,
-          `Refund for returned order #${order.orderId}`,
-          order._id
-        )
+      if (isPaid) {
+        let totalRefund
+
+        if (returnedItems.length === order.items.length) {
+          // ALL items returned → refund exactly what was paid
+          totalRefund = order.finalAmount
+        } else {
+          // PARTIAL return → proportional refund per returned item
+          totalRefund = returnedItems.reduce(
+            (sum, item) => sum + calcItemRefund(item), 0
+          )
+        }
+
+        if (totalRefund > 0) {
+          await creditWallet(
+            order.userId,
+            totalRefund,
+            `Refund for returned order #${order.orderId}`,
+            order._id
+          )
+        }
       }
     }
 
@@ -355,7 +385,6 @@ const updateReturnStatus = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Something went wrong.' })
   }
 }
-
 
 module.exports = {
   loadOrders,

@@ -22,11 +22,7 @@
       --border: #f0dde4;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Poppins', sans-serif;
@@ -46,7 +42,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
     }
 
     .logo {
@@ -57,9 +53,7 @@
       text-decoration: none;
     }
 
-    .logo span {
-      color: var(--dark);
-    }
+    .logo span { color: var(--dark); }
 
     .page-wrapper {
       max-width: 1100px;
@@ -72,15 +66,8 @@
     }
 
     @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .sidebar {
@@ -104,97 +91,67 @@
     .profile-card::before {
       content: '';
       position: absolute;
-      top: -30px;
-      right: -30px;
-      width: 120px;
-      height: 120px;
-      background: rgba(255, 255, 255, 0.08);
+      top: -30px; right: -30px;
+      width: 120px; height: 120px;
+      background: rgba(255,255,255,0.08);
       border-radius: 50%;
     }
 
     .profile-card::after {
       content: '';
       position: absolute;
-      bottom: -20px;
-      left: -20px;
-      width: 80px;
-      height: 80px;
-      background: rgba(255, 255, 255, 0.06);
+      bottom: -20px; left: -20px;
+      width: 80px; height: 80px;
+      background: rgba(255,255,255,0.06);
       border-radius: 50%;
     }
 
-    .avatar-wrap {
-      position: relative;
-      width: 82px;
-      height: 82px;
-    }
+    .avatar-wrap { position: relative; width: 82px; height: 82px; }
 
     .avatar-wrap img,
     .avatar-wrap .avatar-placeholder {
-      width: 82px;
-      height: 82px;
+      width: 82px; height: 82px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid rgba(255, 255, 255, 0.5);
+      border: 3px solid rgba(255,255,255,0.5);
     }
 
     .avatar-wrap .avatar-placeholder {
-      background: rgba(255, 255, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
     }
 
     .avatar-edit {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 24px;
-      height: 24px;
+      position: absolute; bottom: 0; right: 0;
+      width: 24px; height: 24px;
       background: var(--white);
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       transition: transform 0.2s;
     }
 
-    .avatar-edit:hover {
-      transform: scale(1.1);
-    }
-
-    .avatar-edit svg {
-      width: 12px;
-      height: 12px;
-    }
+    .avatar-edit:hover { transform: scale(1.1); }
+    .avatar-edit svg { width: 12px; height: 12px; }
 
     .profile-card .user-name {
       font-family: 'Playfair Display', serif;
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--white);
-      text-align: center;
+      font-size: 18px; font-weight: 700;
+      color: var(--white); text-align: center;
     }
 
     .profile-card .user-email {
       font-size: 11px;
-      color: rgba(255, 255, 255, 0.75);
-      text-align: center;
-      word-break: break-all;
+      color: rgba(255,255,255,0.75);
+      text-align: center; word-break: break-all;
     }
 
     .verified-badge {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 20px;
-      padding: 3px 10px;
-      font-size: 10px;
-      color: white;
-      font-weight: 500;
+      display: flex; align-items: center; gap: 4px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 20px; padding: 3px 10px;
+      font-size: 10px; color: white; font-weight: 500;
     }
 
     .side-nav {
@@ -205,48 +162,26 @@
     }
 
     .side-nav a {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 13px 18px;
-      font-size: 13px;
-      color: var(--muted);
-      text-decoration: none;
+      display: flex; align-items: center; gap: 10px;
+      padding: 13px 18px; font-size: 13px;
+      color: var(--muted); text-decoration: none;
       border-left: 3px solid transparent;
       transition: all 0.2s;
     }
 
     .side-nav a:hover,
     .side-nav a.active {
-      color: var(--rose);
-      background: var(--rose-light);
+      color: var(--rose); background: var(--rose-light);
       border-left-color: var(--rose);
     }
 
-    .side-nav a svg {
-      flex-shrink: 0;
-    }
+    .side-nav a svg { flex-shrink: 0; }
 
-    .side-nav a.logout {
-      color: #e53e3e;
-    }
+    .side-nav a.logout { color: #e53e3e; }
+    .side-nav a.logout:hover { background: #fff5f5; border-left-color: #e53e3e; }
+    .side-nav hr { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
 
-    .side-nav a.logout:hover {
-      background: #fff5f5;
-      border-left-color: #e53e3e;
-    }
-
-    .side-nav hr {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 4px 0;
-    }
-
-    .main-content {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+    .main-content { display: flex; flex-direction: column; gap: 20px; }
 
     .card {
       background: var(--card);
@@ -256,31 +191,21 @@
       animation: fadeUp 0.5s ease both;
     }
 
-    .card:nth-child(2) {
-      animation-delay: 0.1s;
-    }
-
-    .card:nth-child(3) {
-      animation-delay: 0.2s;
-    }
+    .card:nth-child(2) { animation-delay: 0.1s; }
+    .card:nth-child(3) { animation-delay: 0.2s; }
+    .card:nth-child(4) { animation-delay: 0.3s; }
 
     .card-title {
       font-family: 'Playfair Display', serif;
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--dark);
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      font-size: 18px; font-weight: 700;
+      color: var(--dark); margin-bottom: 20px;
+      display: flex; align-items: center; gap: 8px;
     }
 
     .card-title span {
-      width: 4px;
-      height: 20px;
+      width: 4px; height: 20px;
       background: var(--rose);
-      border-radius: 2px;
-      display: inline-block;
+      border-radius: 2px; display: inline-block;
     }
 
     .form-grid {
@@ -289,228 +214,350 @@
       gap: 16px;
     }
 
-    .form-grid .full {
-      grid-column: 1 / -1;
-    }
+    .form-grid .full { grid-column: 1 / -1; }
 
     .field label {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
+      display: block; font-size: 11px; font-weight: 600;
+      color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 6px;
     }
 
     .field input {
-      width: 100%;
-      padding: 10px 14px;
+      width: 100%; padding: 10px 14px;
       border: 1.5px solid var(--border);
       border-radius: 10px;
-      font-family: 'Poppins', sans-serif;
-      font-size: 13px;
-      color: var(--dark);
-      background: var(--bg);
-      transition: border-color 0.2s, box-shadow 0.2s;
-      outline: none;
+      font-family: 'Poppins', sans-serif; font-size: 13px;
+      color: var(--dark); background: var(--bg);
+      transition: border-color 0.2s, box-shadow 0.2s; outline: none;
     }
 
     .field input:focus {
       border-color: var(--rose);
-      box-shadow: 0 0 0 3px rgba(192, 65, 90, 0.08);
+      box-shadow: 0 0 0 3px rgba(192,65,90,0.08);
       background: white;
     }
 
-    .referral-box {
-      background: var(--rose-light);
-      border: 1.5px dashed var(--rose-mid);
+    /* ── Referral Card ── */
+    .referral-hero {
+      background: linear-gradient(135deg, #1a1a2e 0%, #2d1a2e 50%, #3d1a2a 100%);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .referral-hero::before {
+      content: '🎁';
+      position: absolute;
+      right: 20px; top: 16px;
+      font-size: 48px;
+      opacity: 0.15;
+    }
+
+    .referral-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30px; left: -30px;
+      width: 120px; height: 120px;
+      background: rgba(192,65,90,0.15);
+      border-radius: 50%;
+    }
+
+    .referral-hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; font-weight: 700;
+      color: white; margin-bottom: 6px;
+    }
+
+    .referral-hero-sub {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 20px; line-height: 1.5;
+    }
+
+    .referral-hero-sub strong { color: rgba(255,255,255,0.9); }
+
+    /* Stats row */
+    .referral-stats {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-pill {
+      flex: 1;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
       border-radius: 12px;
-      padding: 14px 18px;
+      padding: 12px 16px;
+      text-align: center;
+    }
+
+    .stat-pill .stat-val {
+      font-size: 22px; font-weight: 700;
+      color: white;
+      font-family: 'Playfair Display', serif;
+      line-height: 1;
+    }
+
+    .stat-pill .stat-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.5);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Code + link section */
+    .referral-code-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .referral-code-box {
+      flex: 1;
+      background: rgba(255,255,255,0.1);
+      border: 1.5px dashed rgba(255,255,255,0.25);
+      border-radius: 10px;
+      padding: 10px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    .referral-box .ref-label {
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 500;
+    .referral-code-box .code-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
     }
 
-    .referral-box .ref-code {
-      font-size: 16px;
+    .referral-code-box .code-val {
+      font-size: 18px;
       font-weight: 700;
-      color: var(--rose);
-      letter-spacing: 1px;
+      color: white;
+      letter-spacing: 2px;
+      font-family: 'Playfair Display', serif;
     }
 
-    .copy-btn {
+    .btn-copy-code {
       background: var(--rose);
-      color: white;
-      border: none;
+      color: white; border: none;
       cursor: pointer;
-      padding: 7px 14px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 12px; font-weight: 600;
       font-family: 'Poppins', sans-serif;
       transition: all 0.2s;
+      display: flex; align-items: center; gap: 6px;
+      white-space: nowrap;
+    }
+
+    .btn-copy-code:hover { background: #a0304a; transform: translateY(-1px); }
+
+    .referral-link-row {
+      display: flex; gap: 8px; align-items: center;
+    }
+
+    .referral-link-input {
+      flex: 1;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      font-family: 'Poppins', sans-serif;
+      outline: none;
+      cursor: text;
+    }
+
+    .btn-copy-link {
+      background: rgba(255,255,255,0.12);
+      color: white; border: 1px solid rgba(255,255,255,0.2);
+      cursor: pointer;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 11px; font-weight: 600;
+      font-family: 'Poppins', sans-serif;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-copy-link:hover { background: rgba(255,255,255,0.2); }
+
+    /* How it works */
+    .how-it-works {
       display: flex;
-      align-items: center;
-      gap: 5px;
+      gap: 0;
+      margin-top: 20px;
     }
 
-    .copy-btn:hover {
-      background: #a0304a;
-      transform: translateY(-1px);
+    .how-step {
+      flex: 1;
+      text-align: center;
+      position: relative;
+      padding: 0 8px;
     }
 
+    .how-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 18px; right: -2px;
+      width: calc(100% - 36px);
+      height: 1.5px;
+      background: var(--rose-mid);
+      left: 50%;
+    }
+
+    .how-icon {
+      width: 36px; height: 36px;
+      background: var(--rose-light);
+      border: 2px solid var(--rose-mid);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      margin: 0 auto 8px;
+      position: relative; z-index: 1;
+    }
+
+    .how-title {
+      font-size: 11px; font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 3px;
+    }
+
+    .how-desc {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* Reward badges */
+    .reward-badges {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .reward-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--rose-light);
+      border: 1px solid var(--rose-mid);
+      border-radius: 10px;
+      padding: 10px 14px;
+      flex: 1; min-width: 140px;
+    }
+
+    .reward-badge .badge-icon {
+      font-size: 22px; flex-shrink: 0;
+    }
+
+    .reward-badge .badge-amount {
+      font-size: 16px; font-weight: 700;
+      color: var(--rose);
+      font-family: 'Playfair Display', serif;
+      line-height: 1;
+    }
+
+    .reward-badge .badge-label {
+      font-size: 10px; color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* existing styles */
     .photo-upload-area {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      padding: 16px;
-      background: var(--bg);
-      border-radius: 12px;
-      border: 1.5px dashed var(--border);
+      display: flex; align-items: center; gap: 20px;
+      padding: 16px; background: var(--bg);
+      border-radius: 12px; border: 1.5px dashed var(--border);
       margin-bottom: 16px;
     }
 
     .photo-preview {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--rose-mid);
-      flex-shrink: 0;
+      width: 64px; height: 64px;
+      border-radius: 50%; object-fit: cover;
+      border: 2px solid var(--rose-mid); flex-shrink: 0;
     }
 
     .photo-preview-placeholder {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: var(--rose-light);
+      width: 64px; height: 64px;
+      border-radius: 50%; background: var(--rose-light);
       border: 2px solid var(--rose-mid);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
 
     .upload-btn {
       background: var(--white);
       border: 1.5px solid var(--rose);
-      color: var(--rose);
-      padding: 8px 16px;
+      color: var(--rose); padding: 8px 16px;
       border-radius: 8px;
       font-family: 'Poppins', sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
     }
 
-    .upload-btn:hover {
-      background: var(--rose);
-      color: white;
-    }
+    .upload-btn:hover { background: var(--rose); color: white; }
 
-    .pw-field {
-      position: relative;
-    }
-
-    .pw-field input {
-      padding-right: 40px;
-    }
+    .pw-field { position: relative; }
+    .pw-field input { padding-right: 40px; }
 
     .pw-toggle {
-      position: absolute;
-      right: 12px;
-      top: 50%;
+      position: absolute; right: 12px; top: 50%;
       transform: translateY(-50%);
-      cursor: pointer;
-      color: var(--muted);
-      background: none;
-      border: none;
+      cursor: pointer; color: var(--muted);
+      background: none; border: none;
     }
 
     .btn-primary {
       background: linear-gradient(135deg, var(--rose), #a0304a);
-      color: white;
-      border: none;
-      cursor: pointer;
-      padding: 11px 28px;
-      border-radius: 10px;
+      color: white; border: none; cursor: pointer;
+      padding: 11px 28px; border-radius: 10px;
       font-family: 'Poppins', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 13px; font-weight: 600;
       transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(192, 65, 90, 0.25);
+      box-shadow: 0 4px 12px rgba(192,65,90,0.25);
     }
 
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(192, 65, 90, 0.35);
+      box-shadow: 0 6px 18px rgba(192,65,90,0.35);
     }
 
-    .btn-primary:active {
-      transform: translateY(0);
-    }
-
-    .form-actions {
-      margin-top: 8px;
-    }
+    .btn-primary:active { transform: translateY(0); }
+    .form-actions { margin-top: 8px; }
 
     .success-msg {
-      background: #d4edda;
-      color: #2d7a4f;
-      padding: 10px 16px;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      font-size: 13px;
-      font-weight: 500;
+      background: #d4edda; color: #2d7a4f;
+      padding: 10px 16px; border-radius: 8px;
+      margin-bottom: 16px; font-size: 13px; font-weight: 500;
     }
 
-    .error-msg {
-      color: #e53e3e;
-      font-size: 11px;
-      margin-top: 4px;
-    }
+    .error-msg { color: #e53e3e; font-size: 11px; margin-top: 4px; }
 
     .toast {
-      position: fixed;
-      bottom: 28px;
-      right: 28px;
-      background: #2d7a4f;
-      color: white;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 500;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transform: translateY(80px);
-      opacity: 0;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: fixed; bottom: 28px; right: 28px;
+      background: #2d7a4f; color: white;
+      padding: 12px 20px; border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      display: flex; align-items: center; gap: 8px;
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
       z-index: 999;
     }
 
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
+    .toast.show { transform: translateY(0); opacity: 1; }
 
     @media (max-width: 768px) {
-      .page-wrapper {
-        grid-template-columns: 1fr;
-      }
-
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
+      .page-wrapper { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .referral-stats { flex-direction: column; }
+      .referral-code-row { flex-direction: column; }
     }
   </style>
 </head>
@@ -519,343 +566,430 @@
 
   <%- include('../partials/user/header') %>
 
-    <div class="page-wrapper">
+  <div class="page-wrapper">
 
-      <!-- SIDEBAR -->
-      <aside class="sidebar">
-        <div class="profile-card">
-          <div class="avatar-wrap">
-            <% if (user && user.profilePhoto) { %>
-              <img src="<%= user.profilePhoto %>" alt="<%= user.fullName %>">
-              <% } else { %>
-                <div class="avatar-placeholder">
-                  <svg width="36" height="36" fill="none" stroke="white" stroke-width="1.5" viewBox="0 0 24 24">
-                    <circle cx="12" cy="8" r="4" />
-                    <path d="M6 20c0-3.33 5.33-5 6-5s6 1.67 6 5" />
-                  </svg>
-                </div>
-                <% } %>
-                  <label class="avatar-edit" for="photoInput" title="Change photo">
-                    <svg fill="none" stroke="#c0415a" stroke-width="2" viewBox="0 0 24 24">
-                      <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
-                    </svg>
-                  </label>
-          </div>
-          <div class="user-name">
-            <%= user ? user.fullName : 'Guest User' %>
-          </div>
-          <div class="user-email">
-            <%= user ? user.email : '' %>
-          </div>
-          <% if (user && user.isVerified) { %>
-            <div class="verified-badge">
-              <svg width="10" height="10" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clip-rule="evenodd" />
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="profile-card">
+        <div class="avatar-wrap">
+          <% if (user && user.profilePhoto) { %>
+            <img src="<%= user.profilePhoto %>" alt="<%= user.fullName %>">
+          <% } else { %>
+            <div class="avatar-placeholder">
+              <svg width="36" height="36" fill="none" stroke="white" stroke-width="1.5" viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M6 20c0-3.33 5.33-5 6-5s6 1.67 6 5"/>
               </svg>
-              Verified Account
             </div>
-            <% } %>
-        </div>
-
-        <div class="side-nav">
-          <a href="/profile" class="active">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <circle cx="12" cy="8" r="4" />
-              <path d="M6 20c0-3.33 5.33-5 6-5s6 1.67 6 5" />
-            </svg>
-            Account Overview
-          </a>
-          <a href="/orders">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M3 9h18M9 21V9" />
-            </svg>
-            My Orders
-          </a>
-          <a href="/addresses">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-              <circle cx="12" cy="9" r="2.5" />
-            </svg>
-            Manage Addresses
-          </a>
-          <a href="/wallet">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <rect x="2" y="5" width="20" height="14" rx="2" />
-              <path d="M16 12h2" />
-            </svg>
-            Wallet
-          </a>
-          <a href="/coupons">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M20 12V6a2 2 0 00-2-2H6a2 2 0 00-2 2v6m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4" />
-            </svg>
-            Coupons
-          </a>
-          <hr>
-          <a href="/logout" class="logout">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
-            </svg>
-            Log out
-          </a>
-        </div>
-      </aside>
-
-      <!-- MAIN -->
-      <main class="main-content">
-
-        <!-- Account Settings -->
-        <div class="card">
-          <div class="card-title"><span></span> Account Settings</div>
-
-          <!-- ✅ Success message -->
-          <% if (success) { %>
-            <div class="success-msg">✓ <%= success %>
-            </div>
-            <% } %>
-
-              <!-- ✅ form starts here — photo input is INSIDE the form -->
-              <form action="/profile" method="POST" enctype="multipart/form-data">
-
-                <!-- Photo upload -->
-                <div class="photo-upload-area">
-                  <% if (user && user.profilePhoto) { %>
-                    <img src="<%= user.profilePhoto %>" class="photo-preview" alt="Profile photo" id="photoPreview">
-                    <% } else { %>
-                      <div class="photo-preview-placeholder" id="photoPreview">
-                        <svg width="28" height="28" fill="none" stroke="#c0415a" stroke-width="1.5" viewBox="0 0 24 24">
-                          <circle cx="12" cy="8" r="4" />
-                          <path d="M6 20c0-3.33 5.33-5 6-5s6 1.67 6 5" />
-                        </svg>
-                      </div>
-                      <% } %>
-                        <div>
-                          <div style="font-size:13px;font-weight:600;color:#1a1a2e;margin-bottom:4px;">Profile Photo
-                          </div>
-                          <div style="font-size:11px;color:#7a7a8a;margin-bottom:10px;">JPG or PNG, max 5MB</div>
-                          <label class="upload-btn" for="photoInput">Choose Image</label>
-                          <!-- ✅ name="profilePhoto" and inside form -->
-                          <input type="file" id="photoInput" name="profilePhoto" accept="image/*" style="display:none;"
-                            onchange="previewPhoto(this)">
-                        </div>
-                </div>
-
-                <div class="form-grid">
-                  <div class="field">
-                    <label>Full Name</label>
-                    <input type="text" name="fullName" value="<%= user ? user.fullName : '' %>"
-                      placeholder="Your full name">
-                    <% if (errors && errors.fullName) { %>
-                      <div class="error-msg">
-                        <%= errors.fullName %>
-                      </div>
-                      <% } %>
-                  </div>
-                  <div class="field">
-                    <label>Phone Number</label>
-                    <input type="tel" name="phoneNumber" value="<%= user && user.phoneNumber ? user.phoneNumber : '' %>"
-                      placeholder="Your phone number">
-                    <% if (errors && errors.phoneNumber) { %>
-                      <div class="error-msg">
-                        <%= errors.phoneNumber %>
-                      </div>
-                      <% } %>
-                  </div>
-                  <!-- <div class="field full">
-            <label>Email Address</label>
-            <input type="email" name="email" value="<%= user ? user.email : '' %>" placeholder="your@email.com">
-            <% if (errors && errors.email) { %><div class="error-msg"><%= errors.email %></div><% } %>
-          </div>
-        </div> -->
-
-                  <div class="field full">
-                    <label>Email Address</label>
-                    <div style="display:flex; gap:10px; align-items:flex-start;">
-                      <input type="email" id="newEmailInput" value="<%= user ? user.email : '' %>"
-                        placeholder="your@email.com" style="flex:1;">
-                      <button type="button" class="btn-primary"
-                        style="white-space:nowrap; padding:10px 16px; margin-top:0;" onclick="requestEmailChange()">
-                        Change Email
-                      </button>
-                    </div>
-                    <div style="font-size:11px; color:var(--muted); margin-top:4px;">
-                      An OTP will be sent to the new email to confirm the change.
-                    </div>
-                  </div>
-                  <!-- Referral -->
-                  <div style="margin-top:16px;margin-bottom:20px;">
-                    <label
-                      style="font-size:11px;font-weight:600;color:#7a7a8a;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;">Referral
-                      Code</label>
-                    <div class="referral-box">
-                      <div>
-                        <div class="ref-label">Share & earn rewards</div>
-                        <div class="ref-code">
-                          <%= user && user.referralCode ? user.referralCode : 'AR79kk' %>
-                        </div>
-                      </div>
-                      <button type="button" class="copy-btn" onclick="copyReferral()">
-                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
-                          viewBox="0 0 24 24">
-                          <rect x="9" y="9" width="13" height="13" rx="2" />
-                          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-                        </svg>
-                        Copy
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="form-actions">
-                    <button type="submit" class="btn-primary">Save Changes</button>
-                  </div>
-
-              </form>
-        </div>
-
-        <!-- Change Password -->
-        <div class="card">
-          <div class="card-title"><span></span> Change Password</div>
-          <form action="/profile/changePassword" method="POST">
-            <div class="form-grid">
-              <div class="field full pw-field">
-                <label>Current Password</label>
-                <input type="password" name="currentPassword" id="pw1" placeholder="Enter current password">
-                <button type="button" class="pw-toggle" onclick="togglePw('pw1', this)">
-                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                </button>
-              </div>
-              <div class="field pw-field">
-                <label>New Password</label>
-                <input type="password" name="newPassword" id="pw2" placeholder="New password">
-                <button type="button" class="pw-toggle" onclick="togglePw('pw2', this)">
-                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                </button>
-              </div>
-              <div class="field pw-field">
-                <label>Confirm Password</label>
-                <input type="password" name="confirmPassword" id="pw3" placeholder="Confirm new password">
-                <button type="button" class="pw-toggle" onclick="togglePw('pw3', this)">
-                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div class="form-actions" style="margin-top:16px;">
-              <button type="submit" class="btn-primary">Change Password</button>
-            </div>
-          </form>
-        </div>
-        <% if (typeof pwSuccess !=='undefined' && pwSuccess) { %>
-          <script>
-            window.addEventListener('DOMContentLoaded', () => showToast('Password changed successfully!'));
-          </script>
           <% } %>
-      </main>
-    </div>
+          <label class="avatar-edit" for="photoInput" title="Change photo">
+            <svg fill="none" stroke="#c0415a" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+          </label>
+        </div>
+        <div class="user-name"><%= user ? user.fullName : 'Guest User' %></div>
+        <div class="user-email"><%= user ? user.email : '' %></div>
+        <% if (user && user.isVerified) { %>
+          <div class="verified-badge">
+            <svg width="10" height="10" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            Verified Account
+          </div>
+        <% } %>
+      </div>
 
-    <!-- Toast -->
-    <div class="toast" id="toast">
-      <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd"
-          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-          clip-rule="evenodd" />
-      </svg>
-      <span id="toastMsg">Copied!</span>
-    </div>
+      <div class="side-nav">
+        <a href="/profile" class="active">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="4"/><path d="M6 20c0-3.33 5.33-5 6-5s6 1.67 6 5"/>
+          </svg>
+          Account Overview
+        </a>
+        <a href="/orders">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+          </svg>
+          My Orders
+        </a>
+        <a href="/addresses">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+            <circle cx="12" cy="9" r="2.5"/>
+          </svg>
+          Manage Addresses
+        </a>
+        <a href="/wallet">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 12h2"/>
+          </svg>
+          Wallet
+        </a>
+        <a href="/coupons">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M20 12V6a2 2 0 00-2-2H6a2 2 0 00-2 2v6m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4"/>
+          </svg>
+          Coupons
+        </a>
+        <hr>
+        <a href="/logout" class="logout">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+          </svg>
+          Log out
+        </a>
+      </div>
+    </aside>
 
-    <script>
-  // Auto show success toast if redirected with ?success=true
-  <% if (success) { %>
-        window.addEventListener('DOMContentLoaded', () => showToast('Profile updated successfully!'));
-  <% } %>
+    <!-- MAIN -->
+    <main class="main-content">
 
-        function togglePw(id, btn) {
-          const input = document.getElementById(id);
-          input.type = input.type === 'password' ? 'text' : 'password';
+      <!-- Account Settings -->
+      <div class="card">
+        <div class="card-title"><span></span> Account Settings</div>
+
+        <% if (success) { %>
+          <div class="success-msg">✓ <%= success %></div>
+        <% } %>
+
+        <form action="/profile" method="POST" enctype="multipart/form-data">
+
+          <div class="photo-upload-area">
+            <% if (user && user.profilePhoto) { %>
+              <img src="<%= user.profilePhoto %>" class="photo-preview" alt="Profile photo" id="photoPreview">
+            <% } else { %>
+              <div class="photo-preview-placeholder" id="photoPreview">
+                <svg width="28" height="28" fill="none" stroke="#c0415a" stroke-width="1.5" viewBox="0 0 24 24">
+                  <circle cx="12" cy="8" r="4"/><path d="M6 20c0-3.33 5.33-5 6-5s6 1.67 6 5"/>
+                </svg>
+              </div>
+            <% } %>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#1a1a2e;margin-bottom:4px;">Profile Photo</div>
+              <div style="font-size:11px;color:#7a7a8a;margin-bottom:10px;">JPG or PNG, max 5MB</div>
+              <label class="upload-btn" for="photoInput">Choose Image</label>
+              <input type="file" id="photoInput" name="profilePhoto" accept="image/*" style="display:none;" onchange="previewPhoto(this)">
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="field">
+              <label>Full Name</label>
+              <input type="text" name="fullName" value="<%= user ? user.fullName : '' %>" placeholder="Your full name">
+              <% if (errors && errors.fullName) { %>
+                <div class="error-msg"><%= errors.fullName %></div>
+              <% } %>
+            </div>
+            <div class="field">
+              <label>Phone Number</label>
+              <input type="tel" name="phoneNumber" value="<%= user && user.phoneNumber ? user.phoneNumber : '' %>" placeholder="Your phone number">
+              <% if (errors && errors.phoneNumber) { %>
+                <div class="error-msg"><%= errors.phoneNumber %></div>
+              <% } %>
+            </div>
+
+            <div class="field full">
+              <label>Email Address</label>
+              <div style="display:flex; gap:10px; align-items:flex-start;">
+                <input type="email" id="newEmailInput" value="<%= user ? user.email : '' %>" placeholder="your@email.com" style="flex:1;">
+                <button type="button" class="btn-primary" style="white-space:nowrap; padding:10px 16px; margin-top:0;" onclick="requestEmailChange()">
+                  Change Email
+                </button>
+              </div>
+              <div style="font-size:11px; color:var(--muted); margin-top:4px;">
+                An OTP will be sent to the new email to confirm the change.
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions" style="margin-top:20px;">
+            <button type="submit" class="btn-primary">Save Changes</button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- ── Referral & Rewards Card ── -->
+      <div class="card">
+        <div class="card-title"><span></span> Referral & Rewards</div>
+
+        <!-- Dark hero banner -->
+        <div class="referral-hero">
+          <div class="referral-hero-title">Invite friends, earn rewards 🎁</div>
+          <div class="referral-hero-sub">
+            Share your code and <strong>both you and your friend get rewarded</strong> the moment they sign up.
+          </div>
+
+          <!-- Live stats (loaded via JS) -->
+          <div class="referral-stats">
+            <div class="stat-pill">
+              <div class="stat-val" id="statFriends">–</div>
+              <div class="stat-label">Friends Invited</div>
+            </div>
+            <div class="stat-pill">
+              <div class="stat-val" id="statEarned">–</div>
+              <div class="stat-label">Total Earned</div>
+            </div>
+            <div class="stat-pill">
+              <div class="stat-val" id="statWallet">–</div>
+              <div class="stat-label">Wallet Balance</div>
+            </div>
+          </div>
+
+          <!-- Referral code -->
+          <div class="referral-code-row">
+            <div class="referral-code-box">
+              <div>
+                <div class="code-label">Your Referral Code</div>
+                <div class="code-val" id="referralCodeDisplay">
+                  <%= user && user.referralCode ? user.referralCode : '—' %>
+                </div>
+              </div>
+            </div>
+            <button class="btn-copy-code" onclick="copyCode()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2"/>
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+              </svg>
+              Copy Code
+            </button>
+          </div>
+
+          <!-- Shareable link -->
+          <div class="referral-link-row">
+            <input
+              class="referral-link-input"
+              id="referralLinkInput"
+              readonly
+              value="Loading your link…"
+            />
+            <button class="btn-copy-link" onclick="copyLink()">Copy Link</button>
+          </div>
+        </div>
+
+        <!-- How it works -->
+        <div style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:14px;">
+          How it works
+        </div>
+
+        <div class="how-it-works">
+          <div class="how-step">
+            <div class="how-icon">📤</div>
+            <div class="how-title">Share Your Code</div>
+            <div class="how-desc">Send your unique code or link to friends</div>
+          </div>
+          <div class="how-step">
+            <div class="how-icon">👤</div>
+            <div class="how-title">Friend Signs Up</div>
+            <div class="how-desc">They use your code when creating their account</div>
+          </div>
+          <div class="how-step">
+            <div class="how-icon">✅</div>
+            <div class="how-title">OTP Verified</div>
+            <div class="how-desc">Rewards are credited after email verification</div>
+          </div>
+          <div class="how-step">
+            <div class="how-icon">💰</div>
+            <div class="how-title">Both Get Paid</div>
+            <div class="how-desc">You earn ₹100, your friend gets ₹50</div>
+          </div>
+        </div>
+
+        <!-- Reward breakdown -->
+        <div style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-top:20px; margin-bottom:12px;">
+          Reward breakdown
+        </div>
+
+        <div class="reward-badges">
+          <div class="reward-badge">
+            <div class="badge-icon">🎀</div>
+            <div>
+              <div class="badge-amount">₹50</div>
+              <div class="badge-label">Your friend earns on signup</div>
+            </div>
+          </div>
+          <div class="reward-badge">
+            <div class="badge-icon">💎</div>
+            <div>
+              <div class="badge-amount">₹100</div>
+              <div class="badge-label">You earn per successful referral</div>
+            </div>
+          </div>
+          <div class="reward-badge">
+            <div class="badge-icon">♾️</div>
+            <div>
+              <div class="badge-amount">No limit</div>
+              <div class="badge-label">Refer as many friends as you like</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Change Password -->
+      <div class="card">
+        <div class="card-title"><span></span> Change Password</div>
+        <form action="/profile/changePassword" method="POST">
+          <div class="form-grid">
+            <div class="field full pw-field">
+              <label>Current Password</label>
+              <input type="password" name="currentPassword" id="pw1" placeholder="Enter current password">
+              <button type="button" class="pw-toggle" onclick="togglePw('pw1', this)">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <div class="field pw-field">
+              <label>New Password</label>
+              <input type="password" name="newPassword" id="pw2" placeholder="New password">
+              <button type="button" class="pw-toggle" onclick="togglePw('pw2', this)">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <div class="field pw-field">
+              <label>Confirm Password</label>
+              <input type="password" name="confirmPassword" id="pw3" placeholder="Confirm new password">
+              <button type="button" class="pw-toggle" onclick="togglePw('pw3', this)">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-actions" style="margin-top:16px;">
+            <button type="submit" class="btn-primary">Change Password</button>
+          </div>
+        </form>
+      </div>
+
+      <% if (typeof pwSuccess !== 'undefined' && pwSuccess) { %>
+        <script>
+          window.addEventListener('DOMContentLoaded', () => showToast('Password changed successfully!'));
+        </script>
+      <% } %>
+
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+    </svg>
+    <span id="toastMsg">Copied!</span>
+  </div>
+
+  <script>
+    // ── Show success toast on profile update ──
+    <% if (success) { %>
+      window.addEventListener('DOMContentLoaded', () => showToast('Profile updated successfully!'));
+    <% } %>
+
+    // ── Load referral stats from API ──
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const res  = await fetch('/referral-info')
+        const data = await res.json()
+
+        if (data.success) {
+          // Stats
+          document.getElementById('statFriends').textContent = data.referralCount
+          document.getElementById('statEarned').textContent  = '₹' + (data.referralCount * 100)
+          document.getElementById('statWallet').textContent  = '₹' + data.walletBalance
+
+          // Referral link in the readonly input
+          document.getElementById('referralLinkInput').value = data.referralLink
+
+          // Also update code display in case EJS missed it
+          if (data.referralCode) {
+            document.getElementById('referralCodeDisplay').textContent = data.referralCode
+          }
         }
-
-      function showToast(msg) {
-        const toast = document.getElementById('toast');
-        document.getElementById('toastMsg').textContent = msg;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2500);
+      } catch(e) {
+        document.getElementById('referralLinkInput').value = 'Could not load referral link'
       }
+    })
 
-      function copyReferral() {
-        const code = '<%= user && user.referralCode ? user.referralCode : "AR79kk" %>';
-        navigator.clipboard.writeText(code).then(() => showToast('Referral code copied!'));
-      }
-       
-
-      function previewPhoto(input) {
-  if (input.files && input.files[0]) {
-    const file = input.files[0];
-
-    // Allowed MIME types
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (!allowedTypes.includes(file.type)) {
-      showToast('Only JPG, PNG, WEBP or GIF images are allowed');
-      input.value = '';
-      return;
+    function copyCode() {
+      const code = document.getElementById('referralCodeDisplay').textContent.trim()
+      if (!code || code === '—') return showToast('No referral code found')
+      navigator.clipboard.writeText(code).then(() => showToast('Referral code copied! 🎁'))
     }
 
-    // Max 5MB
-    if (file.size > 5 * 1024 * 1024) {
-      showToast('Image must be under 5MB');
-      input.value = '';
-      return;
+    function copyLink() {
+      const link = document.getElementById('referralLinkInput').value.trim()
+      if (!link || link.startsWith('Could not') || link.startsWith('Loading')) return showToast('Link not ready yet')
+      navigator.clipboard.writeText(link).then(() => showToast('Referral link copied! Share it with friends 🔗'))
     }
 
-    const reader = new FileReader();
-    reader.onload = e => {
-      const preview = document.getElementById('photoPreview');
-      if (preview.tagName === 'IMG') {
-        preview.src = e.target.result;
+    function togglePw(id, btn) {
+      const input = document.getElementById(id)
+      input.type = input.type === 'password' ? 'text' : 'password'
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast')
+      document.getElementById('toastMsg').textContent = msg
+      toast.classList.add('show')
+      setTimeout(() => toast.classList.remove('show'), 2500)
+    }
+
+    function previewPhoto(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0]
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+        if (!allowedTypes.includes(file.type)) {
+          showToast('Only JPG, PNG, WEBP or GIF images are allowed')
+          input.value = ''; return
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          showToast('Image must be under 5MB')
+          input.value = ''; return
+        }
+        const reader = new FileReader()
+        reader.onload = e => {
+          const preview = document.getElementById('photoPreview')
+          if (preview.tagName === 'IMG') {
+            preview.src = e.target.result
+          } else {
+            const img = document.createElement('img')
+            img.src = e.target.result
+            img.className = 'photo-preview'
+            img.id = 'photoPreview'
+            preview.replaceWith(img)
+          }
+        }
+        reader.readAsDataURL(file)
+      }
+    }
+
+    async function requestEmailChange() {
+      const newEmail = document.getElementById('newEmailInput').value.trim()
+      if (!newEmail) return showToast('Enter a new email address first')
+
+      const res  = await fetch('/profile/request-email-change', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newEmail })
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        showToast('OTP sent! Redirecting…')
+        setTimeout(() => window.location.href = data.redirectUrl, 1200)
       } else {
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        img.className = 'photo-preview';
-        img.id = 'photoPreview';
-        preview.replaceWith(img);
+        showToast(data.message)
       }
-    };
-    reader.readAsDataURL(file);
-  }
-}
-
-      async function requestEmailChange() {
-    const newEmail = document.getElementById('newEmailInput').value.trim();
-
-    if (!newEmail) return showToast('Enter a new email address first');
-
-    const res  = await fetch('/profile/request-email-change', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ newEmail })
-    });
-    const data = await res.json();
-
-    if (data.success) {
-      showToast('OTP sent! Redirecting…');
-      setTimeout(() => window.location.href = data.redirectUrl, 1200);
-    } else {
-      showToast(data.message);
     }
-  }
-    </script>
+  </script>
 
-    <%- include('../partials/user/footer') %>
+  <%- include('../partials/user/footer') %>
 </body>
-
 </html>

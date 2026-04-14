@@ -34,7 +34,8 @@ const loadProducts = async (req, res) => {
       .limit(LIMIT)
       .lean();
    
-    
+
+
     res.render('admin/products', {
       products,
       currentPage: page,

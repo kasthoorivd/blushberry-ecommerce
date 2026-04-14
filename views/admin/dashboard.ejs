@@ -152,14 +152,14 @@
       display: inline-block; padding: 2px 10px; border-radius: 20px;
       font-size: 10px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase;
     }
-    .pill-delivered { background: #e8f8f0; color: var(--green); }
-    .pill-placed    { background: #eff6ff; color: var(--blue); }
-    .pill-shipped   { background: #fff8e6; color: var(--amber); }
-    .pill-cancelled { background: #fce8e8; color: #e05555; }
-    .pill-processing{ background: #f3f0ff; color: #7c3aed; }
-    .pill-returned  { background: #fafafa; color: var(--muted); }
-    .ledger-amount { font-weight: 700; color: var(--green); }
-    .ledger-discount{ font-weight: 600; color: #e05555; }
+    .pill-delivered  { background: #e8f8f0; color: var(--green); }
+    .pill-placed     { background: #eff6ff; color: var(--blue); }
+    .pill-shipped    { background: #fff8e6; color: var(--amber); }
+    .pill-cancelled  { background: #fce8e8; color: #e05555; }
+    .pill-processing { background: #f3f0ff; color: #7c3aed; }
+    .pill-returned   { background: #fafafa;  color: var(--muted); }
+    .ledger-amount   { font-weight: 700; color: var(--green); }
+    .ledger-discount { font-weight: 600; color: #e05555; }
 
     .btn-export {
       padding: 8px 18px; background: var(--ink); color: #fff; border: none;
@@ -171,15 +171,21 @@
     /* ── empty state ── */
     .empty { text-align: center; padding: 32px; color: var(--muted); font-size: 13px; }
 
+    /* ── date error ── */
+    #dateError {
+      font-size: 11px; color: #e05555; display: none;
+      padding-left: 2px; margin-top: 4px;
+    }
+
     @media (max-width: 1100px) {
-      .cards-grid   { grid-template-columns: repeat(2, 1fr); }
-      .tables-grid  { grid-template-columns: 1fr; }
-      .brands-grid  { grid-template-columns: repeat(3, 1fr); }
+      .cards-grid  { grid-template-columns: repeat(2, 1fr); }
+      .tables-grid { grid-template-columns: 1fr; }
+      .brands-grid { grid-template-columns: repeat(3, 1fr); }
     }
     @media (max-width: 640px) {
-      .dash-wrap    { padding: 20px 16px; }
-      .cards-grid   { grid-template-columns: 1fr 1fr; }
-      .brands-grid  { grid-template-columns: repeat(2, 1fr); }
+      .dash-wrap   { padding: 20px 16px; }
+      .cards-grid  { grid-template-columns: 1fr 1fr; }
+      .brands-grid { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
@@ -196,23 +202,36 @@
         <p class="page-sub">Blush Berry · Sales Overview</p>
       </div>
 
-      <!-- filter bar -->
-      <form method="GET" action="/admin/dashboard" class="filter-bar" id="filterForm">
+      <!-- ── filter bar ── -->
+      <form method="GET" action="/admin/dashboard" class="filter-bar" id="filterForm" onsubmit="return validateDateRange(event)">
+
         <% ['today','week','month','year','monthly'].forEach(f => { %>
         <button type="submit" name="filter" value="<%= f %>"
-          class="filter-btn <%= filter === f ? 'active' : '' %>"
-          onclick="document.getElementById('filterForm').filter.value='<%= f %>'">
+          class="filter-btn <%= filter === f ? 'active' : '' %>">
           <%= f.charAt(0).toUpperCase() + f.slice(1) %>
         </button>
         <% }) %>
-        <div class="custom-range">
-          <input type="date" name="from" value="<%= fromDate %>" max="<%= new Date().toISOString().split('T')[0] %>">
-          <span style="font-size:12px;color:var(--muted)">–</span>
-          <input type="date" name="to"   value="<%= toDate %>"   max="<%= new Date().toISOString().split('T')[0] %>">
-          <button type="submit" class="btn-apply" name="filter" value="custom">Apply</button>
+
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <input type="date" id="fromInput" name="from"
+              value="<%= fromDate %>"
+              max="<%= new Date().toISOString().split('T')[0] %>"
+              onchange="onFromChange()"
+              style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'Poppins',sans-serif;color:var(--ink);">
+            <span style="font-size:12px;color:var(--muted)">–</span>
+            <input type="date" id="toInput" name="to"
+              value="<%= toDate %>"
+              max="<%= new Date().toISOString().split('T')[0] %>"
+              onchange="onToChange()"
+              style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'Poppins',sans-serif;color:var(--ink);">
+            <button type="submit" name="filter" value="custom" class="btn-apply">Apply</button>
+          </div>
+          <span id="dateError"></span>
         </div>
+
       </form>
-    </div>
+    </div><!-- /page-head -->
 
     <!-- ── summary cards ── -->
     <div class="cards-grid">
@@ -269,41 +288,39 @@
           <h2 class="section-title">Top Products</h2>
           <span style="font-size:11px;color:var(--muted)">by units sold</span>
         </div>
-        <% if(bestProducts.length === 0){ %>
+        <% if (bestProducts.length === 0) { %>
           <p class="empty">No sales data yet.</p>
         <% } else { %>
-        <%
-          const maxPQty = bestProducts[0]?.totalQty || 1
-        %>
-        <table class="rank-table">
-          <thead><tr><th>#</th><th>Product</th><th>Qty</th><th>Revenue</th></tr></thead>
-          <tbody>
-          <% bestProducts.forEach((p, i) => { %>
-          <tr>
-            <td><span class="rank-num <%= i < 3 ? 'top' : '' %>"><%= i+1 %></span></td>
-            <td>
-              <div class="prod-name-cell">
-                <% if(p.image){ %>
-                  <img src="<%= p.image %>" class="prod-thumb" alt="<%= p.name %>">
-                <% } else { %>
-                  <span style="font-size:22px;margin-right:8px;">💄</span>
-                <% } %>
-                <span style="font-size:12px;font-weight:500;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="<%= p.name %>"><%= p.name %></span>
-              </div>
-            </td>
-            <td>
-              <div class="bar-cell">
-                <div class="mini-bar-wrap">
-                  <div class="mini-bar" style="width:<%= Math.round((p.totalQty/maxPQty)*100) %>%"></div>
+          <% const maxPQty = bestProducts[0]?.totalQty || 1 %>
+          <table class="rank-table">
+            <thead><tr><th>#</th><th>Product</th><th>Qty</th><th>Revenue</th></tr></thead>
+            <tbody>
+            <% bestProducts.forEach((p, i) => { %>
+            <tr>
+              <td><span class="rank-num <%= i < 3 ? 'top' : '' %>"><%= i+1 %></span></td>
+              <td>
+                <div class="prod-name-cell">
+                  <% if (p.image) { %>
+                    <img src="<%= p.image %>" class="prod-thumb" alt="<%= p.name %>">
+                  <% } else { %>
+                    <span style="font-size:22px;margin-right:8px;">💄</span>
+                  <% } %>
+                  <span style="font-size:12px;font-weight:500;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="<%= p.name %>"><%= p.name %></span>
                 </div>
-                <span style="font-size:12px;min-width:24px;"><%= p.totalQty %></span>
-              </div>
-            </td>
-            <td>₹<%= (p.totalRevenue||0).toLocaleString('en-IN',{maximumFractionDigits:0}) %></td>
-          </tr>
-          <% }) %>
-          </tbody>
-        </table>
+              </td>
+              <td>
+                <div class="bar-cell">
+                  <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:<%= Math.round((p.totalQty/maxPQty)*100) %>%"></div>
+                  </div>
+                  <span style="font-size:12px;min-width:24px;"><%= p.totalQty %></span>
+                </div>
+              </td>
+              <td>₹<%= (p.totalRevenue||0).toLocaleString('en-IN',{maximumFractionDigits:0}) %></td>
+            </tr>
+            <% }) %>
+            </tbody>
+          </table>
         <% } %>
       </div>
 
@@ -313,32 +330,30 @@
           <h2 class="section-title">Top Categories</h2>
           <span style="font-size:11px;color:var(--muted)">by units sold</span>
         </div>
-        <% if(bestCategories.length === 0){ %>
+        <% if (bestCategories.length === 0) { %>
           <p class="empty">No sales data yet.</p>
         <% } else { %>
-        <%
-          const maxCQty = bestCategories[0]?.totalQty || 1
-        %>
-        <table class="rank-table">
-          <thead><tr><th>#</th><th>Category</th><th>Qty</th><th>Revenue</th></tr></thead>
-          <tbody>
-          <% bestCategories.forEach((c, i) => { %>
-          <tr>
-            <td><span class="rank-num <%= i < 3 ? 'top' : '' %>"><%= i+1 %></span></td>
-            <td style="font-size:13px;font-weight:500;"><%= c.name || 'Unknown' %></td>
-            <td>
-              <div class="bar-cell">
-                <div class="mini-bar-wrap">
-                  <div class="mini-bar" style="width:<%= Math.round((c.totalQty/maxCQty)*100) %>%"></div>
+          <% const maxCQty = bestCategories[0]?.totalQty || 1 %>
+          <table class="rank-table">
+            <thead><tr><th>#</th><th>Category</th><th>Qty</th><th>Revenue</th></tr></thead>
+            <tbody>
+            <% bestCategories.forEach((c, i) => { %>
+            <tr>
+              <td><span class="rank-num <%= i < 3 ? 'top' : '' %>"><%= i+1 %></span></td>
+              <td style="font-size:13px;font-weight:500;"><%= c.name || 'Unknown' %></td>
+              <td>
+                <div class="bar-cell">
+                  <div class="mini-bar-wrap">
+                    <div class="mini-bar" style="width:<%= Math.round((c.totalQty/maxCQty)*100) %>%"></div>
+                  </div>
+                  <span style="font-size:12px;min-width:24px;"><%= c.totalQty %></span>
                 </div>
-                <span style="font-size:12px;min-width:24px;"><%= c.totalQty %></span>
-              </div>
-            </td>
-            <td>₹<%= (c.totalRevenue||0).toLocaleString('en-IN',{maximumFractionDigits:0}) %></td>
-          </tr>
-          <% }) %>
-          </tbody>
-        </table>
+              </td>
+              <td>₹<%= (c.totalRevenue||0).toLocaleString('en-IN',{maximumFractionDigits:0}) %></td>
+            </tr>
+            <% }) %>
+            </tbody>
+          </table>
         <% } %>
       </div>
 
@@ -350,19 +365,19 @@
         <h2 class="section-title">Top Brands</h2>
         <span style="font-size:11px;color:var(--muted)">by units sold</span>
       </div>
-      <% if(bestBrands.length === 0){ %>
+      <% if (bestBrands.length === 0) { %>
         <p class="empty">No brand data yet.</p>
       <% } else { %>
-      <div class="brands-grid">
-        <% bestBrands.forEach((b, i) => { %>
-        <div class="brand-card">
-          <p class="brand-rank">#<%= i+1 %></p>
-          <p class="brand-name"><%= b._id || 'Unknown' %></p>
-          <p class="brand-qty"><%= b.totalQty %> units sold</p>
-          <p class="brand-rev">₹<%= (b.totalRevenue||0).toLocaleString('en-IN',{maximumFractionDigits:0}) %></p>
+        <div class="brands-grid">
+          <% bestBrands.forEach((b, i) => { %>
+          <div class="brand-card">
+            <p class="brand-rank">#<%= i+1 %></p>
+            <p class="brand-name"><%= b._id || 'Unknown' %></p>
+            <p class="brand-qty"><%= b.totalQty %> units sold</p>
+            <p class="brand-rev">₹<%= (b.totalRevenue||0).toLocaleString('en-IN',{maximumFractionDigits:0}) %></p>
+          </div>
+          <% }) %>
         </div>
-        <% }) %>
-      </div>
       <% } %>
     </div>
 
@@ -372,54 +387,54 @@
         <h2 class="section-title">Ledger Book</h2>
         <button class="btn-export" onclick="exportLedger()">⬇ Export CSV</button>
       </div>
-      <% if(ledger.length === 0){ %>
+      <% if (ledger.length === 0) { %>
         <p class="empty">No transactions in this period.</p>
       <% } else { %>
-      <table class="ledger-table" id="ledgerTable">
-        <thead>
+        <table class="ledger-table" id="ledgerTable">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th>Discount</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+          <% ledger.forEach(order => { %>
           <tr>
-            <th>Order ID</th>
-            <th>Date</th>
-            <th>Customer</th>
-            <th>Items</th>
-            <th>Payment</th>
-            <th>Status</th>
-            <th>Discount</th>
-            <th>Amount</th>
+            <td style="font-family:monospace;font-size:11px;"><%= order.orderId %></td>
+            <td><%= new Date(order.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %></td>
+            <td>
+              <div style="font-weight:500;"><%= order.userId?.fullName || order.shippingAddress?.name || '—' %></div>
+              <div style="font-size:10px;color:var(--muted);"><%= order.userId?.email || '' %></div>
+            </td>
+            <td style="color:var(--muted);"><%= order.items.length %> item<%= order.items.length !== 1 ? 's' : '' %></td>
+            <td>
+              <span style="font-size:11px;background:#f5f5f5;padding:2px 8px;border-radius:10px;">
+                <%= order.paymentMethod %>
+              </span>
+            </td>
+            <td>
+              <span class="status-pill pill-<%= order.orderStatus.toLowerCase() %>">
+                <%= order.orderStatus %>
+              </span>
+            </td>
+            <td class="ledger-discount">
+              <% if (order.totalDiscount > 0) { %>
+                −₹<%= order.totalDiscount.toLocaleString('en-IN',{maximumFractionDigits:2}) %>
+              <% } else { %>
+                <span style="color:var(--muted)">—</span>
+              <% } %>
+            </td>
+            <td class="ledger-amount">₹<%= order.finalAmount.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}) %></td>
           </tr>
-        </thead>
-        <tbody>
-        <% ledger.forEach(order => { %>
-        <tr>
-          <td style="font-family:monospace;font-size:11px;"><%= order.orderId %></td>
-          <td><%= new Date(order.createdAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) %></td>
-          <td>
-            <div style="font-weight:500;"><%= order.userId?.fullName || order.shippingAddress?.name || '—' %></div>
-            <div style="font-size:10px;color:var(--muted);"><%= order.userId?.email || '' %></div>
-          </td>
-          <td style="color:var(--muted);"><%= order.items.length %> item<%= order.items.length !== 1 ? 's' : '' %></td>
-          <td>
-            <span style="font-size:11px;background:#f5f5f5;padding:2px 8px;border-radius:10px;">
-              <%= order.paymentMethod %>
-            </span>
-          </td>
-          <td>
-            <span class="status-pill pill-<%= order.orderStatus.toLowerCase() %>">
-              <%= order.orderStatus %>
-            </span>
-          </td>
-          <td class="ledger-discount">
-            <% if(order.totalDiscount > 0){ %>
-              −₹<%= order.totalDiscount.toLocaleString('en-IN',{maximumFractionDigits:2}) %>
-            <% } else { %>
-              <span style="color:var(--muted)">—</span>
-            <% } %>
-          </td>
-          <td class="ledger-amount">₹<%= order.finalAmount.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}) %></td>
-        </tr>
-        <% }) %>
-        </tbody>
-      </table>
+          <% }) %>
+          </tbody>
+        </table>
       <% } %>
     </div>
 
@@ -428,7 +443,7 @@
   <%- include('../partials/admin/adminFooter') %>
 
   <script>
-    // ── chart ─────────────────────────────────────────────────────────────────
+    // ── chart ──────────────────────────────────────────────────────────────────
     const labels   = <%- chartLabels %>
     const revenue  = <%- chartRevenue %>
     const orders   = <%- chartOrders %>
@@ -454,8 +469,8 @@
           borderColor:     active.color,
           borderWidth:     2,
           borderRadius:    6,
-          tension: 0.4,
-          fill: true,
+          tension:         0.4,
+          fill:            true,
           type: labels.length > 15 ? 'line' : 'bar'
         }]
       },
@@ -474,7 +489,10 @@
           }
         },
         scales: {
-          x: { grid: { display: false }, ticks: { font: { family: 'Poppins', size: 11 }, maxRotation: 45 } },
+          x: {
+            grid: { display: false },
+            ticks: { font: { family: 'Poppins', size: 11 }, maxRotation: 45 }
+          },
           y: {
             grid: { color: '#f0e6e8' },
             ticks: {
@@ -486,14 +504,14 @@
       }
     })
 
-    // ── CSV export ────────────────────────────────────────────────────────────
+    // ── CSV export ─────────────────────────────────────────────────────────────
     function exportLedger() {
       const table = document.getElementById('ledgerTable')
       if (!table) return alert('No ledger data to export.')
-      const rows  = [...table.querySelectorAll('tr')]
-      const csv   = rows.map(r =>
+      const rows = [...table.querySelectorAll('tr')]
+      const csv  = rows.map(r =>
         [...r.querySelectorAll('th,td')]
-          .map(c => '"' + c.innerText.replace(/"/g,'""').replace(/\n/g,' ') + '"')
+          .map(c => '"' + c.innerText.replace(/"/g, '""').replace(/\n/g, ' ') + '"')
           .join(',')
       ).join('\n')
 
@@ -504,6 +522,104 @@
       a.download = `blushberry-ledger-${new Date().toISOString().split('T')[0]}.csv`
       a.click()
       URL.revokeObjectURL(url)
+    }
+
+    // ── date validation ────────────────────────────────────────────────────────
+    const today = new Date().toISOString().split('T')[0]
+
+    function showDateError(msg) {
+      const err = document.getElementById('dateError')
+      err.textContent  = msg
+      err.style.display = msg ? 'block' : 'none'
+    }
+
+    function clearDateError() {
+      showDateError('')
+    }
+
+    function highlightInput(id, isError) {
+      document.getElementById(id).style.borderColor = isError ? '#e05555' : 'var(--border)'
+    }
+
+    function onFromChange() {
+      const from = document.getElementById('fromInput')
+      const to   = document.getElementById('toInput')
+      clearDateError()
+      highlightInput('fromInput', false)
+      highlightInput('toInput',   false)
+
+      if (from.value > today) {
+        from.value = today
+        showDateError('"From" date cannot be in the future.')
+        highlightInput('fromInput', true)
+        return
+      }
+      if (to.value && from.value > to.value) {
+        showDateError('"From" date cannot be later than "To" date.')
+        highlightInput('fromInput', true)
+        highlightInput('toInput',   true)
+        return
+      }
+      to.min = from.value || ''
+    }
+
+    function onToChange() {
+      const from = document.getElementById('fromInput')
+      const to   = document.getElementById('toInput')
+      clearDateError()
+      highlightInput('fromInput', false)
+      highlightInput('toInput',   false)
+
+      if (to.value > today) {
+        to.value = today
+        showDateError('"To" date cannot be in the future.')
+        highlightInput('toInput', true)
+        return
+      }
+      if (from.value && to.value < from.value) {
+        showDateError('"To" date cannot be earlier than "From" date.')
+        highlightInput('fromInput', true)
+        highlightInput('toInput',   true)
+        return
+      }
+    }
+
+    function validateDateRange(e) {
+      // Skip validation for preset filter buttons — only validate the Apply button
+      if (e.submitter && e.submitter.value !== 'custom') return true
+
+      const from = document.getElementById('fromInput')
+      const to   = document.getElementById('toInput')
+
+      clearDateError()
+      highlightInput('fromInput', false)
+      highlightInput('toInput',   false)
+
+      if (!from.value || !to.value) {
+        showDateError('Please select both a "From" and "To" date.')
+        if (!from.value) highlightInput('fromInput', true)
+        if (!to.value)   highlightInput('toInput',   true)
+        e.preventDefault()
+        return false
+      }
+
+      if (from.value > today || to.value > today) {
+        showDateError('Dates cannot be in the future.')
+        if (from.value > today) highlightInput('fromInput', true)
+        if (to.value   > today) highlightInput('toInput',   true)
+        e.preventDefault()
+        return false
+      }
+
+      if (from.value > to.value) {
+        showDateError('"From" date must be before or equal to "To" date.')
+        highlightInput('fromInput', true)
+        highlightInput('toInput',   true)
+        e.preventDefault()
+        return false
+      }
+
+      return true
     }
   </script>
 </body>

@@ -3,7 +3,7 @@ const express = require('express')
 const multer = require('multer')
 const path = require('path')
 const userRouter = express.Router()
-
+const User = require('../models/user/userModel')
 const userController = require('../controllers/user/userAuthController')
 const profileController = require('../controllers/user/profileController')
 const addressController = require('../controllers/user/addressController')
@@ -152,6 +152,17 @@ userRouter.get('/wallet', isBlocked, walletController.getWallet)
 userRouter.get('/coupons',isBlocked , profileController.loadCoupons)
 
 userRouter.get('/contact', isBlocked , contactController.loadContact)
+
+
+userRouter.get('/referral-info',  isBlocked, profileController.getReferralInfo)
+ 
+userRouter.get('/validate-referral', async (req, res) => {
+  const { code } = req.query
+  if (!code) return res.json({ valid: false })
+  const user = await User.findOne({ referralCode: code.trim().toUpperCase() })
+  return res.json({ valid: !!user })
+})
+
 // logout
 userRouter.get('/logout', isLoggedIn, userController.logout)
 

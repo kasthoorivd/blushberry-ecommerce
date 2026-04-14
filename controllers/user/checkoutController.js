@@ -13,6 +13,7 @@ const { creditWallet, handleCancellationRefund } = require('./walletController')
 
 const SHIPPING_THRESHOLD = 499
 const SHIPPING_CHARGE    = 49
+const COD_LIMIT = 1500
 
 async function buildCartLines(cartItems) {
   const lines = []
@@ -96,7 +97,19 @@ const loadCheckout = async (req, res) => {
     const totals         = computeTotals(lines, couponDiscount)
    const wallet = await Wallet.findOne({userId})
    const walletBalance = wallet ? wallet.balance :  0
-   
+    
+   const now = new Date()
+   const availableCoupons = await Coupon.find({
+  isActive: true,
+  usedBy: { $ne: userId },
+  minOrderAmount: { $lte: totals.finalAmount },
+  $and: [
+    { $or: [{ expiresAt: null }, { expiresAt: { $gte: now } }] },
+    { $or: [{ maxUses: null }, { $expr: { $lt: [{ $size: '$usedBy' }, '$maxUses'] } }] }
+  ]
+}).lean()
+
+
     return res.render('user/checkout', {
       addresses,
       lines,
@@ -105,6 +118,7 @@ const loadCheckout = async (req, res) => {
       couponCode,
       outOfStock,
       walletBalance,
+      availableCoupons,
       user: req.session.user
     })
   } catch (err) {
@@ -119,10 +133,17 @@ const placeOrder = async (req, res) => {
     const userId = req.session.user._id
     const { addressId, paymentMethod = 'COD' } = req.body
     console.log("Payment Method:", paymentMethod);
+    const numberOfOrder = await Order.find({userId})
+    console.log(numberOfOrder)
+    if(numberOfOrder.length>=5){
+      return res.status(400).json({success:false,message:'limit reached '})
+    }
 
     if (!addressId) {
       return res.status(400).json({ success: false, message: 'Please select a delivery address.' })
     }
+
+    
 
     const address = await Address.findOne({ _id: addressId, user: userId }).lean()
     if (!address) {
@@ -151,9 +172,15 @@ const placeOrder = async (req, res) => {
     const couponDiscount = req.session.coupon?.discount || 0
     const couponCode     = req.session.coupon?.code     || null
     const totals         = computeTotals(lines, couponDiscount)
-    
+     
+    if(paymentMethod==='COD' && totals.finalAmount > COD_LIMIT){
+      return res.status(400).json({
+        success:false,
+        message:'Cash on Delivery is not available for orders above  ₹1,500. Please choose another payment method'
+      })
+    }
      let wallet;
-
+  
 if (paymentMethod.toLowerCase() === 'wallet') {
   wallet = await Wallet.findOne({ userId });
 
@@ -329,16 +356,35 @@ const cancelOrder = async (req, res) => {
       await order.save()
 
     
-      const isPaid = order.paymentMethod !== 'COD' || order.paymentStatus === 'Paid'
-      if (isPaid) {
-        const refundAmount = item.salePrice * item.quantity
-        await creditWallet(
-          req.session.user._id,
-          refundAmount,
-          `Refund for cancelled item "${item.productName}" in order #${order.orderId}`,
-          order._id
-        )
-      }
+     const isPaid = order.paymentMethod !== 'COD' || order.paymentStatus === 'Paid'
+if (isPaid) {
+  // Item's paid value before any order-level deductions
+  const itemPaidBase = item.salePrice * item.quantity
+
+  // Total of all items' salePrice * qty (the base to proportion against)
+  const orderItemsTotal = order.items.reduce(
+    (sum, i) => sum + (i.salePrice * i.quantity), 0
+  )
+
+  // Proportional share of coupon discount for this item
+  const couponShare = orderItemsTotal > 0
+    ? Math.round((itemPaidBase / orderItemsTotal) * (order.couponDiscount || 0))
+    : 0
+
+  // Proportional share of shipping for this item
+  const shippingShare = orderItemsTotal > 0
+    ? Math.round((itemPaidBase / orderItemsTotal) * (order.shippingCharge || 0))
+    : 0
+
+  const refundAmount = itemPaidBase - couponShare + shippingShare
+
+  await creditWallet(
+    req.session.user._id,
+    refundAmount,
+    `Refund for cancelled item "${item.productName}" in order #${order.orderId}`,
+    order._id
+  )
+}
 
       return res.json({ success: true, message: 'Item cancelled successfully.' })
     }
@@ -491,6 +537,7 @@ const downloadInvoice = async (req, res) => {
     const rupee = n => `Rs. ${Number(n || 0).toLocaleString('en-IN')}`
     const fmt   = d => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
 
+    // ── HEADER ─────────────────────────────────────────────────────────────
     doc.rect(50, 45, W, 70).fill(LIGHT)
     doc.fontSize(26).font('Helvetica-Bold').fillColor(PINK).text('Blushberry', 60, 60)
     doc.fontSize(8).font('Helvetica').fillColor(MUTED).text('Beauty & Cosmetics', 60, 90)
@@ -503,29 +550,51 @@ const downloadInvoice = async (req, res) => {
     doc.moveTo(50, y).lineTo(545, y).strokeColor(BORDER).lineWidth(1).stroke()
     y += 15
 
-    doc.fontSize(7).font('Helvetica-Bold').fillColor(MUTED).text('BILL TO / SHIP TO', 50, y)
-    y += 12
-    const addr = order.shippingAddress
-    doc.fontSize(9).font('Helvetica-Bold').fillColor(DARK).text(addr.name, 50, y)
-    y += 13
-    doc.fontSize(8).font('Helvetica').fillColor(MUTED)
+    // ── ADDRESS + PAYMENT INFO (fixed, no overlap) ─────────────────────────
+    const addr       = order.shippingAddress
+    const addrBlockY = y
+
+    // LEFT: Bill To
+    doc.fontSize(7).font('Helvetica-Bold').fillColor(MUTED)
+       .text('BILL TO / SHIP TO', 50, addrBlockY)
+
+    doc.fontSize(9).font('Helvetica-Bold').fillColor(DARK)
+       .text(addr.name, 50, addrBlockY + 12)
+
     const addrLine = [addr.address, addr.city, addr.state, addr.country].filter(Boolean).join(', ')
-    doc.text(addrLine, 50, y, { width: 250 })
-    y += 12
-    doc.text(`PIN: ${addr.pincode}`, 50, y)
-    y += 12
-    doc.text(`Mobile: ${addr.mobile}`, 50, y)
+    doc.fontSize(8).font('Helvetica').fillColor(MUTED)
+       .text(addrLine, 50, addrBlockY + 25, { width: 220 })
 
-    doc.fontSize(7).font('Helvetica-Bold').fillColor(MUTED).text('PAYMENT INFO', 350, y - 49)
+    const addrLineHeight = doc.heightOfString(addrLine, { width: 220 })
+
+    doc.text(`PIN: ${addr.pincode}`,   50, addrBlockY + 25 + addrLineHeight + 4)
+    doc.text(`Mobile: ${addr.mobile}`, 50, addrBlockY + 25 + addrLineHeight + 16)
+
+    // RIGHT: Payment Info
+    doc.fontSize(7).font('Helvetica-Bold').fillColor(MUTED)
+       .text('PAYMENT INFO', 340, addrBlockY, { width: 195 })
+
     doc.fontSize(8).font('Helvetica').fillColor(DARK)
-       .text(`Method: ${order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod}`, 350, y - 36)
-       .text(`Status: ${order.paymentStatus}`, 350, y - 23)
-       .text(`Order Status: ${order.orderStatus}`, 350, y - 10)
+       .text(
+         `Method: ${order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod}`,
+         340, addrBlockY + 12, { width: 195 }
+       )
+       .text(`Status: ${order.paymentStatus}`,     340, addrBlockY + 26, { width: 195 })
+       .text(`Order Status: ${order.orderStatus}`, 340, addrBlockY + 40, { width: 195 })
+       .text(
+         `Date: ${new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`,
+         340, addrBlockY + 54, { width: 195 }
+       )
 
-    y += 20
+    // Advance y past whichever column is taller
+    const leftHeight  = 25 + addrLineHeight + 28
+    const rightHeight = 70
+    y = addrBlockY + Math.max(leftHeight, rightHeight) + 16
+
     doc.moveTo(50, y).lineTo(545, y).strokeColor(BORDER).lineWidth(0.5).stroke()
     y += 15
 
+    // ── ITEMS TABLE HEADER ─────────────────────────────────────────────────
     doc.rect(50, y, W, 22).fill(PINK)
     doc.fontSize(8).font('Helvetica-Bold').fillColor('#ffffff')
        .text('ITEM',        60,  y + 7, { width: 200 })
@@ -535,6 +604,7 @@ const downloadInvoice = async (req, res) => {
        .text('TOTAL',      440,  y + 7, { width: 95, align: 'right'  })
     y += 22
 
+    // ── ITEMS ──────────────────────────────────────────────────────────────
     order.items.forEach((item, i) => {
       const rowH  = 28
       const bgCol = i % 2 === 0 ? '#ffffff' : LIGHT
@@ -550,11 +620,11 @@ const downloadInvoice = async (req, res) => {
          .text(item.productName + (cancelled ? ' (Cancelled)' : ''), 60, y + 9, { width: 195, ellipsis: true })
 
       doc.font('Helvetica').fillColor(MUTED)
-         .text(item.shade || '—',                        260, y + 9, { width: 65  })
-         .text(String(item.quantity),                    330, y + 9, { width: 35, align: 'center' })
-         .text(rupee(item.salePrice),                    365, y + 9, { width: 75, align: 'right'  })
+         .text(item.shade || '—',                     260, y + 9, { width: 65  })
+         .text(String(item.quantity),                 330, y + 9, { width: 35, align: 'center' })
+         .text(rupee(item.salePrice),                 365, y + 9, { width: 75, align: 'right'  })
       doc.fillColor(cancelled ? MUTED : DARK)
-         .text(rupee(item.salePrice * item.quantity),    440, y + 9, { width: 95, align: 'right'  })
+         .text(rupee(item.salePrice * item.quantity), 440, y + 9, { width: 95, align: 'right'  })
 
       y += rowH
     })
@@ -562,6 +632,7 @@ const downloadInvoice = async (req, res) => {
     doc.moveTo(50, y).lineTo(545, y).strokeColor(BORDER).lineWidth(0.5).stroke()
     y += 15
 
+    // ── TOTALS ─────────────────────────────────────────────────────────────
     const totRow = (label, value, bold = false, color = DARK) => {
       if (bold) {
         doc.rect(50, y - 3, W, 22).fill(LIGHT)
@@ -599,6 +670,7 @@ const downloadInvoice = async (req, res) => {
       y += 32
     }
 
+    // ── FOOTER ─────────────────────────────────────────────────────────────
     y = Math.max(y + 20, 720)
     doc.moveTo(50, y).lineTo(545, y).strokeColor(BORDER).lineWidth(0.5).stroke()
     y += 10
