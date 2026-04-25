@@ -2,12 +2,12 @@ const User = require('../../models/user/userModel');
 const Otp = require('../../models/user/otpModel');
 const Product = require('../../models/user/productModel')
 const Wishlist = require('../../models/user/wishlistModel')
+const Offer = require('../../models/user/offerModel')
 const bcrypt = require('bcrypt');
 const crypto = require('crypto')
 const generateOtp = require('../../utils/generateOtp');
 const sendEmail = require("../../utils/sendEmail");
 const passport = require('../../config/passport');
-const getEffectivePrice = require('../../utils/getEffectivePrice')
 const { isBlocked } = require('../../middleware/authMiddleware');
 const Wallet = require('../../models/user/walletModel');
 
@@ -73,13 +73,47 @@ const loadHomePage = async (req, res) => {
       .limit(8)
       .lean()
 
-    await Promise.all(products.map(async (p) => {
-      const { finalPrice, bestDiscount, originalPrice } = await getEffectivePrice(p)
-      p.displayPrice  = finalPrice
-      p.originalPrice = originalPrice
-      p.displayOffer  = bestDiscount
-      p.inStock       = p.variants.some(v => v.stock > 0)
-    }))
+    const now = new Date()
+const activeOffers = await Offer.find({
+  isActive:  true,
+  startDate: { $lte: now },
+  endDate:   { $gte: now }
+}).lean()
+
+const productOfferMap  = {}
+const categoryOfferMap = {}
+
+for (const o of activeOffers) {
+  const key = String(o.targetId)
+  if (o.type === 'product') {
+    if (!productOfferMap[key] || o.discountPercent > productOfferMap[key])
+      productOfferMap[key] = o.discountPercent
+  } else if (o.type === 'category') {
+    if (!categoryOfferMap[key] || o.discountPercent > categoryOfferMap[key])
+      categoryOfferMap[key] = o.discountPercent
+  }
+}
+
+products.forEach(p => {
+  const productOffer  = productOfferMap[String(p._id)] || 0
+  const categoryOffer = categoryOfferMap[String(p.categoryId?._id || p.categoryId)] || 0
+  const bestOffer     = Math.max(productOffer, categoryOffer)
+
+  const origPrices = p.variants.map(v => v.varientPrice)
+  p.originalPrice  = Math.min(...origPrices)
+  p.displayOffer   = bestOffer
+
+  if (bestOffer > 0) {
+    p.displayPrice = parseFloat((p.originalPrice * (1 - bestOffer / 100)).toFixed(2))
+  } else {
+    const effectivePrices = p.variants.map(v => v.salePrice > 0 ? v.salePrice : v.varientPrice)
+    p.displayPrice = Math.min(...effectivePrices)
+  }
+
+  p.inStock = p.variants.some(v => v.stock > 0)
+})
+
+
  let wishlistIds = []
 if (req.session.user?._id) {
   const wishlist = await Wishlist.findOne({ userId: req.session.user._id })
@@ -121,6 +155,8 @@ const signup = async (req, res) => {
     if (existingUser) {
       return res.json({ success: false, message: 'User already exists' });
     }
+
+   
 
     // ── Referral: accept code from body OR session (URL param) ──
     const referralInput = inputReferralCode?.trim() || req.session.referralCode?.trim();
@@ -320,8 +356,14 @@ const loadLogin = (req, res) => {
     ? 'Your account has been blocked by the admin. Please contact support.'
     : null
 
-  res.render('user/loginPage', { blockedMessage })
+  let googleMessage = null
+  if (req.query.googleError === 'already_registered') {
+    googleMessage = 'This email is already registered with a password. Please log in with your email and password instead.'
+  }
+
+  res.render('user/loginPage', { blockedMessage, googleMessage })
 }
+
 
 const login = async (req, res) => {
   try {
@@ -530,17 +572,19 @@ const requestEmailChange = async (req, res) => {
 };
 
 
-const logout = async (req, res) => {
+const logout = (req, res) => {
   try {
-    req.session.destroy(() => {
-      res.clearCookie('connect.sid');
-      res.redirect('/');
-    });
+    req.logout((err) => {            
+      if (err) console.error(err)
+    })
+    delete req.session.user         
+    res.clearCookie('user.sid')      
+    res.redirect('/')
   } catch (error) {
-    console.log('error during logout:', error);
-    res.status(500).send('error during logout');
+    console.error('error during logout:', error)
+    res.status(500).send('error during logout')
   }
-};
+}
 
 
 const getReferralInfo = async (req, res) => {

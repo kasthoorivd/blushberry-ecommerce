@@ -181,7 +181,40 @@
 </head>
 <body>
   <%- include('../partials/user/header') %>
+   <% if (typeof unavailable !== 'undefined' && unavailable) { %>
+  <div style="
+    margin: 32px 48px;
+    padding: 24px 28px;
+    background: #fce8ed;
+    border: 1px solid #f0c0cc;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  ">
+    <span style="font-size:28px;">🚫</span>
+    <div>
+      <p style="font-size:15px;font-weight:600;color:#c0415a;margin-bottom:4px;">Product Unavailable</p>
+      <p style="font-size:13px;color:#888;"><%= unavailableMsg %></p>
+      <div style="margin-top:12px;display:flex;gap:10px;">
+        <a href="/products" style="
+          padding:8px 18px;background:#1a1a2e;color:#fff;
+          border-radius:5px;font-size:12px;font-weight:600;
+          letter-spacing:.6px;text-transform:uppercase;
+        ">Browse Products</a>
+        <button onclick="history.back()" style="
+          padding:8px 18px;background:#fff;color:#1a1a2e;
+          border:1px solid #e8d8dc;border-radius:5px;font-size:12px;
+          font-weight:600;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;
+        ">Go Back</button>
+      </div>
+    </div>
+  </div>
 
+  <%- include('../partials/user/footer') %>
+  </body></html>
+  <% return %> 
+<% } %>
   <!-- ── Breadcrumb ── -->
   <nav class="breadcrumb">
     <a href="/">Home</a>
@@ -257,16 +290,19 @@
       <div class="price-block">
         <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px;">
           <span class="price-main" id="displayPrice">₹<%= product.displayPrice.toFixed(2) %></span>
-          <% if(product.displayOffer > 0){ %>
-            <span class="price-orig" id="origPrice">₹<%= product.originalPrice.toFixed(2) %></span>
-            <span class="offer-tag"><%= product.displayOffer %>% OFF</span>
-          <% } %>
-        </div>
-        <% if(product.displayOffer > 0){ %>
-          <p class="price-save" id="priceSave">
-            You save ₹<%= (product.originalPrice - product.displayPrice).toFixed(2) %>
-          </p>
-        <% } %>
+         <% const detailHasSaving = product.originalPrice > product.displayPrice %>
+<% if(detailHasSaving){ %>
+  <span class="price-orig" id="origPrice">₹<%= product.originalPrice.toFixed(2) %></span>
+  <% if(product.displayOffer > 0){ %>
+    <span class="offer-tag"><%= product.displayOffer %>% OFF</span>
+  <% } %>
+<% } %>
+</div>
+<% if(detailHasSaving){ %>
+  <p class="price-save" id="priceSave">
+    You save ₹<%= (product.originalPrice - product.displayPrice).toFixed(2) %>
+  </p>
+<% } %>
         <p class="price-per-shade">Price may vary by shade</p>
 
         <% if(!product.inStock){ %>
@@ -499,13 +535,13 @@
           <!-- Related card: sale price + strikethrough + save -->
           <div style="display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;">
             <span class="rel-price">₹<%= rel.displayPrice.toFixed(2) %></span>
-            <% if(rel.displayOffer > 0){ %>
-              <span class="rel-orig">₹<%= rel.originalPrice.toFixed(2) %></span>
-            <% } %>
+            <% if(rel.originalPrice > rel.displayPrice){ %>
+  <span class="rel-orig">₹<%= rel.originalPrice.toFixed(2) %></span>
+<% } %>
           </div>
-          <% if(rel.displayOffer > 0){ %>
-            <span class="rel-save">Save ₹<%= (rel.originalPrice - rel.displayPrice).toFixed(2) %></span>
-          <% } %>
+         <% if(rel.originalPrice > rel.displayPrice){ %>
+  <span class="rel-save">Save ₹<%= (rel.originalPrice - rel.displayPrice).toFixed(2) %></span>
+<% } %>
         </div>
       </div>
       <% }) %>

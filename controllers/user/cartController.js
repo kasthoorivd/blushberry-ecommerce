@@ -5,6 +5,22 @@ const Coupon = require('../../models/user/couponModel')
 
 
 const MAX_QTY_PER_ITEM = 5
+async function validateProductAvailability(productId, shade) {
+  const product = await Product.findOne({
+    _id: productId,
+    isDeleted: false,
+    isListed: true
+  }).lean()
+
+  if (!product) return { ok: false, message: 'This product is no longer available.' }
+
+  const variant = findVariant(product, shade)
+  if (!variant) return { ok: false, message: 'Selected shade is no longer available.' }
+
+  if (variant.stock <= 0) return { ok: false, message: 'This shade is currently out of stock.', outOfStock: true }
+
+  return { ok: true, product, variant }
+}
 
 function getVariantPrice(variant) {
   return variant.salePrice > 0 ? variant.salePrice : variant.varientPrice
@@ -22,28 +38,39 @@ const loadCart = async (req, res) => {
     const userId = req.session.user?._id
     if (!userId) return res.redirect('/login')
 
-    const cart = await Cart.findOne({ userId })
-      .populate({
-        path: 'items.productId',
-        select: 'name images variants isListed isDeleted offer categoryId'
-      })
-      .lean()
+    // ── Fetch cart WITHOUT populate — we'll fetch products fresh below ──
+    const cart = await Cart.findOne({ userId }).lean()
+    const sessionRemovedNames = req.session.cartRemovedNames || []
+req.session.cartRemovedNames = null
     let validItems = []
-    let removedNames = []
+    let removedNames = [...sessionRemovedNames]
+    let invalidCartItemIds = []
 
     if (cart && cart.items.length) {
       for (const item of cart.items) {
-        const product = item.productId
+
+        // ── Always fetch fresh from DB — no populate, no stale cache ──
+        const product = await Product.findById(item.productId)
+          .select('name images variants isListed isDeleted offer categoryId')
+          .lean()
+
+        console.log('DEBUG product:', product?.name, 'isListed:', product?.isListed, 'isDeleted:', product?.isDeleted)
+
         if (!product || product.isDeleted || !product.isListed) {
           removedNames.push(product?.name || 'A product')
+          invalidCartItemIds.push(item._id)
           continue
         }
+        
+
         const variant = findVariant(product, item.shade)
-        if (!variant) continue
+        if (!variant) {
+          invalidCartItemIds.push(item._id)
+          continue
+        }
 
         const currentPrice = getVariantPrice(variant)
         const inStock = variant.stock > 0
-
 
         validItems.push({
           ...item,
@@ -52,19 +79,25 @@ const loadCart = async (req, res) => {
           currentPrice,
           inStock,
           stockAvailable: variant.stock,
-
           qtyExceedsStock: item.quantity > variant.stock,
           qtyExceedsMax: item.quantity > MAX_QTY_PER_ITEM,
           effectiveQty: Math.min(item.quantity, variant.stock, MAX_QTY_PER_ITEM)
-
         })
       }
     }
 
+    if (invalidCartItemIds.length > 0) {
+      await Cart.updateOne(
+        { userId },
+        { $pull: { items: { _id: { $in: invalidCartItemIds } } } }
+      )
+    }
+
+    console.log('DEBUG removedNames:', removedNames)
+
     const subtotal = validItems
       .filter(i => i.inStock)
       .reduce((sum, i) => sum + i.currentPrice * i.effectiveQty, 0)
-
 
     const hasOutOfStock = validItems.some(i => !i.inStock)
     const hasQtyIssues = validItems.some(i => i.qtyExceedsStock || i.qtyExceedsMax)
@@ -76,7 +109,6 @@ const loadCart = async (req, res) => {
       return sum + ((original - current) * item.effectiveQty)
     }, 0)
 
-
     res.render('user/cart', {
       items: validItems,
       subtotal,
@@ -87,7 +119,6 @@ const loadCart = async (req, res) => {
       canCheckout,
       maxQty: MAX_QTY_PER_ITEM,
       user: req.session.user || null,
-
     })
 
   } catch (error) {
@@ -95,8 +126,6 @@ const loadCart = async (req, res) => {
     res.status(500).redirect('/products')
   }
 }
-
-
 const addToCart = async (req, res) => {
   try {
     const userId = req.session.user?._id
@@ -107,62 +136,38 @@ const addToCart = async (req, res) => {
     const { productId, quantity = 1, shade = '' } = req.body
     const qty = parseInt(quantity) || 1
 
-    // ── validate product ──
-    const product = await Product.findOne({ _id: productId, isDeleted: false, isListed: true })
-    if (!product) {
-      return res.status(404).json({ success: false, message: 'Product is no longer available.' })
+    // ── Validate product is listed, not deleted, shade exists, in stock ──
+    const check = await validateProductAvailability(productId, shade)
+    if (!check.ok) {
+      return res.status(400).json({ success: false, message: check.message })
     }
 
-    const variant = findVariant(product, shade)
-    if (!variant) {
-      return res.status(400).json({ success: false, message: 'Shade not found.' })
-    }
+    const { product, variant } = check
 
-    if (variant.stock <= 0) {
-      return res.status(400).json({ success: false, message: 'This shade is out of stock.' })
-    }
-
-    // ── get or create cart ──
     let cart = await Cart.findOne({ userId })
     if (!cart) cart = new Cart({ userId, items: [] })
 
-    // check if same product+shade already in cart
     const existingIdx = cart.items.findIndex(
       i => String(i.productId) === String(productId) &&
         i.shade.toLowerCase() === (shade || variant.shade).toLowerCase()
     )
 
     if (existingIdx > -1) {
-      // item already exists — increment quantity
       const newQty = cart.items[existingIdx].quantity + qty
-
       if (newQty > MAX_QTY_PER_ITEM) {
-        return res.status(400).json({
-          success: false,
-          message: `Maximum ${MAX_QTY_PER_ITEM} units allowed per item.`
-        })
+        return res.status(400).json({ success: false, message: `Maximum ${MAX_QTY_PER_ITEM} units allowed per item.` })
       }
       if (newQty > variant.stock) {
-        return res.status(400).json({
-          success: false,
-          message: `Only ${variant.stock} units available in this shade.`
-        })
+        return res.status(400).json({ success: false, message: `Only ${variant.stock} units available in this shade.` })
       }
       cart.items[existingIdx].quantity = newQty
       cart.items[existingIdx].priceAtAdd = getVariantPrice(variant)
     } else {
-      // new item
       if (qty > MAX_QTY_PER_ITEM) {
-        return res.status(400).json({
-          success: false,
-          message: `Maximum ${MAX_QTY_PER_ITEM} units allowed per item.`
-        })
+        return res.status(400).json({ success: false, message: `Maximum ${MAX_QTY_PER_ITEM} units allowed per item.` })
       }
       if (qty > variant.stock) {
-        return res.status(400).json({
-          success: false,
-          message: `Only ${variant.stock} units available in stock.`
-        })
+        return res.status(400).json({ success: false, message: `Only ${variant.stock} units available in stock.` })
       }
       cart.items.push({
         productId: product._id,
@@ -174,7 +179,6 @@ const addToCart = async (req, res) => {
 
     await cart.save()
 
-    // ── remove from wishlist if present ──
     await Wishlist.findOneAndUpdate(
       { userId },
       { $pull: { products: product._id } }
@@ -203,21 +207,21 @@ const updateCartItem = async (req, res) => {
     if (itemIdx === -1) return res.status(404).json({ success: false, message: 'Item not found.' })
 
     const item = cart.items[itemIdx]
-    const product = await Product.findOne({ _id: item.productId, isDeleted: false, isListed: true })
 
-    if (!product) {
+    // ── Re-validate product availability on every qty change ──
+    const check = await validateProductAvailability(item.productId, item.shade)
+    if (!check.ok) {
+      // Remove the item from cart since it's no longer valid
       cart.items.splice(itemIdx, 1)
       await cart.save()
-      return res.json({ success: true, removed: true, message: 'Product no longer available.' })
+      return res.status(400).json({
+        success: false,
+        removed: true,
+        message: check.message
+      })
     }
 
-    const variant = findVariant(product, item.shade)
-    if (!variant) {
-      cart.items.splice(itemIdx, 1)
-      await cart.save()
-      return res.json({ success: true, removed: true, message: 'Shade no longer available.' })
-    }
-
+    const { variant } = check
     let newQty = item.quantity
 
     if (action === 'increment') {
@@ -225,7 +229,7 @@ const updateCartItem = async (req, res) => {
         return res.status(400).json({ success: false, message: `Maximum ${MAX_QTY_PER_ITEM} units allowed.` })
       }
       if (item.quantity >= variant.stock) {
-        return res.status(400).json({ success: false, message: `Only ${variant.stock} units in stock.` })
+        return res.status(400).json({ success: false, message: `Only ${variant.stock} unit${variant.stock === 1 ? '' : 's'} in stock.` })
       }
       newQty = item.quantity + 1
     } else if (action === 'decrement') {

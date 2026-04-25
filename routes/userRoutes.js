@@ -57,17 +57,39 @@ userRouter.post('/verifyOtp', userController.verifyOtp)
 userRouter.post('/resendOtp', userController.resendOtp)
 
 // google auth 
-userRouter.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
+userRouter.get('/auth/google', (req, res, next) => {
+  const state = req.query.intent || 'login'
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    state
+  })(req, res, next)
+})
 
 
 userRouter.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login' }),
-  (req, res) => {
+  (req, res, next) => {
+    passport.authenticate('google', (err, user, info) => {
+      if (err) return next(err)
 
-    req.session.user = req.user; 
-    res.redirect('/');
+      if (!user) {
+        // info.message is set in passport.js via done(null, false, { message })
+        if (info?.message === 'already_registered') {
+          return res.redirect('/login?googleError=already_registered')
+        }
+        return res.redirect('/login')
+      }
+
+      req.session.user = {
+        _id:          user._id,
+        email:        user.email,
+        isBlocked:    user.isBlocked,
+        fullName:     user.fullName,
+        profilePhoto: user.profilePhoto,
+      }
+      res.redirect('/')
+    })(req, res, next)
   }
-);
+)
 
 // forgot password
 userRouter.get('/forgot-password', userController.LoadforgotPassword)

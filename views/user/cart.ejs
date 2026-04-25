@@ -155,9 +155,9 @@
 
               <div class="item-price-row">
                 <span class="item-price">₹<%= item.currentPrice.toFixed(2) %></span>
-                <% if (item.product.offer > 0) { %>
-                  <span class="item-orig">₹<%= (item.variant.varientPrice).toFixed(2) %></span>
-                <% } %>
+               <% if (item.variant.varientPrice > item.currentPrice) { %>
+  <span class="item-orig">₹<%= (item.variant.varientPrice).toFixed(2) %></span>
+<% } %>
                 <span class="item-subtotal">× <%= item.effectiveQty %> = ₹<%= (item.currentPrice * item.effectiveQty).toFixed(2) %></span>
               </div>
 

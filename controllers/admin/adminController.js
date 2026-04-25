@@ -5,13 +5,11 @@ const loadAdminLogin = (req, res) => {
     res.render('admin/adminLogin.ejs')
 }
 
-
-
 const adminLogin = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password } = req.body
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email })
 
         if (!user) {
             return res.json({ success: false, message: "Admin not found" })
@@ -27,41 +25,34 @@ const adminLogin = async (req, res) => {
             return res.json({ success: false, message: 'Incorrect password' })
         }
 
-        req.session.admin = user._id;
+    
+        req.session.admin = { _id: user._id, email: user.email }
+
         req.session.save((err) => {
             if (err) {
-                console.log("Session save error", err);
+                console.error("Session save error:", err)
                 return res.status(500).json({ success: false, message: "Session error" })
             }
-            return res.json({
-                success: true,
-                redirectUrl: '/admin/dashboard'
-            })
+            return res.json({ success: true, redirectUrl: '/admin/dashboard' })
         })
 
     } catch (error) {
-        console.log("Admin login error", error)
+        console.error("Admin login error:", error)
         res.status(500).json({ success: false, message: "Server error" })
     }
 }
 
-const adminLogout = async (req, res) => {
+
+const adminLogout = (req, res) => {
     try {
-        req.session.destroy((err) => {
-            if (err) {
-                console.error("adminLogout error:", err);
-                return res.redirect("/admin/dashboard");
-            }
-            res.clearCookie("connect.sid");
-            return res.redirect("/admin/login");
-        });
+        delete req.session.admin
+        res.clearCookie("admin.sid")
+        return res.redirect("/admin/login")
     } catch (error) {
-        console.error("adminLogout error:", error);
-        return res.redirect("/admin/dashboard");
+        console.error("adminLogout error:", error)
+        return res.redirect("/admin/dashboard")
     }
-};
-
-
+}
 
 module.exports = {
     loadAdminLogin,

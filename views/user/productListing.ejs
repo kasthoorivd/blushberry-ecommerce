@@ -307,14 +307,14 @@
               <span style="font-size:40px;">💄</span>
             <% } %>
 
-            <!-- ✅ Badge: shows exact % off -->
-            <% if(!product.inStock){ %>
-              <span class="badge badge-out">Sold Out</span>
-            <% } else if(product.displayOffer >= 10){ %>
-              <span class="badge badge-sale"><%= product.displayOffer %>% OFF</span>
-            <% } else if((Date.now() - new Date(product.createdAt)) < 7*24*60*60*1000){ %>
-              <span class="badge badge-new">New</span>
-            <% } %>
+           <!-- Badge -->
+<% if(!product.inStock){ %>
+  <span class="badge badge-out">Sold Out</span>
+<% } else if(product.displayOffer >= 10){ %>
+  <span class="badge badge-sale"><%= product.displayOffer %>% OFF</span>
+<% } else if((Date.now() - new Date(product.createdAt)) < 7*24*60*60*1000){ %>
+  <span class="badge badge-new">New</span>
+<% } %>
 
             <!-- Wishlist -->
             <%
@@ -356,15 +356,18 @@
             <!-- ✅ Price + cart: sale price, strikethrough, save amount -->
             <div class="card-footer">
               <div>
-                <div style="display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;">
-                  <span class="card-price">₹<%= product.displayPrice.toFixed(2) %></span>
-                  <% if(product.displayOffer > 0){ %>
-                    <span class="card-orig">₹<%= product.originalPrice.toFixed(2) %></span>
-                  <% } %>
-                </div>
-                <% if(product.displayOffer > 0){ %>
-                  <span class="card-save">Save ₹<%= (product.originalPrice - product.displayPrice).toFixed(2) %></span>
-                <% } %>
+                <%
+  const hasSaving = product.originalPrice > product.displayPrice
+%>
+<div style="display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;">
+  <span class="card-price">₹<%= product.displayPrice.toFixed(2) %></span>
+  <% if(hasSaving){ %>
+    <span class="card-orig">₹<%= product.originalPrice.toFixed(2) %></span>
+  <% } %>
+</div>
+<% if(hasSaving){ %>
+  <span class="card-save">Save ₹<%= (product.originalPrice - product.displayPrice).toFixed(2) %></span>
+<% } %>
               </div>
               <% if(product.inStock){ %>
               <button class="btn-cart" onclick="addToCart(event,'<%= product._id %>')">ADD TO CART</button>

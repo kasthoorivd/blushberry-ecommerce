@@ -1,7 +1,8 @@
 const Product = require('../../models/user/productModel')
 const Review  = require('../../models/user/reviewModel')
-const Offer   = require('../../models/user/offerModel')  // ← add this
+const Offer   = require('../../models/user/offerModel')  
 const Wishlist = require('../../models/user/wishlistModel')
+const Category = require('../../models/user/categoryModel')
 // ── fetch active offers and return lookup maps ────────────────────────────────
 async function getActiveOfferMaps() {
   const now = new Date()
@@ -60,18 +61,33 @@ const loadProductDetail = async (req, res) => {
       _id:       req.params.id,
       isDeleted: false
     })
-    .populate('categoryId', 'name')
+    .populate('categoryId', 'name isListed')
     .lean()
 
-    if (!product || !product.isListed) {
-      req.session.toast = { type: 'error', message: 'This product is no longer available' }
-      return res.redirect('/products')
+    if(!product || !product.isListed || !product.categoryId?.isListed){
+      return res.render('user/productDetail',{
+        unavailable: true,
+        unavailableMsg: !product
+        ? 'This product does not exist or has been removed'
+        :!product.isListed 
+        ?'This prdouct is currently unavailable'
+        :'This product\'s category is currently unavailable',
+        product: product || null,
+        reviews: [],
+        avgRating: 0,
+        ratingBreakdown:{ 5:0, 4:0, 3:0, 2:0, 1:0 },
+        reviewCount:    0,
+        userReview:     null,
+        related:        [],
+        wishlistIds:    [],
+        user:           req.session.user || null
+      })
     }
 
-    // ── apply admin offers ──────────────────────────────────────────────────
+    
     const { productOfferMap, categoryOfferMap } = await getActiveOfferMaps()
     applyBestOffer(product, productOfferMap, categoryOfferMap)
-    // ───────────────────────────────────────────────────────────────────────
+   
 
     const reviews = await Review.find({ productId: product._id, isDeleted: false })
       .populate('userId', 'fullName profilePhoto')
@@ -107,7 +123,7 @@ const loadProductDetail = async (req, res) => {
     .limit(4)
     .lean()
 
-    // apply offers to related products too
+    
     related.forEach(p => applyBestOffer(p, productOfferMap, categoryOfferMap))
 let wishlistIds = []
 if (req.session.user?._id) {
@@ -131,6 +147,7 @@ if (req.session.user?._id) {
     return res.redirect('/products')
   }
 }
+
 
 
 const submitReview = async (req, res) => {
@@ -163,6 +180,7 @@ const submitReview = async (req, res) => {
     res.status(500).json({ success: false, message: 'Could not submit review.' })
   }
 }
+
 
 
 const deleteReview = async (req, res) => {

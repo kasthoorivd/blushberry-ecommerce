@@ -410,99 +410,103 @@
             <span class="card-icon"><i class="fas fa-undo"></i></span>
             <span class="card-title">Return Management</span>
           </div>
-          <div class="card-body">
+         <div class="card-body">
 
-            <!-- WHOLE ORDER RETURN -->
-            <% if (order.returnStatus !== 'None') { %>
-              <div style="margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);">
-                <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.5rem;">
-                  Whole Order Return
-                </div>
-                <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-                  <div>
-                    <span style="font-size:0.83rem;color:var(--text);">Current status:</span>
-                    <span class="return-badge return-<%= order.returnStatus %>" style="margin-left:0.4rem;">
-                      <%= order.returnStatus %>
-                    </span>
-                  </div>
-                  <% if (order.returnReason) { %>
-                    <div style="font-size:0.75rem;color:var(--muted);font-style:italic;">
-                      Reason: <%= order.returnReason %>
-                    </div>
-                  <% } %>
-                </div>
-                <% if (!['Approved','Rejected','Completed'].includes(order.returnStatus)) { %>
-                  <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.85rem;flex-wrap:wrap;">
-                    <select class="status-select" id="wholeReturnSelect">
-                      <option value="Requested"  <%= order.returnStatus==='Requested'  ? 'selected':'' %>>Requested</option>
-                      <option value="Approved"   <%= order.returnStatus==='Approved'   ? 'selected':'' %>>Approved</option>
-                      <option value="Rejected"   <%= order.returnStatus==='Rejected'   ? 'selected':'' %>>Rejected</option>
-                      <option value="Completed"  <%= order.returnStatus==='Completed'  ? 'selected':'' %>>Completed</option>
-                    </select>
-                    <button class="btn-update-status" onclick="updateReturnStatus('<%= order._id %>', null, 'wholeReturnSelect')">
-                      <i class="fas fa-save"></i> Update Return
-                    </button>
-                  </div>
-                <% } %>
-              </div>
-            <% } %>
-
-            <!-- PER-ITEM RETURNS -->
-            <%
-              var returnedItems = (order.itemStatuses || []).filter(function(s){ return s.status === 'Returned' })
-            %>
-            <% if (returnedItems.length > 0) { %>
-              <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.75rem;">
-                Item Returns
-              </div>
-              <% returnedItems.forEach(function(is) {
-                var matchedItem = order.items.find(function(i){ return is.itemId && i._id.toString() === is.itemId.toString() })
-              %>
-                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:0.9rem;margin-bottom:0.75rem;">
-                  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
-                    <div>
-                      <div style="font-size:0.86rem;font-weight:500;color:var(--text);">
-                        <%= matchedItem ? matchedItem.productName : 'Unknown Item' %>
-                        <% if (matchedItem && matchedItem.shade) { %>
-                          <span style="font-size:0.72rem;color:var(--muted);margin-left:0.3rem;"><%= matchedItem.shade %></span>
-                        <% } %>
-                      </div>
-                      <% if (is.returnReason) { %>
-                        <div style="font-size:0.74rem;color:var(--muted);font-style:italic;margin-top:0.2rem;">
-                          Reason: <%= is.returnReason %>
-                        </div>
-                      <% } %>
-                      <div style="margin-top:0.4rem;">
-                        <span style="font-size:0.72rem;color:var(--muted);">Status:</span>
-                        <span class="return-badge return-<%= is.returnStatus %>" style="margin-left:0.3rem;">
-                          <%= is.returnStatus %>
-                        </span>
-                      </div>
-                    </div>
-                    <% if (!['Approved','Rejected','Completed'].includes(is.returnStatus)) { %>
-                      <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
-                        <select class="status-select" id="itemReturnSelect-<%= is.itemId %>" style="max-width:180px;">
-                          <option value="Requested" <%= is.returnStatus==='Requested' ? 'selected':'' %>>Requested</option>
-                          <option value="Approved"  <%= is.returnStatus==='Approved'  ? 'selected':'' %>>Approved</option>
-                          <option value="Rejected"  <%= is.returnStatus==='Rejected'  ? 'selected':'' %>>Rejected</option>
-                          <option value="Completed" <%= is.returnStatus==='Completed' ? 'selected':'' %>>Completed</option>
-                        </select>
-                        <button class="btn-update-status"
-                          onclick="updateReturnStatus('<%= order._id %>', '<%= is.itemId %>', 'itemReturnSelect-<%= is.itemId %>')">
-                          <i class="fas fa-save"></i> Update
-                        </button>
-                      </div>
-                    <% } %>
-                  </div>
-                </div>
-              <% }) %>
-            <% } %>
-
-          </div>
+  <!-- WHOLE ORDER RETURN — only show if customer did a whole-order return -->
+  <% if (order.returnStatus && order.returnStatus !== 'None') { %>
+    <% 
+      // Check if this was truly a whole-order return (no individual item returns)
+      var hasItemReturns = (order.itemStatuses || []).some(function(s){ return s.status === 'Returned' })
+      var isWholeOrderReturn = !hasItemReturns
+    %>
+    <% if (isWholeOrderReturn) { %>
+      <div style="margin-bottom:1.25rem;">
+        <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.5rem;">
+          Whole Order Return
         </div>
-      <% } %>
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+          <div>
+            <span style="font-size:0.83rem;color:var(--text);">Current status:</span>
+            <span class="return-badge return-<%= order.returnStatus %>" style="margin-left:0.4rem;">
+              <%= order.returnStatus %>
+            </span>
+          </div>
+          <% if (order.returnReason) { %>
+            <div style="font-size:0.75rem;color:var(--muted);font-style:italic;">
+              Reason: <%= order.returnReason %>
+            </div>
+          <% } %>
+        </div>
+        <% if (!['Approved','Rejected','Completed'].includes(order.returnStatus)) { %>
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.85rem;flex-wrap:wrap;">
+            <select class="status-select" id="wholeReturnSelect">
+              <option value="Requested" <%= order.returnStatus==='Requested' ? 'selected':'' %>>Requested</option>
+              <option value="Approved"  <%= order.returnStatus==='Approved'  ? 'selected':'' %>>Approved</option>
+              <option value="Rejected"  <%= order.returnStatus==='Rejected'  ? 'selected':'' %>>Rejected</option>
+              <option value="Completed" <%= order.returnStatus==='Completed' ? 'selected':'' %>>Completed</option>
+            </select>
+            <button class="btn-update-status" onclick="updateReturnStatus('<%= order._id %>', null, 'wholeReturnSelect')">
+              <i class="fas fa-save"></i> Update Return
+            </button>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+  <% } %>
 
+  <!-- PER-ITEM RETURNS — only show if customer returned individual items -->
+  <%
+    var returnedItems = (order.itemStatuses || []).filter(function(s){ return s.status === 'Returned' })
+  %>
+  <% if (returnedItems.length > 0 ) { %>
+    <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:0.75rem;">
+      Item Returns
     </div>
+    <% returnedItems.forEach(function(is) {
+      var matchedItem = order.items.find(function(i){ return is.itemId && i._id.toString() === is.itemId.toString() })
+    %>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:0.9rem;margin-bottom:0.75rem;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:0.86rem;font-weight:500;color:var(--text);">
+              <%= matchedItem ? matchedItem.productName : 'Unknown Item' %>
+              <% if (matchedItem && matchedItem.shade) { %>
+                <span style="font-size:0.72rem;color:var(--muted);margin-left:0.3rem;"><%= matchedItem.shade %></span>
+              <% } %>
+            </div>
+            <% if (is.returnReason) { %>
+              <div style="font-size:0.74rem;color:var(--muted);font-style:italic;margin-top:0.2rem;">
+                Reason: <%= is.returnReason %>
+              </div>
+            <% } %>
+            <div style="margin-top:0.4rem;">
+              <span style="font-size:0.72rem;color:var(--muted);">Status:</span>
+              <span class="return-badge return-<%= is.returnStatus %>" style="margin-left:0.3rem;">
+                <%= is.returnStatus %>
+              </span>
+            </div>
+          </div>
+          <% if (!['Approved','Rejected','Completed'].includes(is.returnStatus)) { %>
+            <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+              <select class="status-select" id="itemReturnSelect-<%= is.itemId %>" style="max-width:180px;">
+                <option value="Requested" <%= is.returnStatus==='Requested' ? 'selected':'' %>>Requested</option>
+                <option value="Approved"  <%= is.returnStatus==='Approved'  ? 'selected':'' %>>Approved</option>
+                <option value="Rejected"  <%= is.returnStatus==='Rejected'  ? 'selected':'' %>>Rejected</option>
+                <option value="Completed" <%= is.returnStatus==='Completed' ? 'selected':'' %>>Completed</option>
+              </select>
+              <button class="btn-update-status"
+                onclick="updateReturnStatus('<%= order._id %>', '<%= is.itemId %>', 'itemReturnSelect-<%= is.itemId %>')">
+                <i class="fas fa-save"></i> Update
+              </button>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    <% }) %>
+  <% } %>
+</div> <!-- card-body -->
+</div> <!-- card -->
+<% } %> 
     <%- include('../partials/admin/adminFooter') %>
   </div>
 </div>

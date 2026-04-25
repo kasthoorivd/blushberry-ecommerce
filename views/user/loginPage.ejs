@@ -245,6 +245,13 @@
   </div>
 <% } %>
 
+<% if (typeof googleMessage !== 'undefined' && googleMessage) { %>
+  <div style="background:#fff3f5;border:1px solid #f4a7bc;color:#c2185b;padding:0.75rem 1rem;border-radius:8px;font-size:0.84rem;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+    <i class="fas fa-info-circle"></i>
+    <%= googleMessage %>
+  </div>
+<% } %>
+
       <form id="loginForm" style="width:100%;">
 
         <div class="input-group" id="field-email">
@@ -266,7 +273,7 @@
       </p>
       <div class="or-divider"><span>Or continue with</span></div>
 
-      <a href="http://localhost:3000/auth/google" class="social-btn">
+      <a href="/auth/google?intent=login" class="social-btn">
         <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google"/>
         Login with Google
       </a>
