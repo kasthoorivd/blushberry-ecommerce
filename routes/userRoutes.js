@@ -102,7 +102,7 @@ userRouter.get('/otp-forgot-password', userController.showForgotOtpPage)
 //profile
 userRouter.get('/profile',isBlocked,profileController.loadProfile)
 userRouter.post('/profile',isBlocked,upload.single('profilePhoto'),profileController.updateProfile)
-userRouter.put('/profile/changepassword',isBlocked,profileController.changePassword)
+userRouter.post('/profile/changePassword',isBlocked,profileController.changePassword)
 userRouter.post('/profile/request-email-change',isBlocked,profileController.requestEmailChange);
 
 

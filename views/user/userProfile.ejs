@@ -863,6 +863,7 @@
               </button>
             </div>
           </div>
+          
           <div class="form-actions" style="margin-top:16px;">
             <button type="submit" class="btn-primary">Change Password</button>
           </div>
@@ -885,111 +886,110 @@
     </svg>
     <span id="toastMsg">Copied!</span>
   </div>
+<script>
+  function showToast(msg) {
+    const toast = document.getElementById('toast')
+    document.getElementById('toastMsg').textContent = msg
+    toast.classList.add('show')
+    setTimeout(() => toast.classList.remove('show'), 2500)
+  }
 
-  <script>
-    // ── Show success toast on profile update ──
+  // ── Toasts on page load (must come after showToast is defined) ──
+  window.addEventListener('DOMContentLoaded', () => {
     <% if (success) { %>
-      window.addEventListener('DOMContentLoaded', () => showToast('Profile updated successfully!'));
+      showToast('Profile updated successfully! ✓');
     <% } %>
 
-    // ── Load referral stats from API ──
-    window.addEventListener('DOMContentLoaded', async () => {
-      try {
-        const res  = await fetch('/referral-info')
-        const data = await res.json()
+    <% if (pwSuccess) { %>
+      showToast('Password changed successfully! 🔐');
+    <% } %>
+  });
 
-        if (data.success) {
-          // Stats
-          document.getElementById('statFriends').textContent = data.referralCount
-          document.getElementById('statEarned').textContent  = '₹' + (data.referralCount * 100)
-          document.getElementById('statWallet').textContent  = '₹' + data.walletBalance
-
-          // Referral link in the readonly input
-          document.getElementById('referralLinkInput').value = data.referralLink
-
-          // Also update code display in case EJS missed it
-          if (data.referralCode) {
-            document.getElementById('referralCodeDisplay').textContent = data.referralCode
-          }
-        }
-      } catch(e) {
-        document.getElementById('referralLinkInput').value = 'Could not load referral link'
-      }
-    })
-
-    function copyCode() {
-      const code = document.getElementById('referralCodeDisplay').textContent.trim()
-      if (!code || code === '—') return showToast('No referral code found')
-      navigator.clipboard.writeText(code).then(() => showToast('Referral code copied! 🎁'))
-    }
-
-    function copyLink() {
-      const link = document.getElementById('referralLinkInput').value.trim()
-      if (!link || link.startsWith('Could not') || link.startsWith('Loading')) return showToast('Link not ready yet')
-      navigator.clipboard.writeText(link).then(() => showToast('Referral link copied! Share it with friends 🔗'))
-    }
-
-    function togglePw(id, btn) {
-      const input = document.getElementById(id)
-      input.type = input.type === 'password' ? 'text' : 'password'
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toast')
-      document.getElementById('toastMsg').textContent = msg
-      toast.classList.add('show')
-      setTimeout(() => toast.classList.remove('show'), 2500)
-    }
-
-    function previewPhoto(input) {
-      if (input.files && input.files[0]) {
-        const file = input.files[0]
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-        if (!allowedTypes.includes(file.type)) {
-          showToast('Only JPG, PNG, WEBP or GIF images are allowed')
-          input.value = ''; return
-        }
-        if (file.size > 5 * 1024 * 1024) {
-          showToast('Image must be under 5MB')
-          input.value = ''; return
-        }
-        const reader = new FileReader()
-        reader.onload = e => {
-          const preview = document.getElementById('photoPreview')
-          if (preview.tagName === 'IMG') {
-            preview.src = e.target.result
-          } else {
-            const img = document.createElement('img')
-            img.src = e.target.result
-            img.className = 'photo-preview'
-            img.id = 'photoPreview'
-            preview.replaceWith(img)
-          }
-        }
-        reader.readAsDataURL(file)
-      }
-    }
-
-    async function requestEmailChange() {
-      const newEmail = document.getElementById('newEmailInput').value.trim()
-      if (!newEmail) return showToast('Enter a new email address first')
-
-      const res  = await fetch('/profile/request-email-change', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ newEmail })
-      })
+  // ── Load referral stats from API ──
+  window.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const res  = await fetch('/referral-info')
       const data = await res.json()
 
       if (data.success) {
-        showToast('OTP sent! Redirecting…')
-        setTimeout(() => window.location.href = data.redirectUrl, 1200)
-      } else {
-        showToast(data.message)
+        document.getElementById('statFriends').textContent = data.referralCount
+        document.getElementById('statEarned').textContent  = '₹' + (data.referralCount * 100)
+        document.getElementById('statWallet').textContent  = '₹' + data.walletBalance
+        document.getElementById('referralLinkInput').value = data.referralLink
+        if (data.referralCode) {
+          document.getElementById('referralCodeDisplay').textContent = data.referralCode
+        }
       }
+    } catch(e) {
+      document.getElementById('referralLinkInput').value = 'Could not load referral link'
     }
-  </script>
+  })
 
+  function copyCode() {
+    const code = document.getElementById('referralCodeDisplay').textContent.trim()
+    if (!code || code === '—') return showToast('No referral code found')
+    navigator.clipboard.writeText(code).then(() => showToast('Referral code copied! 🎁'))
+  }
+
+  function copyLink() {
+    const link = document.getElementById('referralLinkInput').value.trim()
+    if (!link || link.startsWith('Could not') || link.startsWith('Loading')) return showToast('Link not ready yet')
+    navigator.clipboard.writeText(link).then(() => showToast('Referral link copied! Share it with friends 🔗'))
+  }
+
+  function togglePw(id, btn) {
+    const input = document.getElementById(id)
+    input.type = input.type === 'password' ? 'text' : 'password'
+  }
+
+  function previewPhoto(input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0]
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+      if (!allowedTypes.includes(file.type)) {
+        showToast('Only JPG, PNG, WEBP or GIF images are allowed')
+        input.value = ''; return
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Image must be under 5MB')
+        input.value = ''; return
+      }
+      const reader = new FileReader()
+      reader.onload = e => {
+        const preview = document.getElementById('photoPreview')
+        if (preview.tagName === 'IMG') {
+          preview.src = e.target.result
+        } else {
+          const img = document.createElement('img')
+          img.src = e.target.result
+          img.className = 'photo-preview'
+          img.id = 'photoPreview'
+          preview.replaceWith(img)
+        }
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  async function requestEmailChange() {
+    const newEmail = document.getElementById('newEmailInput').value.trim()
+    if (!newEmail) return showToast('Enter a new email address first')
+
+    const res  = await fetch('/profile/request-email-change', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ newEmail })
+    })
+    const data = await res.json()
+
+    if (data.success) {
+      showToast('OTP sent! Redirecting…')
+      setTimeout(() => window.location.href = data.redirectUrl, 1200)
+    } else {
+      showToast(data.message)
+    }
+  }
+</script>
   <%- include('../partials/user/footer') %>
 </body>
 </html>

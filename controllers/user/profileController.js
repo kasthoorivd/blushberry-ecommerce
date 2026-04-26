@@ -86,7 +86,7 @@ const updateProfile = async (req, res) => {
             profilePhoto: updatedUser.profilePhoto
         };
 
-        res.redirect('/profile');
+        res.redirect('/profile?success=true');
 
     } catch (error) {
         console.log(error);
@@ -94,22 +94,39 @@ const updateProfile = async (req, res) => {
     }
 }
 
-
 const changePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword, confirmPassword } = req.body;
+        
+        // ✅ ADD THESE to diagnose
+        console.log('Body received:', req.body);
+        console.log('currentPassword:', currentPassword);
+        console.log('newPassword:', newPassword);
+        console.log('confirmPassword:', confirmPassword);
+        
         const errors = {};
 
         const userId = new mongoose.Types.ObjectId(req.session.user._id);
         const findUser = await User.findById(userId);
         if (!findUser) return res.redirect('/profile');
 
-        const passwordMatch = await bcrypt.compare(currentPassword, findUser.password);
+        console.log('User found:', findUser.email);
+        console.log('Has password:', !!findUser.password);
+
+        if (!findUser.password) {
+            const address = await Address.findOne({ user: findUser._id, isDefault: true });
+            return res.render('user/userProfile', {
+                errors: { currentPassword: 'Your account uses Google login — no password to change' },
+                user: findUser, success: null, address: address || null, pwSuccess: false
+            });
+        }
 
         if (!currentPassword) {
             errors.currentPassword = 'Current password is required';
-        } else if (!passwordMatch) {
-            errors.currentPassword = 'Invalid current password';
+        } else {
+            const passwordMatch = await bcrypt.compare(currentPassword, findUser.password);
+            console.log('Password match:', passwordMatch);  // ✅ ADD THIS
+            if (!passwordMatch) errors.currentPassword = 'Invalid current password';
         }
 
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*!])[A-Za-z\d@#$%^&*!]{8,}$/;
@@ -125,6 +142,8 @@ const changePassword = async (req, res) => {
             errors.confirmPassword = 'Passwords do not match';
         }
 
+        console.log('Errors:', errors);  // ✅ ADD THIS — this will tell you exactly what's failing
+
         if (Object.keys(errors).length > 0) {
             const address = await Address.findOne({ user: findUser._id, isDefault: true });
             return res.render('user/userProfile', {
@@ -133,12 +152,11 @@ const changePassword = async (req, res) => {
         }
 
         const passwordHash = await bcrypt.hash(newPassword, 10);
-        const result = await User.findByIdAndUpdate(
+        await User.findByIdAndUpdate(
             findUser._id,
             { $set: { password: passwordHash } },
             { new: true }
         );
-        console.log('Password updated for:', result?.email);
 
         res.redirect('/profile?pwSuccess=true');
 
@@ -147,7 +165,6 @@ const changePassword = async (req, res) => {
         res.redirect('/profile');
     }
 };
-
 
 const requestEmailChange = async (req, res) => {
     try {
