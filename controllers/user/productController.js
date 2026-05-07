@@ -94,14 +94,14 @@ const loadProductListing = async (req, res) => {
     const totalProducts = await Product.countDocuments(filter)
     const totalPages    = Math.ceil(totalProducts / LIMIT) || 1
     const safePage      = Math.min(page, totalPages)
-
+ 
     const products = await Product.find(filter)
       .populate('categoryId', 'name')
       .sort(sortOption)
       .skip((safePage - 1) * LIMIT)
       .limit(LIMIT)
       .lean()
-
+  
     // ── fetch all active offers once ──────────────────────────────────────
     const now = new Date()
     const activeOffers = await Offer.find({

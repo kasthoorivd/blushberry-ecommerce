@@ -145,6 +145,9 @@ userRouter.get('/checkout',           isBlocked, checkoutController.loadCheckout
 userRouter.post('/checkout/place-order', isBlocked, checkoutController.placeOrder)
  userRouter.post('/checkout/create-razorpay-order', isBlocked, checkoutController.createRazorpayOrder)  
 userRouter.post('/checkout/verify-payment',      isBlocked, checkoutController.verifyPayment)          
+userRouter.post('/orders/payment-failed',isBlocked,checkoutController.handleFailedPayment)
+userRouter.post('/orders/:orderId/retry-payment',isBlocked,checkoutController.retryPayment)
+userRouter.post('/orders/verify-retry-payment',isBlocked,checkoutController.verifyRetryPayment)
 
 // order failure page
 userRouter.get('/order-failure',                 isBlocked, (req, res) => {                           

@@ -72,6 +72,25 @@
       width: 220px;
       transition: border 0.2s;
     }
+   
+    .badge-Failed {
+  background: rgba(229, 57, 53, 0.1);
+  color: #e53935;
+}
+
+.btn-retry {
+  font-size: 0.78rem;
+  color: #fff;
+  background: #e53935;
+  border: none;
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--body);
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.btn-retry:hover { background: #c62828; }
 
     .search-input:focus {
       border-color: var(--accent);
@@ -295,26 +314,29 @@
                   </div>
                 </div>
                 <% const hasItemReturn=order.itemStatuses && order.itemStatuses.some(s=> s.status === 'Returned')
-                  const returnedItem = hasItemReturn ? order.itemStatuses.find(s => s.status === 'Returned') : null
-                  const itemReturnStatus = returnedItem ? (returnedItem.returnStatus || 'Requested') : 'Requested'
-                  const showReturn = (order.returnStatus && order.returnStatus !== 'None') || hasItemReturn
-                  const returnLabel = (order.returnStatus && order.returnStatus !== 'None') ? order.returnStatus :
-                  itemReturnStatus
-                  %>
-                  <% if (showReturn) { %>
-                    <span class="badge badge-Returned">
-                      <i class="fas fa-undo"></i>&nbsp;Return: <%= returnLabel %>
-                    </span>
-                    <% } else { %>
-                      <span class="badge badge-<%= order.orderStatus %>">
-                        <% if (order.orderStatus==='Delivered' ) { %><i class="fas fa-check-circle"></i>
-                          <% } else if (order.orderStatus==='Cancelled' ) { %><i class="fas fa-times-circle"></i>
-                            <% } else if (order.orderStatus==='Shipped' ) { %><i class="fas fa-truck"></i>
-                              <% } else { %><i class="fas fa-clock"></i>
-                                <% } %>
-                                  &nbsp;<%= order.orderStatus %>
-                      </span>
-                      <% } %>
+  const returnedItem = hasItemReturn ? order.itemStatuses.find(s => s.status === 'Returned') : null
+  const itemReturnStatus = returnedItem ? (returnedItem.returnStatus || 'Requested') : 'Requested'
+  const showReturn = (order.returnStatus && order.returnStatus !== 'None') || hasItemReturn
+  const returnLabel = (order.returnStatus && order.returnStatus !== 'None') ? order.returnStatus :
+  itemReturnStatus
+  %><% if (order.orderStatus === 'Failed') { %>
+    <span class="badge badge-Failed">
+      <i class="fas fa-exclamation-circle"></i>&nbsp;Payment Failed
+    </span>
+  <% } else if (showReturn) { %>
+    <span class="badge badge-Returned">
+      <i class="fas fa-undo"></i>&nbsp;Return: <%= returnLabel %>
+    </span>
+    <% } else { %>
+      <span class="badge badge-<%= order.orderStatus %>">
+        <% if (order.orderStatus==='Delivered' ) { %><i class="fas fa-check-circle"></i>
+          <% } else if (order.orderStatus==='Cancelled' ) { %><i class="fas fa-times-circle"></i>
+            <% } else if (order.orderStatus==='Shipped' ) { %><i class="fas fa-truck"></i>
+              <% } else { %><i class="fas fa-clock"></i>
+                <% } %>
+                  &nbsp;<%= order.orderStatus %>
+      </span>
+      <% } %>
               </div>
               <div class="order-card-body">
                 <div>
@@ -327,11 +349,17 @@
                     </div>
                     <% } %>
                 </div>
-                <div class="order-right">
-                  <div class="order-amount">₹<%= order.finalAmount.toLocaleString('en-IN') %>
-                  </div>
-                  <a href="/orders/<%= order._id %>" class="btn-view">View Details</a>
-                </div>
+              <div class="order-right">
+  <div class="order-amount">₹<%= order.finalAmount.toLocaleString('en-IN') %>
+  </div>
+  <% if (order.orderStatus === 'Failed') { %>
+    <button class="btn-retry" onclick="retryPayment('<%= order._id %>')">
+      <i class="fas fa-redo"></i> Retry Payment
+    </button>
+  <% } else { %>
+    <a href="/orders/<%= order._id %>" class="btn-view">View Details</a>
+  <% } %>
+</div>
               </div>
             </div>
             <% }) %>
@@ -350,5 +378,60 @@
                 </div>
                 <% } %>
   </div>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script>
+async function retryPayment(orderId) {
+  try {
+    const res  = await fetch(`/orders/${orderId}/retry-payment`, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+    const data = await res.json()
+    if (!data.success) {
+      return Swal.fire({ icon: 'error', title: 'Error', text: data.message, confirmButtonColor: '#c2185b' })
+    }
+
+    const options = {
+      key:         data.razorpayKeyId,
+      amount:      data.amount,
+      currency:    'INR',
+      name:        'Blushberry',
+      description: 'Retry Payment',
+      order_id:    data.razorpayOrderId,
+      prefill: { name: data.customerName, email: data.customerEmail, contact: data.customerPhone },
+      theme: { color: '#c2185b' },
+      handler: async function (response) {
+        const verify = await fetch('/orders/verify-retry-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            razorpay_order_id:   response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature:  response.razorpay_signature,
+            orderId:             data.orderId,
+          })
+        })
+        const vData = await verify.json()
+        if (vData.success) {
+          await Swal.fire({ icon: 'success', title: 'Payment Successful!', timer: 1800, showConfirmButton: false })
+          window.location.href = `/orders/${vData.dbId}`
+        } else {
+          Swal.fire({ icon: 'error', title: 'Verification Failed', text: vData.message, confirmButtonColor: '#c2185b' })
+        }
+      },
+      modal: {
+        ondismiss: function () {
+          Swal.fire({ icon: 'info', title: 'Payment Cancelled', text: 'You can retry anytime from My Orders.', confirmButtonColor: '#c2185b' })
+        }
+      }
+    }
+
+    const modal = new Razorpay(options)
+    modal.open()
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'Something went wrong', confirmButtonColor: '#c2185b' })
+  }
+}
+</script>
+
 
   <%- include('../partials/user/footer') %>

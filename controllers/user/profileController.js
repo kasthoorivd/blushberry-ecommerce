@@ -97,23 +97,20 @@ const updateProfile = async (req, res) => {
 const changePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword, confirmPassword } = req.body;
-        
-        // ✅ ADD THESE to diagnose
+
+
         console.log('Body received:', req.body);
         console.log('currentPassword:', currentPassword);
         console.log('newPassword:', newPassword);
         console.log('confirmPassword:', confirmPassword);
-        
+
         const errors = {};
 
         const userId = new mongoose.Types.ObjectId(req.session.user._id);
         const findUser = await User.findById(userId);
         if (!findUser) return res.redirect('/profile');
 
-        console.log('User found:', findUser.email);
-        console.log('Has password:', !!findUser.password);
-
-        if (!findUser.password) {
+        if (findUser.googleId || !findUser.password) {
             const address = await Address.findOne({ user: findUser._id, isDefault: true });
             return res.render('user/userProfile', {
                 errors: { currentPassword: 'Your account uses Google login — no password to change' },
@@ -172,6 +169,10 @@ const requestEmailChange = async (req, res) => {
         const userId = req.session.user?._id;
 
         if (!userId) return res.json({ success: false, message: "Not logged in" });
+
+        const user = await User.findById(userId);
+        if (user?.googleId) return res.json({ success: false, message: "Google login accounts cannot change email here." });
+
         if (!newEmail) return res.json({ success: false, message: "New email is required" });
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -249,7 +250,7 @@ const getReferralInfo = async (req, res) => {
             console.log(`Generated missing referral code for ${user.email}: ${user.referralCode}`);
         }
 
-        const wallet        = await Wallet.findOne({ userId }).lean();
+        const wallet = await Wallet.findOne({ userId }).lean();
         const referralCount = await User.countDocuments({ referredBy: userId });
 
         // Use BASE_URL from .env — fallback to current host for local dev
@@ -258,7 +259,7 @@ const getReferralInfo = async (req, res) => {
             : `${req.protocol}://${req.get('host')}`;
 
         return res.json({
-            success:      true,
+            success: true,
             referralCode: user.referralCode,
             referralLink: `${baseUrl}/signup?ref=${user.referralCode}`,
             referralCount,
