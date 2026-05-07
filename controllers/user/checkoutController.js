@@ -1,19 +1,19 @@
-const Cart    = require('../../models/user/cartModel')
-const User    = require('../../models/user/userModel')
-const Wallet  = require('../../models/user/walletModel')
+const Cart = require('../../models/user/cartModel')
+const User = require('../../models/user/userModel')
+const Wallet = require('../../models/user/walletModel')
 const Address = require('../../models/user/addressModel')
 const Product = require('../../models/user/productModel')
-const Order   = require('../../models/user/orderModel')
-const Coupon  = require('../../models/user/couponModel')
+const Order = require('../../models/user/orderModel')
+const Coupon = require('../../models/user/couponModel')
 const PDFDocument = require('pdfkit')
-const Razorpay    = require('razorpay')
-const crypto      = require('crypto')
+const Razorpay = require('razorpay')
+const crypto = require('crypto')
 
 const { creditWallet, handleCancellationRefund } = require('./walletController')
 
 const SHIPPING_THRESHOLD = 499
-const SHIPPING_CHARGE    = 49
-const COD_LIMIT          = 1500
+const SHIPPING_CHARGE = 49
+const COD_LIMIT = 1500
 
 async function buildCartLines(cartItems) {
   const lines = []
@@ -26,17 +26,17 @@ async function buildCartLines(cartItems) {
     const variant = product.variants?.find(v => v.shade === item.shade) || product.variants?.[0]
     if (!variant) continue
 
-    const originalPrice  = variant.varientPrice || 0
-    const salePrice      = variant.salePrice     || 0
+    const originalPrice = variant.varientPrice || 0
+    const salePrice = variant.salePrice || 0
 
     // ── Use the same logic as cartController's getVariantPrice ──
     // salePrice already has any offer baked in — don't apply offer % again
     const finalUnitPrice = salePrice > 0 ? salePrice : originalPrice
-    const itemDiscount   = (originalPrice - finalUnitPrice) * item.quantity
-    const itemTotal      = finalUnitPrice * item.quantity
+    const itemDiscount = (originalPrice - finalUnitPrice) * item.quantity
+    const itemTotal = finalUnitPrice * item.quantity
 
     const shadeImages = variant.images?.length ? variant.images : null
-    const image       = shadeImages?.[0] || product.images?.[0] || ''
+    const image = shadeImages?.[0] || product.images?.[0] || ''
 
     lines.push({
       cartItemId: item._id, productId: product._id, productName: product.name,
@@ -49,11 +49,11 @@ async function buildCartLines(cartItems) {
 }
 
 function computeTotals(lines, couponDiscount = 0) {
-  const subtotal              = lines.reduce((s, l) => s + l.originalPrice * l.quantity, 0)
-  const itemDiscounts         = lines.reduce((s, l) => s + l.itemDiscount, 0)
-  const amountAfterDiscounts  = subtotal - itemDiscounts - couponDiscount
-  const shippingCharge        = amountAfterDiscounts > SHIPPING_THRESHOLD ? 0 : SHIPPING_CHARGE
-  const finalAmount           = amountAfterDiscounts + shippingCharge
+  const subtotal = lines.reduce((s, l) => s + l.originalPrice * l.quantity, 0)
+  const itemDiscounts = lines.reduce((s, l) => s + l.itemDiscount, 0)
+  const amountAfterDiscounts = subtotal - itemDiscounts - couponDiscount
+  const shippingCharge = amountAfterDiscounts > SHIPPING_THRESHOLD ? 0 : SHIPPING_CHARGE
+  const finalAmount = amountAfterDiscounts + shippingCharge
   return {
     subtotal, itemDiscounts, couponDiscount, totalDiscount: itemDiscounts + couponDiscount,
     shippingCharge, tax: 0, finalAmount: Math.max(finalAmount, 0),
@@ -77,21 +77,21 @@ async function recalcCODAfterItemCancel(order) {
   }, 0)
 
   let couponDiscount = order.couponDiscount || 0
-  let couponVoided   = false
+  let couponVoided = false
 
   if (order.couponCode && couponDiscount > 0) {
     const coupon = await Coupon.findOne({ code: order.couponCode })
     const minVal = coupon ? (coupon.minOrderAmount || 0) : 0
     if (activeTotal < minVal) {
       couponDiscount = 0
-      couponVoided   = true
+      couponVoided = true
     }
   }
 
   // Mirror the same formula used in computeTotals (no tax currently)
   const amountAfterDiscounts = Math.max(activeTotal - couponDiscount, 0)
-  const shippingCharge       = amountAfterDiscounts > SHIPPING_THRESHOLD ? 0 : SHIPPING_CHARGE
-  const finalAmount          = amountAfterDiscounts + shippingCharge
+  const shippingCharge = amountAfterDiscounts > SHIPPING_THRESHOLD ? 0 : SHIPPING_CHARGE
+  const finalAmount = amountAfterDiscounts + shippingCharge
 
   return { finalAmount, couponVoided, couponDiscount, shippingCharge }
 }
@@ -101,7 +101,7 @@ async function recalcCODAfterItemCancel(order) {
 const loadCheckout = async (req, res) => {
   try {
     const userId = req.session.user._id
-    const cart   = await Cart.findOne({ userId })
+    const cart = await Cart.findOne({ userId })
     if (!cart || !cart.items.length) return res.redirect('/cart')
 
     const addresses = await Address.find({ user: userId })
@@ -124,13 +124,19 @@ const loadCheckout = async (req, res) => {
       await cart.save()
       return res.redirect('/cart')
     }
+    const outOfStock = lines.filter(l => l.stock < l.quantity)
+    if (outOfStock.length > 0) {
+      req.session.checkoutError = outOfStock.map(l =>
+        `"${l.productName} (${l.shade})" — only ${l.stock} left, but ${l.quantity} in cart.`
+      ).join(' ')
+      return res.redirect('/cart')
+    }
 
-    const outOfStock     = lines.filter(l => l.stock < l.quantity)
     const couponDiscount = req.session.coupon?.discount || 0
-    const couponCode     = req.session.coupon?.code     || null
-    const totals         = computeTotals(lines, couponDiscount)
-    const wallet         = await Wallet.findOne({ userId })
-    const walletBalance  = wallet ? wallet.balance : 0
+    const couponCode = req.session.coupon?.code || null
+    const totals = computeTotals(lines, couponDiscount)
+    const wallet = await Wallet.findOne({ userId })
+    const walletBalance = wallet ? wallet.balance : 0
 
     const now = new Date()
     const availableCoupons = await Coupon.find({
@@ -178,8 +184,8 @@ const placeOrder = async (req, res) => {
     }
 
     const couponDiscount = req.session.coupon?.discount || 0
-    const couponCode     = req.session.coupon?.code     || null
-    const totals         = computeTotals(lines, couponDiscount)
+    const couponCode = req.session.coupon?.code || null
+    const totals = computeTotals(lines, couponDiscount)
 
     if (paymentMethod === 'COD' && totals.finalAmount > COD_LIMIT) {
       return res.status(400).json({ success: false, message: 'Cash on Delivery is not available for orders above ₹1,500. Please choose another payment method' })
@@ -288,7 +294,7 @@ const cancelOrder = async (req, res) => {
 
       // BLOCK: online/wallet paid orders with a coupon → no per-item cancel
       const isOnlinePaid = order.paymentMethod !== 'COD'
-      const hasCoupon    = !!(order.couponCode && order.couponDiscount > 0)
+      const hasCoupon = !!(order.couponCode && order.couponDiscount > 0)
 
       if (isOnlinePaid && hasCoupon) {
         return res.status(400).json({
@@ -307,7 +313,7 @@ const cancelOrder = async (req, res) => {
 
       // Mark item as cancelled
       if (itemStatus) {
-        itemStatus.status       = 'Cancelled'
+        itemStatus.status = 'Cancelled'
         itemStatus.cancelReason = reason
       } else {
         order.itemStatuses.push({ itemId, status: 'Cancelled', cancelReason: reason })
@@ -325,12 +331,12 @@ const cancelOrder = async (req, res) => {
         const { finalAmount, couponVoided, couponDiscount, shippingCharge } =
           await recalcCODAfterItemCancel(order)
 
-        order.finalAmount    = finalAmount
+        order.finalAmount = finalAmount
         order.shippingCharge = shippingCharge
 
         if (couponVoided) {
           order.couponDiscount = 0
-          order.couponVoided   = true
+          order.couponVoided = true
           couponVoidedMsg = ' Your coupon has been removed as the remaining items no longer meet the minimum order value.'
         } else {
           order.couponDiscount = couponDiscount
@@ -343,9 +349,9 @@ const cancelOrder = async (req, res) => {
         return !s || s.status === 'Active'
       })
       if (activeItems.length === 0) {
-        order.orderStatus  = 'Cancelled'
+        order.orderStatus = 'Cancelled'
         order.cancelReason = 'All items cancelled'
-        order.cancelledAt  = new Date()
+        order.cancelledAt = new Date()
       }
 
       await order.save()
@@ -353,13 +359,13 @@ const cancelOrder = async (req, res) => {
       // ── Refund for online/wallet paid orders (no coupon, already guarded above) ──
       const isPaid = order.paymentMethod !== 'COD' || order.paymentStatus === 'Paid'
       if (isPaid) {
-        const itemPaidBase    = item.salePrice * item.quantity
+        const itemPaidBase = item.salePrice * item.quantity
         const orderItemsTotal = order.items.reduce((sum, i) => sum + i.salePrice * i.quantity, 0)
-        const couponShare     = orderItemsTotal > 0
+        const couponShare = orderItemsTotal > 0
           ? Math.round((itemPaidBase / orderItemsTotal) * (order.couponDiscount || 0)) : 0
-        const shippingShare   = orderItemsTotal > 0
+        const shippingShare = orderItemsTotal > 0
           ? Math.round((itemPaidBase / orderItemsTotal) * (order.shippingCharge || 0)) : 0
-        const refundAmount    = itemPaidBase - couponShare + shippingShare
+        const refundAmount = itemPaidBase - couponShare + shippingShare
 
         await creditWallet(
           req.session.user._id,
@@ -380,9 +386,9 @@ const cancelOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'This order cannot be cancelled.' })
     }
 
-    order.orderStatus  = 'Cancelled'
+    order.orderStatus = 'Cancelled'
     order.cancelReason = reason
-    order.cancelledAt  = new Date()
+    order.cancelledAt = new Date()
 
     order.items.forEach(item => {
       const existing = order.itemStatuses.find(s => s.itemId?.toString() === item._id.toString())
@@ -435,7 +441,7 @@ const returnOrder = async (req, res) => {
         return res.status(400).json({ success: false, message: 'Item already cancelled or returned.' })
       }
       if (itemStatus) {
-        itemStatus.status       = 'Returned'
+        itemStatus.status = 'Returned'
         itemStatus.returnReason = reason
         itemStatus.returnStatus = 'Requested'
       } else {
@@ -451,7 +457,7 @@ const returnOrder = async (req, res) => {
 
     order.returnStatus = 'Requested'
     order.returnReason = reason
-    order.returnedAt   = new Date()
+    order.returnedAt = new Date()
 
     order.items.forEach(item => {
       const existing = order.itemStatuses.find(s => s.itemId?.toString() === item._id.toString())
@@ -474,11 +480,11 @@ const loadOrders = async (req, res) => {
   try {
     const userId = req.session.user._id
     const search = (req.query.search?.trim() || '').replace(/^#/, '')
-    let query    = { userId }
+    let query = { userId }
     if (search) {
       query.$or = [
-        { orderId:             { $regex: search, $options: 'i' } },
-        { orderStatus:         { $regex: search, $options: 'i' } },
+        { orderId: { $regex: search, $options: 'i' } },
+        { orderStatus: { $regex: search, $options: 'i' } },
         { 'items.productName': { $regex: search, $options: 'i' } },
       ]
     }
@@ -502,16 +508,16 @@ const downloadInvoice = async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="invoice-${order.orderId}.pdf"`)
     doc.pipe(res)
 
-    const PINK    = '#c2185b'
-    const DARK    = '#1a0a10'
-    const MUTED   = '#8a6d74'
-    const LIGHT   = '#fef0f4'
-    const BORDER  = '#f0dde4'
+    const PINK = '#c2185b'
+    const DARK = '#1a0a10'
+    const MUTED = '#8a6d74'
+    const LIGHT = '#fef0f4'
+    const BORDER = '#f0dde4'
     const SUCCESS = '#22b573'
-    const W       = 495
+    const W = 495
 
     const rupee = n => `Rs. ${Number(n || 0).toLocaleString('en-IN')}`
-    const fmt   = d => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+    const fmt = d => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
 
     doc.rect(50, 45, W, 70).fill(LIGHT)
     doc.fontSize(26).font('Helvetica-Bold').fillColor(PINK).text('Blushberry', 60, 60)
@@ -525,7 +531,7 @@ const downloadInvoice = async (req, res) => {
     doc.moveTo(50, y).lineTo(545, y).strokeColor(BORDER).lineWidth(1).stroke()
     y += 15
 
-    const addr       = order.shippingAddress
+    const addr = order.shippingAddress
     const addrBlockY = y
 
     doc.fontSize(7).font('Helvetica-Bold').fillColor(MUTED).text('BILL TO / SHIP TO', 50, addrBlockY)
@@ -533,17 +539,17 @@ const downloadInvoice = async (req, res) => {
     const addrLine = [addr.address, addr.city, addr.state, addr.country].filter(Boolean).join(', ')
     doc.fontSize(8).font('Helvetica').fillColor(MUTED).text(addrLine, 50, addrBlockY + 25, { width: 220 })
     const addrLineHeight = doc.heightOfString(addrLine, { width: 220 })
-    doc.text(`PIN: ${addr.pincode}`,   50, addrBlockY + 25 + addrLineHeight + 4)
+    doc.text(`PIN: ${addr.pincode}`, 50, addrBlockY + 25 + addrLineHeight + 4)
     doc.text(`Mobile: ${addr.mobile}`, 50, addrBlockY + 25 + addrLineHeight + 16)
 
     doc.fontSize(7).font('Helvetica-Bold').fillColor(MUTED).text('PAYMENT INFO', 340, addrBlockY, { width: 195 })
     doc.fontSize(8).font('Helvetica').fillColor(DARK)
       .text(`Method: ${order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod}`, 340, addrBlockY + 12, { width: 195 })
-      .text(`Status: ${order.paymentStatus}`,     340, addrBlockY + 26, { width: 195 })
+      .text(`Status: ${order.paymentStatus}`, 340, addrBlockY + 26, { width: 195 })
       .text(`Order Status: ${order.orderStatus}`, 340, addrBlockY + 40, { width: 195 })
       .text(`Date: ${new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`, 340, addrBlockY + 54, { width: 195 })
 
-    const leftHeight  = 25 + addrLineHeight + 28
+    const leftHeight = 25 + addrLineHeight + 28
     const rightHeight = 70
     y = addrBlockY + Math.max(leftHeight, rightHeight) + 16
 
@@ -552,25 +558,25 @@ const downloadInvoice = async (req, res) => {
 
     doc.rect(50, y, W, 22).fill(PINK)
     doc.fontSize(8).font('Helvetica-Bold').fillColor('#ffffff')
-      .text('ITEM',        60,  y + 7, { width: 200 })
-      .text('SHADE',      260,  y + 7, { width: 70  })
-      .text('QTY',        330,  y + 7, { width: 35, align: 'center' })
-      .text('UNIT PRICE', 365,  y + 7, { width: 75, align: 'right'  })
-      .text('TOTAL',      440,  y + 7, { width: 95, align: 'right'  })
+      .text('ITEM', 60, y + 7, { width: 200 })
+      .text('SHADE', 260, y + 7, { width: 70 })
+      .text('QTY', 330, y + 7, { width: 35, align: 'center' })
+      .text('UNIT PRICE', 365, y + 7, { width: 75, align: 'right' })
+      .text('TOTAL', 440, y + 7, { width: 95, align: 'right' })
     y += 22
 
     order.items.forEach((item, i) => {
-      const rowH    = 28
-      const bgCol   = i % 2 === 0 ? '#ffffff' : LIGHT
+      const rowH = 28
+      const bgCol = i % 2 === 0 ? '#ffffff' : LIGHT
       doc.rect(50, y, W, rowH).fill(bgCol)
       const is = (order.itemStatuses || []).find(s => s.itemId && s.itemId.toString() === item._id.toString())
       const cancelled = is && is.status === 'Cancelled'
       doc.fontSize(8).font(cancelled ? 'Helvetica-Oblique' : 'Helvetica').fillColor(cancelled ? MUTED : DARK)
         .text(item.productName + (cancelled ? ' (Cancelled)' : ''), 60, y + 9, { width: 195, ellipsis: true })
       doc.font('Helvetica').fillColor(MUTED)
-        .text(item.shade || '—',                     260, y + 9, { width: 65 })
-        .text(String(item.quantity),                 330, y + 9, { width: 35, align: 'center' })
-        .text(rupee(item.salePrice),                 365, y + 9, { width: 75, align: 'right' })
+        .text(item.shade || '—', 260, y + 9, { width: 65 })
+        .text(String(item.quantity), 330, y + 9, { width: 35, align: 'center' })
+        .text(rupee(item.salePrice), 365, y + 9, { width: 75, align: 'right' })
       doc.fillColor(cancelled ? MUTED : DARK)
         .text(rupee(item.salePrice * item.quantity), 440, y + 9, { width: 95, align: 'right' })
       y += rowH
@@ -584,7 +590,7 @@ const downloadInvoice = async (req, res) => {
         doc.rect(50, y - 3, W, 22).fill(LIGHT)
         doc.fontSize(9).font('Helvetica-Bold').fillColor(color)
           .text(label, 50, y, { width: 390, align: 'right' })
-          .text(value, 440, y, { width: 95,  align: 'right' })
+          .text(value, 440, y, { width: 95, align: 'right' })
         y += 22
       } else {
         doc.fontSize(8).font('Helvetica').fillColor(MUTED).text(label, 50, y, { width: 390, align: 'right' })
@@ -628,13 +634,13 @@ const downloadInvoice = async (req, res) => {
 }
 
 const razorpay = new Razorpay({
-  key_id:     process.env.RAZORPAY_KEY_ID,
+  key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 })
 
 const createRazorpayOrder = async (req, res) => {
   try {
-    const userId     = req.session.user._id
+    const userId = req.session.user._id
     const { addressId } = req.body
 
     if (!addressId) return res.status(400).json({ success: false, message: 'Please select a delivery address.' })
@@ -655,8 +661,8 @@ const createRazorpayOrder = async (req, res) => {
     }
 
     const couponDiscount = req.session.coupon?.discount || 0
-    const totals         = computeTotals(lines, couponDiscount)
-    const amountInPaise  = Math.round(totals.finalAmount * 100)
+    const totals = computeTotals(lines, couponDiscount)
+    const amountInPaise = Math.round(totals.finalAmount * 100)
 
     const razorpayOrder = await razorpay.orders.create({
       amount: amountInPaise, currency: 'INR', receipt: `blushberry_${Date.now()}`,
@@ -700,8 +706,8 @@ const verifyPayment = async (req, res) => {
     }
 
     const couponDiscount = req.session.coupon?.discount || 0
-    const couponCode     = req.session.coupon?.code     || null
-    const totals         = computeTotals(lines, couponDiscount)
+    const couponCode = req.session.coupon?.code || null
+    const totals = computeTotals(lines, couponDiscount)
 
     const orderItems = lines.map(l => ({
       productId: l.productId, productName: l.productName, productImage: l.image,
@@ -749,8 +755,152 @@ const verifyPayment = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Something went wrong while saving your order.' })
   }
 }
+const handleFailedPayment = async (req, res) => {
+  try {
+    const userId = req.session.user._id
+    const { razorpay_order_id, addressId } = req.body
+
+    // ── If an order with this Razorpay order ID already exists, don't create a duplicate ──
+    if (razorpay_order_id) {
+      const existing = await Order.findOne({ razorpayOrderId: razorpay_order_id })
+      if (existing) {
+        return res.json({ success: true, dbId: existing._id })
+      }
+    }
+
+    const address = await Address.findOne({ _id: addressId, user: userId }).lean()
+    if (!address) return res.status(400).json({ success: false, message: 'Invalid address.' })
+
+    const cart = await Cart.findOne({ userId })
+    if (!cart || !cart.items.length) return res.status(400).json({ success: false, message: 'Cart is empty.' })
+
+    const lines = await buildCartLines(cart.items)
+    const couponDiscount = req.session.coupon?.discount || 0
+    const couponCode = req.session.coupon?.code || null
+    const totals = computeTotals(lines, couponDiscount)
+
+    const orderItems = lines.map(l => ({
+      productId: l.productId, productName: l.productName, productImage: l.image,
+      shade: l.shade, quantity: l.quantity, priceAtOrder: l.originalPrice,
+      salePrice: l.finalUnitPrice, discount: l.itemDiscount,
+    }))
+
+    const shippingAddress = {
+      name: address.name, address: address.address, city: address.city || '',
+      state: address.state, country: address.country, pincode: address.pincode,
+      mobile: address.mobile, email: address.email, landmark: address.landmark || '',
+      addressType: address.addressType || 'Home',
+    }
+
+    const order = new Order({
+      userId, items: orderItems, shippingAddress,
+      subtotal: totals.subtotal, totalDiscount: totals.totalDiscount,
+      shippingCharge: totals.shippingCharge, tax: 0, finalAmount: totals.finalAmount,
+      couponCode, couponDiscount, paymentMethod: 'Online',
+      paymentStatus: 'Failed', orderStatus: 'Failed',
+      razorpayOrderId: razorpay_order_id || null,
+      itemStatuses: orderItems.map(() => ({ status: 'Active' })),
+    })
+
+    await order.save()
+    return res.json({ success: true, dbId: order._id })
+  } catch (err) {
+    console.error('handleFailedPayment error:', err)
+    return res.status(500).json({ success: false, message: 'Something went wrong.' })
+  }
+}
+
+const retryPayment = async (req, res) => {
+  try {
+    const userId = req.session.user._id
+    const order = await Order.findById(req.params.orderId)
+
+    if (!order || order.userId.toString() !== userId.toString()) {
+      return res.status(404).json({ success: false, message: 'Order not found.' })
+    }
+    if (order.orderStatus !== 'Failed' || order.paymentStatus !== 'Failed') {
+      return res.status(400).json({ success: false, message: 'Only failed orders can be retried.' })
+    }
+
+    const amountInPaise = Math.round(order.finalAmount * 100)
+    const razorpayOrder = await razorpay.orders.create({
+      amount: amountInPaise, currency: 'INR', receipt: `retry_${Date.now()}`,
+    })
+
+    // Update the order with the new Razorpay order ID
+    order.razorpayOrderId = razorpayOrder.id
+    await order.save()
+
+    const user = req.session.user
+    return res.json({
+      success: true,
+      razorpayOrderId: razorpayOrder.id,
+      razorpayKeyId: process.env.RAZORPAY_KEY_ID,
+      amount: amountInPaise,
+      orderId: order._id,           // DB id — used in verifyRetryPayment
+      customerName: user.name || '',
+      customerEmail: user.email || '',
+      customerPhone: user.mobile || '',
+    })
+  } catch (err) {
+    console.error('retryPayment error:', err)
+    return res.status(500).json({ success: false, message: 'Failed to initiate retry payment.' })
+  }
+}
+
+const verifyRetryPayment = async (req, res) => {
+  try {
+    const userId = req.session.user._id
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body
+
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex')
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.status(400).json({ success: false, message: 'Payment verification failed.' })
+    }
+
+    const order = await Order.findById(orderId)
+    if (!order || order.userId.toString() !== userId.toString()) {
+      return res.status(404).json({ success: false, message: 'Order not found.' })
+    }
+
+    // Activate the order
+    order.paymentStatus = 'Paid'
+    order.orderStatus = 'Placed'
+    order.razorpayOrderId = razorpay_order_id
+    order.razorpayPaymentId = razorpay_payment_id
+    await order.save()
+
+    // Deduct stock now that payment is confirmed
+    for (const item of order.items) {
+      await Product.updateOne(
+        { _id: item.productId, 'variants.shade': item.shade },
+        { $inc: { 'variants.$.stock': -item.quantity } }
+      )
+    }
+
+    // Mark coupon as used
+    if (order.couponCode) {
+      await Coupon.findOneAndUpdate({ code: order.couponCode }, { $addToSet: { usedBy: userId } })
+    }
+
+    // Clear cart
+    const cart = await Cart.findOne({ userId })
+    if (cart) { cart.items = []; await cart.save() }
+    delete req.session.coupon
+
+    return res.json({ success: true, dbId: order._id })
+  } catch (err) {
+    console.error('verifyRetryPayment error:', err)
+    return res.status(500).json({ success: false, message: 'Something went wrong.' })
+  }
+}
 
 module.exports = {
   loadCheckout, placeOrder, createRazorpayOrder, verifyPayment,
   loadOrderSuccess, loadOrders, loadOrderDetail, cancelOrder, returnOrder, downloadInvoice,
+  handleFailedPayment, retryPayment, verifyRetryPayment
 }

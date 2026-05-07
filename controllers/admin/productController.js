@@ -34,8 +34,6 @@ const loadProducts = async (req, res) => {
       .limit(LIMIT)
       .lean();
    
-
-
     res.render('admin/products', {
       products,
       currentPage: page,
@@ -55,7 +53,7 @@ const loadProducts = async (req, res) => {
 
 const loadAddProduct = async (req, res) => {
   try {
-    const categories = await Category.find({ isDeleted: false }).lean();
+    const categories = await Category.find({ isDeleted: false, isListed: true }).lean();
     res.render('admin/addProduct', { categories });
   } catch (err) {
     console.error('getAddProduct error:', err);
@@ -114,8 +112,7 @@ const loadEditProduct = async (req, res) => {
   try {
     const product = await Product.findOne({ _id: req.params.id, isDeleted: false })
     if (!product) return res.status(400).render('error', { message: 'Product not found' })
-
-    const categories = await Category.find({ isDeleted: false }).lean();
+    const categories = await Category.find({ isDeleted: false, isListed: true }).lean();
     res.render('admin/editProduct', { product, categories })
   } catch (error) {
     console.error('loadEditProduct error:', error)

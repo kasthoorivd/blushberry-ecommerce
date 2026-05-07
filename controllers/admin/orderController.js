@@ -96,14 +96,14 @@ const loadOrders = async (req, res) => {
 
     const total      = await Order.countDocuments(query)
     const totalPages = Math.ceil(total / LIMIT)
-
+    
     const orders = await Order.find(query)
       .select('orderId createdAt shippingAddress items finalAmount paymentMethod paymentStatus orderStatus returnStatus itemStatuses cancelReason')
       .populate('userId', 'name email')
       .sort(sortObj)
       .skip((page - 1) * LIMIT)
       .limit(LIMIT)
-
+     
     res.render('admin/orders', {
       orders,
       currentPage: page,

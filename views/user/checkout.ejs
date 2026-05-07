@@ -61,6 +61,7 @@
       box-shadow: 0 1px 8px rgba(194, 24, 91, 0.06);
     }
 
+
     .nav-brand {
       font-family: var(--display);
       font-size: 1.5rem;
@@ -1296,16 +1297,51 @@ function selectCoupon(code) {
               } catch(e) { window.location.href = '/order-failure?reason=verification_error'; }
             },
             modal: {
-              ondismiss: function() {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-lock"></i> Place Order · ' + FINAL_AMOUNT_STR;
-                Swal.fire({ icon: 'info', title: 'Payment Cancelled', text: 'You closed the payment window. No charge was made.', confirmButtonColor: '#c2185b' });
-              }
+  ondismiss: async function() {
+    // Save a failed order so user can retry from My Orders
+    try {
+      await fetch('/orders/payment-failed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          razorpay_order_id: rpData.razorpayOrderId,
+          addressId: selectedAddressId
+        })
+      });
+    } catch(e) { /* silent — don't block the UI */ }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-lock"></i> Place Order · ' + FINAL_AMOUNT_STR;
+    Swal.fire({
+      icon: 'info',
+      title: 'Payment Cancelled',
+      text: 'Your order has been saved. You can retry payment anytime from My Orders.',
+      confirmButtonColor: '#c2185b'
+    }).then(function() { window.location.href = '/orders'; });
+  }
             }
-          };
+          }
 
           var rzp = new Razorpay(options);
-          rzp.on('payment.failed', function(response) { window.location.href = '/order-failure?reason=' + encodeURIComponent(response.error.description); });
+         rzp.on('payment.failed', async function(response) {
+  try {
+    await fetch('/orders/payment-failed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        razorpay_order_id: rpData.razorpayOrderId,
+        addressId: selectedAddressId
+      })
+    });
+  } catch(e) { /* silent */ }
+
+  Swal.fire({
+    icon: 'error',
+    title: 'Payment Failed',
+    text: 'Your order has been saved. You can retry payment from My Orders.',
+    confirmButtonColor: '#c2185b'
+  }).then(function() { window.location.href = '/orders'; });
+});
           rzp.open();
           return;
         }

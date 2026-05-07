@@ -41,7 +41,9 @@ const loadCart = async (req, res) => {
     // ── Fetch cart WITHOUT populate — we'll fetch products fresh below ──
     const cart = await Cart.findOne({ userId }).lean()
     const sessionRemovedNames = req.session.cartRemovedNames || []
-req.session.cartRemovedNames = null
+    req.session.cartRemovedNames = null
+    const checkoutError = req.session.checkoutError || null
+    req.session.checkoutError = null
     let validItems = []
     let removedNames = [...sessionRemovedNames]
     let invalidCartItemIds = []
@@ -61,7 +63,7 @@ req.session.cartRemovedNames = null
           invalidCartItemIds.push(item._id)
           continue
         }
-        
+
 
         const variant = findVariant(product, item.shade)
         if (!variant) {
@@ -119,6 +121,7 @@ req.session.cartRemovedNames = null
       canCheckout,
       maxQty: MAX_QTY_PER_ITEM,
       user: req.session.user || null,
+      checkoutError,
     })
 
   } catch (error) {
@@ -421,7 +424,7 @@ const applyCoupon = async (req, res) => {
     discount = Math.min(discount, cartTotal)
 
     req.session.coupon = {
-      code:     coupon.code,
+      code: coupon.code,
       discount: discount,
       couponId: coupon._id
     }
@@ -431,9 +434,9 @@ const applyCoupon = async (req, res) => {
       : `₹${discount} off`
 
     return res.json({
-      success:  true,
+      success: true,
       discount: discount,
-      message:  `Coupon applied! ${label}`
+      message: `Coupon applied! ${label}`
     })
 
   } catch (err) {

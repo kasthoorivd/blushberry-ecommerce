@@ -60,7 +60,7 @@ const orderSchema = new Schema(
 
     orderStatus: {
       type: String,
-      enum: ['Placed', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'],
+      enum: ['Placed', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned','Failed'],
       default: 'Placed'
     },
 
