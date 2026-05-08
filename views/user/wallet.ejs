@@ -298,6 +298,45 @@
       z-index: 999;
     }
     .toast.show { transform: translateY(0); opacity: 1; }
+    /* ── PAGINATION ── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  color: var(--muted);
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.page-btn:hover {
+  background: var(--rose-light);
+  border-color: var(--rose-mid);
+  color: var(--rose);
+}
+
+.page-btn.active {
+  background: var(--rose);
+  border-color: var(--rose);
+  color: var(--white);
+}
 
     /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
@@ -437,7 +476,7 @@
       <!-- Transactions Card -->
       <div class="card">
         <div class="card-title"><span></span> Transaction History</div>
-
+    
         <!-- Info box -->
         <div class="info-box">
           <svg width="16" height="16" fill="none" stroke="#c0415a" stroke-width="2" viewBox="0 0 24 24">
@@ -499,6 +538,26 @@
         </div>
       </div>
 
+      <!-- Pagination -->
+        <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+          <div class="pagination">
+            <% if (currentPage > 1) { %>
+              <a href="/wallet?page=<%= currentPage - 1 %>" class="page-btn">« Prev</a>
+            <% } %>
+
+            <% for (let i = 1; i <= totalPages; i++) { %>
+              <a href="/wallet?page=<%= i %>"
+                 class="page-btn <%= i === currentPage ? 'active' : '' %>">
+                <%= i %>
+              </a>
+            <% } %>
+
+            <% if (currentPage < totalPages) { %>
+              <a href="/wallet?page=<%= currentPage + 1 %>" class="page-btn">Next »</a>
+            <% } %>
+          </div>
+        <% } %>
+
     </main>
   </div>
 
@@ -510,26 +569,7 @@
     <span id="toastMsg">Done!</span>
   </div>
 
-   <!-- Pagination -->
-  <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
-    <div class="pagination">
-      <% if (currentPage > 1) { %>
-        <a href="/wallet?page=<%= currentPage - 1 %>" class="page-btn">« Prev</a>
-      <% } %>
-
-      <% for (let i = 1; i <= totalPages; i++) { %>
-        <a href="/wallet?page=<%= i %>"
-           class="page-btn <%= i === currentPage ? 'active' : '' %>">
-          <%= i %>
-        </a>
-      <% } %>
-
-      <% if (currentPage < totalPages) { %>
-        <a href="/wallet?page=<%= currentPage + 1 %>" class="page-btn">Next »</a>
-      <% } %>
-    </div>
-  <% } %>
-
+  
 
   <script>
     function filterTx(type, btn) {
