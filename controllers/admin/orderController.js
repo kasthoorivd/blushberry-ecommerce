@@ -86,6 +86,10 @@ const loadOrders = async (req, res) => {
       ]
     }
 
+    const payment = {
+      
+    }
+
     const sortMap = {
       newest:      { createdAt: -1 },
       oldest:      { createdAt:  1 },
@@ -150,7 +154,8 @@ const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body
     const allowed = ['Placed', 'Processing', 'Shipped', 'Delivered', 'Cancelled']
-
+   
+     
     if (!allowed.includes(status)) {
       return res.status(400).json({ success: false, message: 'Invalid status.' })
     }

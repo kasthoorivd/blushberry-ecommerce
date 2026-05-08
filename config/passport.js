@@ -1,20 +1,21 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/user/userModel");
+const crypto = require('crypto');
 
 passport.use(
   new GoogleStrategy(
     {
-      clientID:     process.env.GOOGLE_CLIENT_ID,
+      clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL:   "https://blushberry.bond/auth/google/callback"
+      callbackURL: "https://blushberry.bond/auth/google/callback"
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const email        = profile.emails[0].value;
+        const email = profile.emails[0].value;
         const profilePhoto = profile.photos[0].value;
-        const googleId     = profile.id;
-        const fullName     = profile.displayName;
+        const googleId = profile.id;
+        const fullName = profile.displayName;
 
         const existingUser = await User.findOne({ email });
 
@@ -35,7 +36,7 @@ passport.use(
            * they changed it in Google, then let them in.
            */
           existingUser.profilePhoto = profilePhoto;
-          existingUser.fullName     = fullName;
+          existingUser.fullName = fullName;
           await existingUser.save();
           return done(null, existingUser);
         }
@@ -43,11 +44,16 @@ passport.use(
         /*
          * Case 3 — brand new user. Create their account.
          */
+        const referralCode =
+          fullName.substring(0, 3).toUpperCase() +
+          crypto.randomBytes(3).toString('hex').toUpperCase();
+
         const newUser = await User.create({
           fullName,
           email,
           googleId,
           profilePhoto,
+          referralCode,
           isVerified: true,
         });
 
