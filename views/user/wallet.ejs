@@ -510,6 +510,27 @@
     <span id="toastMsg">Done!</span>
   </div>
 
+   <!-- Pagination -->
+  <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+    <div class="pagination">
+      <% if (currentPage > 1) { %>
+        <a href="/wallet?page=<%= currentPage - 1 %>" class="page-btn">« Prev</a>
+      <% } %>
+
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <a href="/wallet?page=<%= i %>"
+           class="page-btn <%= i === currentPage ? 'active' : '' %>">
+          <%= i %>
+        </a>
+      <% } %>
+
+      <% if (currentPage < totalPages) { %>
+        <a href="/wallet?page=<%= currentPage + 1 %>" class="page-btn">Next »</a>
+      <% } %>
+    </div>
+  <% } %>
+
+
   <script>
     function filterTx(type, btn) {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));

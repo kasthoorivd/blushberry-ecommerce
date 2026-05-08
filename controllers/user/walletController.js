@@ -9,19 +9,31 @@ async function getOrCreateWallet(userId){
     return wallet
 }
 
+
+
 const getWallet = async (req,res) =>{
     try {
         const wallet = await getOrCreateWallet(req.session.user._id)
 
         const transactions = [...wallet.transactions].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
-
+        const page = parseInt(req.query.page) || 1
+        const limit = 5
+        const skip = (page - 1) * limit
+        const totalWallet = await Wallet.countDocuments()
+        const totalPages = Math.ceil(totalWallet/limit)
+         const wallets = await Wallet.find({userId})
+         .sort({createdAt:-1})
+         .skip(skip)
+         .limit(limit)
 
         res.render('user/wallet' ,{
             user:req.session.user,
             wallet,
             transactions,
             success:req.query.success || null,
-            error:req.query.error || null
+            error:req.query.error || null,
+            totalPages,
+            wallets
         })
     } catch (error) {
         console.error('getWallet error : ' , error)

@@ -201,7 +201,7 @@
 
 <body>
   <div class="admin-wrapper">
-    <%- include('../partials/admin/adminSidebar') %>
+    <%- include('../partials/admin/adminsidebar') %>
     <div class="admin-main">
       <div class="admin-content">
 
@@ -242,7 +242,17 @@
               <option value="Delivered" <%= locals.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
               <option value="Cancelled" <%= locals.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
               <option value="Returned" <%= locals.status === 'Returned' ? 'selected' : '' %>>Returned</option>
+              
             </select>
+  
+              <select class="filter-select" name="sort" onchange="document.getElementById('filterForm').submit()">
+                 <option value="" <%= !locals.sort || sort === '' ? 'selected' : '' %>>All Statuses</option>
+              <option value="Online" <%= !locals.sort || sort === 'newest' ? 'selected' : '' %>>Online</option>
+              <option value="COD" <%= locals.sort === 'oldest' ? 'selected' : '' %>>COD</option>
+              <option value="Wallet" <%= locals.sort === 'amount_high' ? 'selected' : '' %>>Wallet</option>
+             
+            </select>
+
 
             <select class="filter-select" name="sort" onchange="document.getElementById('filterForm').submit()">
               <option value="newest" <%= !locals.sort || sort === 'newest' ? 'selected' : '' %>>Newest First</option>
