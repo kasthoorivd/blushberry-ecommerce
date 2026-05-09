@@ -9,12 +9,12 @@ const MongoStore    = require('connect-mongo')
 const methodOverride = require('method-override')
 const nocache       = require('nocache')
 
-const connectDb         = require('./config/connectDb')
+const connectDB        = require('./config/connectDB')
 const userRouter        = require('./routes/userRoutes')
 const adminRouter       = require('./routes/adminRoutes')
 const attachCartCount   = require('./middleware/cartCountMiddleware')
 
-connectDb()
+connectDB()
 
 app.use(morgan('dev'))
 app.use(methodOverride('_method'))

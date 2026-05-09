@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-const connectDb = async () => {
+const connectDB = async () => {
 
     try {
 
@@ -19,4 +19,4 @@ const connectDb = async () => {
 
 }
 
-module.exports = connectDb
+module.exports = connectDB
