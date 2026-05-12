@@ -1,7 +1,7 @@
 const User     = require('../../models/user/userModel')
 const Category = require('../../models/user/categoryModel')
-const statusCode = require('../../utils/statusCode')
-const Product  = require('../../models/user/productModel')  // add at top
+const Product  = require('../../models/user/productModel')
+const { HttpStatus } = require('../../utils/statusCode')
 
 const loadCategory = async (req, res) => {
     try {
@@ -21,9 +21,8 @@ const loadCategory = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit)
-            .lean()  
+            .lean()
 
-  
         const categoryIds = categories.map(c => c._id)
 
         const productCounts = await Product.aggregate([
@@ -36,14 +35,13 @@ const loadCategory = async (req, res) => {
             countMap[item._id.toString()] = item.count
         })
 
-        
         categories.forEach(cat => {
             cat.productCount = countMap[cat._id.toString()] || 0
         })
 
         const user = await User.findById(req.session.userId)
 
-        res.render('admin/category', {
+        res.status(HttpStatus.OK).render('admin/category', {
             categories,
             currentPage: page,
             totalPages,
@@ -55,7 +53,7 @@ const loadCategory = async (req, res) => {
 
     } catch (err) {
         console.error('loadCategory error:', err)
-        res.status(500).send('Server Error')
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('Server Error')
     }
 }
 
@@ -63,10 +61,10 @@ const loadCategory = async (req, res) => {
 const loadAddCategory = async (req, res) => {
     try {
         const user = await User.findById(req.session.userId)
-        res.render('admin/addCategory', { user })
+        res.status(HttpStatus.OK).render('admin/addCategory', { user })
     } catch (err) {
         console.error('loadAddCategory error:', err)
-        res.status(500).send('Server Error')
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('Server Error')
     }
 }
 
@@ -77,10 +75,10 @@ const loadEditCategory = async (req, res) => {
         if (!category) return res.redirect('/admin/category')
 
         const user = await User.findById(req.session.userId)
-        res.render('admin/editCategory', { category, user })
+        res.status(HttpStatus.OK).render('admin/editCategory', { category, user })
     } catch (err) {
         console.error('loadEditCategory error:', err)
-        res.status(500).send('Server Error')
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('Server Error')
     }
 }
 
@@ -90,17 +88,17 @@ const addCategory = async (req, res) => {
         const { name, description, offer } = req.body
 
         if (!name || !name.trim()) {
-            return res.status(400).json({ success: false, message: 'Category name is required' })
+            return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Category name is required' })
         }
         if (!description || !description.trim()) {
-            return res.status(400).json({ success: false, message: 'Description is required' })
+            return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Description is required' })
         }
 
         const existingCategory = await Category.findOne({
             name: { $regex: new RegExp(`^${name.trim()}$`, 'i') }
         })
         if (existingCategory) {
-            return res.status(409).json({ success: false, message: 'Category already exists' })
+            return res.status(HttpStatus.CONFLICT).json({ success: false, message: 'Category already exists' })
         }
 
         const newCategory = new Category({
@@ -112,11 +110,11 @@ const addCategory = async (req, res) => {
         })
         await newCategory.save()
 
-        return res.status(201).json({ success: true, message: 'Category added successfully' })
+        return res.status(HttpStatus.CREATED).json({ success: true, message: 'Category added successfully' })
 
     } catch (error) {
         console.error('addCategory error:', error)
-        return res.status(500).json({ success: false, message: 'Something went wrong. Please try again.' })
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Something went wrong. Please try again.' })
     }
 }
 
@@ -128,7 +126,7 @@ const editCategory = async (req, res) => {
 
         const category = await Category.findById(categoryId)
         if (!category) {
-            return res.status(404).json({ success: false, message: 'Category not found' })
+            return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Category not found' })
         }
 
         const existingCategory = await Category.findOne({
@@ -136,7 +134,7 @@ const editCategory = async (req, res) => {
             _id:  { $ne: categoryId }
         })
         if (existingCategory) {
-            return res.status(409).json({ success: false, message: 'Category already exists' })
+            return res.status(HttpStatus.CONFLICT).json({ success: false, message: 'Category already exists' })
         }
 
         await Category.findByIdAndUpdate(
@@ -149,11 +147,11 @@ const editCategory = async (req, res) => {
             { new: true }
         )
 
-        return res.status(200).json({ success: true, message: 'Category updated successfully' })
+        return res.status(HttpStatus.OK).json({ success: true, message: 'Category updated successfully' })
 
     } catch (error) {
         console.error('editCategory error:', error)
-        return res.status(500).json({ success: false, message: 'Something went wrong. Please try again.' })
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Something went wrong. Please try again.' })
     }
 }
 
@@ -164,11 +162,11 @@ const deleteCategory = async (req, res) => {
 
         const category = await Category.findById(categoryId)
         if (!category) {
-            return res.status(404).json({ success: false, message: 'Category not found' })
+            return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Category not found' })
         }
 
         if (category.isDeleted) {
-            return res.status(400).json({ success: false, message: 'Category already deleted' })
+            return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Category already deleted' })
         }
 
         await Category.findByIdAndUpdate(
@@ -177,15 +175,13 @@ const deleteCategory = async (req, res) => {
             { new: true }
         )
 
-        return res.status(200).json({ success: true, message: 'Category deleted successfully' })
+        return res.status(HttpStatus.OK).json({ success: true, message: 'Category deleted successfully' })
 
     } catch (error) {
         console.error('deleteCategory error:', error)
-        return res.status(500).json({ success: false, message: 'Something went wrong. Please try again.' })
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Something went wrong. Please try again.' })
     }
 }
-
-
 
 
 const toggleCategoryListing = async (req, res) => {
@@ -194,7 +190,7 @@ const toggleCategoryListing = async (req, res) => {
 
         const category = await Category.findById(categoryId)
         if (!category) {
-            return res.status(404).json({
+            return res.status(HttpStatus.NOT_FOUND).json({
                 success: false,
                 message: 'Category not found'
             })
@@ -209,19 +205,20 @@ const toggleCategoryListing = async (req, res) => {
             { isListed: newListingStatus }
         )
 
-        return res.status(200).json({
+        return res.status(HttpStatus.OK).json({
             success: true,
             message: newListingStatus ? 'Category listed successfully' : 'Category unlisted successfully'
         })
 
     } catch (error) {
         console.error('toggleCategoryListing error:', error)
-        return res.status(500).json({
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: 'Something went wrong. Please try again.'
         })
     }
 }
+
 module.exports = {
     loadCategory,
     loadAddCategory,

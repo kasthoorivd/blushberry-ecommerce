@@ -3,6 +3,7 @@ const Review  = require('../../models/user/reviewModel')
 const Offer   = require('../../models/user/offerModel')  
 const Wishlist = require('../../models/user/wishlistModel')
 const Category = require('../../models/user/categoryModel')
+const {HttpStatus} = require('../../utils/statusCode')
 // ── fetch active offers and return lookup maps ────────────────────────────────
 async function getActiveOfferMaps() {
   const now = new Date()
@@ -165,7 +166,7 @@ const submitReview = async (req, res) => {
 
     const ratingNum = parseInt(rating)
     if (!ratingNum || ratingNum < 1 || ratingNum > 5)
-      return res.status(400).json({ success: false, message: 'Rating must be between 1 and 5.' })
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Rating must be between 1 and 5.' })
 
     await Review.findOneAndUpdate(
       { productId, userId },
@@ -177,7 +178,7 @@ const submitReview = async (req, res) => {
 
   } catch (err) {
     console.error('submitReview error:', err)
-    res.status(500).json({ success: false, message: 'Could not submit review.' })
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Could not submit review.' })
   }
 }
 
@@ -187,7 +188,7 @@ const deleteReview = async (req, res) => {
   try {
     const userId = req.session.user?._id
     if (!userId)
-      return res.status(401).json({ success: false, message: 'Not logged in.' })
+      return res.status(HttpStatus.UNAUTHORIZED).json({ success: false, message: 'Not logged in.' })
 
     await Review.findOneAndUpdate(
       { productId: req.params.id, userId },
@@ -198,7 +199,7 @@ const deleteReview = async (req, res) => {
 
   } catch (err) {
     console.error('deleteReview error:', err)
-    res.status(500).json({ success: false, message: 'Could not delete review.' })
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Could not delete review.' })
   }
 }
 

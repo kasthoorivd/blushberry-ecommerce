@@ -8,6 +8,7 @@ const crypto = require('crypto')
 const mongoose = require('mongoose')
 const generateOtp = require('../../utils/generateOtp')
 const sendEmail = require('../../utils/sendEmail')
+const {HttpStatus} = require('../../utils/statusCode')
 
 // ── Generate referral code for users who don't have one ──
 const generateReferralCode = (fullName) => {
@@ -26,7 +27,7 @@ const loadProfile = async (req, res) => {
         const pwSuccess = req.query.pwSuccess === 'true';
         return res.render('user/userProfile', { user, address: address || null, success, errors: null, pwSuccess })
     } catch (error) {
-        res.status(500).json({ error: 'page not loading' })
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: 'page not loading' })
     }
 }
 
@@ -90,7 +91,7 @@ const updateProfile = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(500).json({ error: "cannot update" });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: "cannot update" });
     }
 }
 
@@ -196,7 +197,7 @@ const requestEmailChange = async (req, res) => {
 
     } catch (err) {
         console.error('requestEmailChange error:', err);
-        res.status(500).json({ success: false, message: "Server error" });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: "Server error" });
     }
 };
 
@@ -224,7 +225,7 @@ const loadCoupons = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(500).json({ error: 'Could not load coupons' });
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Could not load coupons' });
     }
 };
 
@@ -235,7 +236,7 @@ const loadCoupons = async (req, res) => {
 const getReferralInfo = async (req, res) => {
     try {
         const userId = req.session.user?._id;
-        if (!userId) return res.status(401).json({ success: false, message: 'Not logged in' });
+        if (!userId) return res.status(HttpStatus.UNAUTHORIZED).json({ success: false, message: 'Not logged in' });
 
         let user = await User.findById(userId).lean();
 
@@ -267,7 +268,7 @@ const getReferralInfo = async (req, res) => {
         });
     } catch (err) {
         console.error('getReferralInfo error:', err);
-        return res.status(500).json({ success: false, message: 'Server error' });
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Server error' });
     }
 };
 

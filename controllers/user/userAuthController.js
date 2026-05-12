@@ -11,6 +11,8 @@ const passport = require('../../config/passport');
 const { isBlocked } = require('../../middleware/authMiddleware');
 const Wallet = require('../../models/user/walletModel');
 
+const {HttpStatus} = require('../../utils/statusCode')
+
 const generateReferralCode = (fullName) => {
   const prefix = fullName.substring(0, 3).toUpperCase();
   const random = crypto.randomBytes(3).toString('hex').toUpperCase();
@@ -192,7 +194,7 @@ const signup = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: 'Server error' });
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -305,7 +307,7 @@ const verifyOtp = async (req, res) => {
 
   } catch (error) {
     console.error("VERIFY OTP ERROR:", error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: error.message });
   }
 };
 
@@ -326,7 +328,7 @@ const resendOtp = async (req, res) => {
     }
 
     if (!email) {
-      return res.status(400).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         success: false,
         message: "Session expired. Please start again."
       });
@@ -345,7 +347,7 @@ const resendOtp = async (req, res) => {
 
   } catch (error) {
     console.error("RESEND OTP ERROR:", error);
-    return res.status(500).json({ success: false, message: "Something went wrong" });
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: "Something went wrong" });
   }
 };
 
@@ -428,7 +430,7 @@ const forgotPassword = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(400).json({ success: false, message: "Email not registered" });
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "Email not registered" });
     }
 
     const otpCode = generateOtp();
@@ -447,7 +449,7 @@ const forgotPassword = async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: "Server error" });
   }
 };
 
@@ -479,14 +481,14 @@ const showResetPage = (req, res) => {
 const resetPassword = async (req, res) => {
   try {
     if (!req.session.canResetPassword) {
-      return res.status(400).json({ success: false, message: "Not authorized" });
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "Not authorized" });
     }
 
     const email = req.session.forgotEmail;
     const { password, confirmPassword } = req.body;
 
     if (password !== confirmPassword) {
-      return res.status(400).json({ success: false, message: "Passwords do not match" });
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "Passwords do not match" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -499,7 +501,7 @@ const resetPassword = async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: "Server error" });
   }
 };
 
@@ -567,7 +569,7 @@ const requestEmailChange = async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: "Server error" });
   }
 };
 
@@ -582,7 +584,7 @@ const logout = (req, res) => {
     res.redirect('/')
   } catch (error) {
     console.error('error during logout:', error)
-    res.status(500).send('error during logout')
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('error during logout')
   }
 }
 
@@ -602,7 +604,7 @@ const getReferralInfo = async (req, res) => {
       walletBalance: wallet?.balance || 0
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: 'Server error' });
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Server error' });
   }
 };
 
