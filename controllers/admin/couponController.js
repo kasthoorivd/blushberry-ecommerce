@@ -1,4 +1,5 @@
 const Coupon = require('../../models/user/couponModel')
+const { HttpStatus } = require('../../utils/statusCode')
 
 const loadCoupons = async (req, res) => {
   try {
@@ -12,14 +13,14 @@ const loadCoupons = async (req, res) => {
       .limit(LIMIT)
       .lean()
 
-    res.render('admin/coupons', {
+    res.status(HttpStatus.OK).render('admin/coupons', {
       coupons,
-      currentPage:  page,
-      totalPages:   Math.ceil(totalCoupons / LIMIT)
+      currentPage: page,
+      totalPages:  Math.ceil(totalCoupons / LIMIT)
     })
   } catch (error) {
     console.error(error)
-    res.status(500).send('Error loading coupons')
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('Error loading coupons')
   }
 }
 
@@ -32,7 +33,7 @@ const createCoupon = async (req, res) => {
 
     const existing = await Coupon.findOne({ code: code.toUpperCase() })
     if (existing) {
-      return res.json({ success: false, message: 'Coupon code already exists.' })
+      return res.status(HttpStatus.CONFLICT).json({ success: false, message: 'Coupon code already exists.' })
     }
 
     const type     = discountType === 'percentage' ? 'percentage' : 'flat'
@@ -40,17 +41,16 @@ const createCoupon = async (req, res) => {
     const minOrder = parseFloat(minOrderAmount) || 0
 
     if (!amount || amount <= 0) {
-      return res.json({ success: false, message: 'Discount value must be greater than 0.' })
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Discount value must be greater than 0.' })
     }
 
     if (type === 'percentage') {
       if (amount > 90) {
-        return res.json({ success: false, message: 'Percentage discount cannot exceed 90%.' })
+        return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Percentage discount cannot exceed 90%.' })
       }
     } else {
-      // flat: min order must be at least 2× discount
       if (minOrder > 0 && minOrder < amount * 2) {
-        return res.json({
+        return res.status(HttpStatus.BAD_REQUEST).json({
           success: false,
           message: `Min Order Amount must be at least 2× the discount (₹${amount * 2} or more).`
         })
@@ -58,39 +58,47 @@ const createCoupon = async (req, res) => {
     }
 
     await Coupon.create({
-      code:            code.toUpperCase(),
-      discountType:    type,
-      discountAmount:  amount,
-      maxDiscount:     type === 'percentage' ? (parseFloat(maxDiscount) || null) : null,
-      minOrderAmount:  minOrder,
-      maxUses:         maxUses  || null,
-      expiresAt:       expiresAt || null
+      code:           code.toUpperCase(),
+      discountType:   type,
+      discountAmount: amount,
+      maxDiscount:    type === 'percentage' ? (parseFloat(maxDiscount) || null) : null,
+      minOrderAmount: minOrder,
+      maxUses:        maxUses   || null,
+      expiresAt:      expiresAt || null
     })
 
-    return res.json({ success: true, message: 'Coupon created successfully.' })
+    return res.status(HttpStatus.CREATED).json({ success: true, message: 'Coupon created successfully.' })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ success: false, message: 'Server error.' })
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Server error.' })
   }
 }
 
 const toggleCoupon = async (req, res) => {
   try {
     const coupon = await Coupon.findById(req.params.id)
+    if (!coupon) {
+      return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Coupon not found.' })
+    }
     coupon.isActive = !coupon.isActive
     await coupon.save()
-    res.json({ success: true, isActive: coupon.isActive })
+    res.status(HttpStatus.OK).json({ success: true, isActive: coupon.isActive })
   } catch (error) {
-    res.status(500).json({ success: false })
+    console.error(error)
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false })
   }
 }
 
 const deleteCoupon = async (req, res) => {
   try {
-    await Coupon.findByIdAndDelete(req.params.id)
-    res.json({ success: true })
+    const coupon = await Coupon.findByIdAndDelete(req.params.id)
+    if (!coupon) {
+      return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Coupon not found.' })
+    }
+    res.status(HttpStatus.OK).json({ success: true })
   } catch (error) {
-    res.status(500).json({ success: false })
+    console.error(error)
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false })
   }
 }
 

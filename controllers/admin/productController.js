@@ -1,6 +1,7 @@
-const Product = require('../../models/user/productModel')
+const Product  = require('../../models/user/productModel')
 const Category = require('../../models/user/categoryModel')
 const { cloudinary } = require('../../config/cloudinary')
+const { HttpStatus } = require('../../utils/statusCode')
 
 const LIMIT = 5
 
@@ -11,29 +12,29 @@ async function uploadIfBase64(value, folder) {
     const result = await cloudinary.uploader.upload(value, { folder })
     return result.secure_url
   }
-  return value   
+  return value
 }
 
 const loadProducts = async (req, res) => {
   try {
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const searchQuery = (req.query.search || '').trim();
-    const filter = { isDeleted: false };
+    const page = Math.max(1, parseInt(req.query.page) || 1)
+    const searchQuery = (req.query.search || '').trim()
+    const filter = { isDeleted: false }
 
     if (searchQuery) {
-      filter.name = { $regex: searchQuery, $options: 'i' };
+      filter.name = { $regex: searchQuery, $options: 'i' }
     }
 
-    const totalProducts = await Product.countDocuments(filter);
-    const totalPages = Math.ceil(totalProducts / LIMIT);
+    const totalProducts = await Product.countDocuments(filter)
+    const totalPages    = Math.ceil(totalProducts / LIMIT)
 
     const products = await Product.find(filter)
       .populate('categoryId', 'name')
       .sort({ createdAt: -1 })
       .skip((page - 1) * LIMIT)
       .limit(LIMIT)
-      .lean();
-   
+      .lean()
+
     res.render('admin/products', {
       products,
       currentPage: page,
@@ -42,22 +43,20 @@ const loadProducts = async (req, res) => {
       limit: LIMIT,
       searchQuery,
       user: req.session.admin || null
-    });
-
-    
+    })
   } catch (err) {
-    console.error('getProducts error:', err);
-    res.status(500).render('error', { message: 'Could not load products.' });
+    console.error('getProducts error:', err)
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).render('error', { message: 'Could not load products.' })
   }
 }
 
 const loadAddProduct = async (req, res) => {
   try {
-    const categories = await Category.find({ isDeleted: false, isListed: true }).lean();
-    res.render('admin/addProduct', { categories });
+    const categories = await Category.find({ isDeleted: false, isListed: true }).lean()
+    res.render('admin/addProduct', { categories })
   } catch (err) {
-    console.error('getAddProduct error:', err);
-    res.status(500).render('error', { message: 'Could not load form.' });
+    console.error('getAddProduct error:', err)
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).render('error', { message: 'Could not load form.' })
   }
 }
 
@@ -70,10 +69,8 @@ const addProduct = async (req, res) => {
     )
     const imageUrls = uploadedImages.map(r => r.secure_url)
 
-   
     const processedVariants = await Promise.all(
       variants.map(async (v) => {
-       
         const swatchUrl = await uploadIfBase64(v.image, 'blushberry/shades')
 
         const shadeGalleryUrls = await Promise.all(
@@ -100,23 +97,24 @@ const addProduct = async (req, res) => {
     })
 
     await product.save()
-    return res.json({ success: true, message: 'Product added successfully' })
-
+    return res.status(HttpStatus.OK).json({ success: true, message: 'Product added successfully' })
   } catch (error) {
     console.error('addProduct error:', error)
-    return res.json({ success: false, message: 'Failed to add product' })
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Failed to add product' })
   }
 }
 
 const loadEditProduct = async (req, res) => {
   try {
     const product = await Product.findOne({ _id: req.params.id, isDeleted: false })
-    if (!product) return res.status(400).render('error', { message: 'Product not found' })
-    const categories = await Category.find({ isDeleted: false, isListed: true }).lean();
+    if (!product) {
+      return res.status(HttpStatus.BAD_REQUEST).render('error', { message: 'Product not found' })
+    }
+    const categories = await Category.find({ isDeleted: false, isListed: true }).lean()
     res.render('admin/editProduct', { product, categories })
   } catch (error) {
     console.error('loadEditProduct error:', error)
-    res.status(500).render('error', { message: 'Could not load product' })
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).render('error', { message: 'Could not load product' })
   }
 }
 
@@ -125,7 +123,6 @@ const editProduct = async (req, res) => {
     const { id } = req.params
     const { name, description, categoryId, existingImages, newImages, variants } = req.body
 
-  
     const uploadedNew = await Promise.all(
       (newImages || []).map(base64 =>
         cloudinary.uploader.upload(base64, { folder: 'blushberry/products' })
@@ -136,14 +133,11 @@ const editProduct = async (req, res) => {
       ...uploadedNew.map(r => r.secure_url)
     ]
 
-    
     const processedVariants = await Promise.all(
       variants.map(async (v) => {
-       
         const swatchUrl = await uploadIfBase64(v.image, 'blushberry/shades')
 
-      
-        const kept = v.keptImages || []
+        const kept     = v.keptImages || []
         const uploaded = await Promise.all(
           (v.newImages || []).map(img => uploadIfBase64(img, 'blushberry/shades'))
         )
@@ -168,52 +162,55 @@ const editProduct = async (req, res) => {
       variants: processedVariants
     })
 
-    return res.json({ success: true, message: 'Product updated successfully' })
-
+    return res.status(HttpStatus.OK).json({ success: true, message: 'Product updated successfully' })
   } catch (error) {
     console.error('editProduct error:', error)
-    return res.json({ success: false, message: 'Failed to update product' })
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Failed to update product' })
   }
 }
 
 const toggleProductListing = async (req, res) => {
   try {
-    const product = await Product.findOne({ _id: req.params.id, isDeleted: false });
-    if (!product) return res.status(404).json({ success: false, message: 'Product not found.' });
+    const product = await Product.findOne({ _id: req.params.id, isDeleted: false })
+    if (!product) {
+      return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Product not found.' })
+    }
 
-    product.isListed = !product.isListed;
-    await product.save();
+    product.isListed = !product.isListed
+    await product.save()
 
-    res.json({
+    res.status(HttpStatus.OK).json({
       success: true,
       isListed: product.isListed,
       message: `Product ${product.isListed ? 'listed' : 'unlisted'} successfully.`,
-    });
+    })
   } catch (err) {
-    console.error('toggleProductListing error:', err);
-    res.status(500).json({ success: false, message: 'Toggle failed.' });
+    console.error('toggleProductListing error:', err)
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Toggle failed.' })
   }
-};
+}
 
 const deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ success: false, message: 'Product not found.' });
-
-    if (product.isDeleted) {
-      return res.status(400).json({ success: false, message: 'Product already deleted.' });
+    const product = await Product.findById(req.params.id)
+    if (!product) {
+      return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Product not found.' })
     }
 
-    product.isDeleted = true;
-    product.isListed = false;
-    await product.save();
+    if (product.isDeleted) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Product already deleted.' })
+    }
 
-    res.json({ success: true, message: `"${product.name}" has been deleted.` });
+    product.isDeleted = true
+    product.isListed  = false
+    await product.save()
+
+    res.status(HttpStatus.OK).json({ success: true, message: `"${product.name}" has been deleted.` })
   } catch (err) {
-    console.error('deleteProduct error:', err);
-    res.status(500).json({ success: false, message: 'Delete failed.' });
+    console.error('deleteProduct error:', err)
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Delete failed.' })
   }
-};
+}
 
 module.exports = {
   loadProducts,

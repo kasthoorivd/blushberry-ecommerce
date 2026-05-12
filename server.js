@@ -26,7 +26,7 @@ app.use(nocache())
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'))
 
-// ─── Shared session store (both sessions use same DB, different cookie names) ───
+
 const mongoStoreOptions = { mongoUrl: process.env.MONGO_URI }
 
 const cookieBase = {
@@ -36,9 +36,9 @@ const cookieBase = {
   sameSite: 'lax'
 }
 
-// ─── User session middleware ───────────────────────────────────────────────────
+
 const userSession = session({
-  name: 'user.sid',                          // <-- unique cookie name
+  name: 'user.sid',                        
   secret: process.env.USER_SESSION_SECRET || 'user-secret-key',
   resave: false,
   saveUninitialized: false,
@@ -46,9 +46,9 @@ const userSession = session({
   cookie: cookieBase
 })
 
-// ─── Admin session middleware ──────────────────────────────────────────────────
+
 const adminSession = session({
-  name: 'admin.sid',                         // <-- unique cookie name
+  name: 'admin.sid',                        
   secret: process.env.ADMIN_SESSION_SECRET || 'admin-secret-key',
   resave: false,
   saveUninitialized: false,
@@ -56,14 +56,14 @@ const adminSession = session({
   cookie: cookieBase
 })
 
-// ─── Passport only runs in user context ───────────────────────────────────────
+
 app.use('/admin', adminSession)
 
 app.use('/', userSession)
 app.use(passport.initialize())
-app.use(passport.session())        // passport only touches the user session
+app.use(passport.session())        
 
-// ─── Shared locals ────────────────────────────────────────────────────────────
+
 app.use(attachCartCount)
 
 app.use((req, res, next) => {
@@ -74,6 +74,20 @@ app.use((req, res, next) => {
   res.locals.errors      = null
   res.locals.formData    = {}
   next()
+})
+
+app.use((req, res, next) => {
+  res.status(404).render('error', { 
+    statusCode: 404,
+    message: 'Page not found' 
+  })
+})
+
+app.use((err, req, res, next) => {
+  console.error(err.stack)
+  const statusCode = err.status || err.statusCode || 500
+  const message    = err.message || 'Something went wrong'
+  res.status(statusCode).render('error', { statusCode, message })
 })
 
 app.use('/', userRouter)

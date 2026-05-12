@@ -2,6 +2,7 @@ const Product = require('../../models/user/productModel')
 const Category = require('../../models/user/categoryModel')
 const Offer = require('../../models/user/offerModel')
 const Wishlist = require('../../models/user/wishlistModel')
+const {HttpStatus} = require('../../utils/statusCode')
 const LIMIT = 6
 
 
@@ -183,7 +184,7 @@ const loadProductListing = async (req, res) => {
 
   } catch (err) {
     console.error('loadProductListing error:', err)
-    res.status(500).render('error', { message: 'Could not load products.' })
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).render('error', { message: 'Could not load products.' })
   }
 }
  

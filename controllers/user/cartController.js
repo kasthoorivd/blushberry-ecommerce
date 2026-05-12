@@ -1,10 +1,12 @@
-const Cart = require('../../models/user/cartModel')
+const Cart     = require('../../models/user/cartModel')
 const Wishlist = require('../../models/user/wishlistModel')
-const Product = require('../../models/user/productModel')
-const Coupon = require('../../models/user/couponModel')
+const Product  = require('../../models/user/productModel')
+const Coupon   = require('../../models/user/couponModel')
+const { HttpStatus } = require('../../utils/statusCode')
 
 
 const MAX_QTY_PER_ITEM = 5
+
 async function validateProductAvailability(productId, shade) {
   const product = await Product.findOne({
     _id: productId,
@@ -33,37 +35,33 @@ function findVariant(product, shade) {
   ) || product.variants[0]
 }
 
+
 const loadCart = async (req, res) => {
   try {
     const userId = req.session.user?._id
     if (!userId) return res.redirect('/login')
 
-    // ── Fetch cart WITHOUT populate — we'll fetch products fresh below ──
     const cart = await Cart.findOne({ userId }).lean()
     const sessionRemovedNames = req.session.cartRemovedNames || []
     req.session.cartRemovedNames = null
     const checkoutError = req.session.checkoutError || null
     req.session.checkoutError = null
-    let validItems = []
-    let removedNames = [...sessionRemovedNames]
+
+    let validItems        = []
+    let removedNames      = [...sessionRemovedNames]
     let invalidCartItemIds = []
 
     if (cart && cart.items.length) {
       for (const item of cart.items) {
-
-        // ── Always fetch fresh from DB — no populate, no stale cache ──
         const product = await Product.findById(item.productId)
           .select('name images variants isListed isDeleted offer categoryId')
           .lean()
-
-        console.log('DEBUG product:', product?.name, 'isListed:', product?.isListed, 'isDeleted:', product?.isDeleted)
 
         if (!product || product.isDeleted || !product.isListed) {
           removedNames.push(product?.name || 'A product')
           invalidCartItemIds.push(item._id)
           continue
         }
-
 
         const variant = findVariant(product, item.shade)
         if (!variant) {
@@ -72,7 +70,7 @@ const loadCart = async (req, res) => {
         }
 
         const currentPrice = getVariantPrice(variant)
-        const inStock = variant.stock > 0
+        const inStock      = variant.stock > 0
 
         validItems.push({
           ...item,
@@ -80,10 +78,10 @@ const loadCart = async (req, res) => {
           variant,
           currentPrice,
           inStock,
-          stockAvailable: variant.stock,
+          stockAvailable:  variant.stock,
           qtyExceedsStock: item.quantity > variant.stock,
-          qtyExceedsMax: item.quantity > MAX_QTY_PER_ITEM,
-          effectiveQty: Math.min(item.quantity, variant.stock, MAX_QTY_PER_ITEM)
+          qtyExceedsMax:   item.quantity > MAX_QTY_PER_ITEM,
+          effectiveQty:    Math.min(item.quantity, variant.stock, MAX_QTY_PER_ITEM)
         })
       }
     }
@@ -95,23 +93,21 @@ const loadCart = async (req, res) => {
       )
     }
 
-    console.log('DEBUG removedNames:', removedNames)
-
     const subtotal = validItems
       .filter(i => i.inStock)
       .reduce((sum, i) => sum + i.currentPrice * i.effectiveQty, 0)
 
     const hasOutOfStock = validItems.some(i => !i.inStock)
-    const hasQtyIssues = validItems.some(i => i.qtyExceedsStock || i.qtyExceedsMax)
-    const canCheckout = validItems.length > 0 && !hasOutOfStock && !hasQtyIssues
+    const hasQtyIssues  = validItems.some(i => i.qtyExceedsStock || i.qtyExceedsMax)
+    const canCheckout   = validItems.length > 0 && !hasOutOfStock && !hasQtyIssues
 
     const totalItemDiscount = validItems.reduce((sum, item) => {
       const original = item.variant?.varientPrice || 0
-      const current = item.currentPrice || 0
+      const current  = item.currentPrice || 0
       return sum + ((original - current) * item.effectiveQty)
     }, 0)
 
-    res.render('user/cart', {
+    res.status(HttpStatus.OK).render('user/cart', {
       items: validItems,
       subtotal,
       totalItemDiscount,
@@ -126,23 +122,24 @@ const loadCart = async (req, res) => {
 
   } catch (error) {
     console.error('loadCart error:', error)
-    res.status(500).redirect('/products')
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).redirect('/products')
   }
 }
+
+
 const addToCart = async (req, res) => {
   try {
     const userId = req.session.user?._id
     if (!userId) {
-      return res.status(401).json({ success: false, message: 'Please log in.', redirect: '/login' })
+      return res.status(HttpStatus.UNAUTHORIZED).json({ success: false, message: 'Please log in.', redirect: '/login' })
     }
 
     const { productId, quantity = 1, shade = '' } = req.body
     const qty = parseInt(quantity) || 1
 
-    // ── Validate product is listed, not deleted, shade exists, in stock ──
     const check = await validateProductAvailability(productId, shade)
     if (!check.ok) {
-      return res.status(400).json({ success: false, message: check.message })
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: check.message })
     }
 
     const { product, variant } = check
@@ -158,24 +155,24 @@ const addToCart = async (req, res) => {
     if (existingIdx > -1) {
       const newQty = cart.items[existingIdx].quantity + qty
       if (newQty > MAX_QTY_PER_ITEM) {
-        return res.status(400).json({ success: false, message: `Maximum ${MAX_QTY_PER_ITEM} units allowed per item.` })
+        return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: `Maximum ${MAX_QTY_PER_ITEM} units allowed per item.` })
       }
       if (newQty > variant.stock) {
-        return res.status(400).json({ success: false, message: `Only ${variant.stock} units available in this shade.` })
+        return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: `Only ${variant.stock} units available in this shade.` })
       }
-      cart.items[existingIdx].quantity = newQty
+      cart.items[existingIdx].quantity   = newQty
       cart.items[existingIdx].priceAtAdd = getVariantPrice(variant)
     } else {
       if (qty > MAX_QTY_PER_ITEM) {
-        return res.status(400).json({ success: false, message: `Maximum ${MAX_QTY_PER_ITEM} units allowed per item.` })
+        return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: `Maximum ${MAX_QTY_PER_ITEM} units allowed per item.` })
       }
       if (qty > variant.stock) {
-        return res.status(400).json({ success: false, message: `Only ${variant.stock} units available in stock.` })
+        return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: `Only ${variant.stock} units available in stock.` })
       }
       cart.items.push({
-        productId: product._id,
-        shade: shade || variant.shade,
-        quantity: qty,
+        productId:  product._id,
+        shade:      shade || variant.shade,
+        quantity:   qty,
         priceAtAdd: getVariantPrice(variant)
       })
     }
@@ -188,36 +185,41 @@ const addToCart = async (req, res) => {
     )
 
     const cartCount = cart.items.reduce((s, i) => s + i.quantity, 0)
-    res.json({ success: true, message: 'Added to cart!', cartCount })
+    res.status(HttpStatus.OK).json({ success: true, message: 'Added to cart!', cartCount })
 
   } catch (error) {
     console.error('addToCart error:', error)
-    res.status(500).json({ success: false, message: 'Could not add to cart.' })
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Could not add to cart.' })
   }
 }
+
 
 const updateCartItem = async (req, res) => {
   try {
     const userId = req.session.user?._id
-    if (!userId) return res.status(401).json({ success: false, message: 'Not logged in.' })
+    if (!userId) {
+      return res.status(HttpStatus.UNAUTHORIZED).json({ success: false, message: 'Not logged in.' })
+    }
 
     const { itemId, action } = req.body
 
     const cart = await Cart.findOne({ userId })
-    if (!cart) return res.status(404).json({ success: false, message: 'Cart not found.' })
+    if (!cart) {
+      return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Cart not found.' })
+    }
 
     const itemIdx = cart.items.findIndex(i => String(i._id) === String(itemId))
-    if (itemIdx === -1) return res.status(404).json({ success: false, message: 'Item not found.' })
+    if (itemIdx === -1) {
+      return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Item not found.' })
+    }
 
-    const item = cart.items[itemIdx]
-
-    // ── Re-validate product availability on every qty change ──
+    const item  = cart.items[itemIdx]
     const check = await validateProductAvailability(item.productId, item.shade)
+
     if (!check.ok) {
-      // Remove the item from cart since it's no longer valid
       cart.items.splice(itemIdx, 1)
       await cart.save()
-      return res.status(400).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         success: false,
         removed: true,
         message: check.message
@@ -229,10 +231,10 @@ const updateCartItem = async (req, res) => {
 
     if (action === 'increment') {
       if (item.quantity >= MAX_QTY_PER_ITEM) {
-        return res.status(400).json({ success: false, message: `Maximum ${MAX_QTY_PER_ITEM} units allowed.` })
+        return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: `Maximum ${MAX_QTY_PER_ITEM} units allowed.` })
       }
       if (item.quantity >= variant.stock) {
-        return res.status(400).json({ success: false, message: `Only ${variant.stock} unit${variant.stock === 1 ? '' : 's'} in stock.` })
+        return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: `Only ${variant.stock} unit${variant.stock === 1 ? '' : 's'} in stock.` })
       }
       newQty = item.quantity + 1
     } else if (action === 'decrement') {
@@ -240,44 +242,50 @@ const updateCartItem = async (req, res) => {
         cart.items.splice(itemIdx, 1)
         await cart.save()
         const cartCount = cart.items.reduce((s, i) => s + i.quantity, 0)
-        return res.json({ success: true, removed: true, cartCount })
+        return res.status(HttpStatus.OK).json({ success: true, removed: true, cartCount })
       }
       newQty = item.quantity - 1
     }
 
-    cart.items[itemIdx].quantity = newQty
+    cart.items[itemIdx].quantity   = newQty
     cart.items[itemIdx].priceAtAdd = getVariantPrice(variant)
     await cart.save()
 
     const cartCount = cart.items.reduce((s, i) => s + i.quantity, 0)
     const itemTotal = getVariantPrice(variant) * newQty
-    res.json({ success: true, newQty, itemTotal, cartCount })
+    res.status(HttpStatus.OK).json({ success: true, newQty, itemTotal, cartCount })
 
   } catch (err) {
     console.error('updateCartItem error:', err)
-    res.status(500).json({ success: false, message: 'Could not update cart.' })
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Could not update cart.' })
   }
 }
+
 
 const removeFromCart = async (req, res) => {
   try {
     const userId = req.session.user?._id
-    if (!userId) return res.status(401).json({ success: false, message: 'Not logged in.' })
+    if (!userId) {
+      return res.status(HttpStatus.UNAUTHORIZED).json({ success: false, message: 'Not logged in.' })
+    }
 
     const cart = await Cart.findOne({ userId })
-    if (!cart) return res.status(404).json({ success: false, message: 'Cart not found.' })
+    if (!cart) {
+      return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Cart not found.' })
+    }
 
     cart.items = cart.items.filter(i => String(i._id) !== String(req.params.itemId))
     await cart.save()
 
     const cartCount = cart.items.reduce((s, i) => s + i.quantity, 0)
-    res.json({ success: true, message: 'Item removed.', cartCount })
+    res.status(HttpStatus.OK).json({ success: true, message: 'Item removed.', cartCount })
 
   } catch (err) {
     console.error('removeFromCart error:', err)
-    res.status(500).json({ success: false, message: 'Could not remove item.' })
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Could not remove item.' })
   }
 }
+
 
 const loadWishlist = async (req, res) => {
   try {
@@ -286,7 +294,7 @@ const loadWishlist = async (req, res) => {
 
     const wishlist = await Wishlist.findOne({ userId })
       .populate({
-        path: 'products',
+        path:  'products',
         match: { isDeleted: false, isListed: true },
         select: 'name images variants offer createdAt',
         populate: { path: 'categoryId', select: 'name' }
@@ -294,16 +302,16 @@ const loadWishlist = async (req, res) => {
       .lean()
 
     const products = (wishlist?.products || []).map(p => {
-      const prices = p.variants.map(v => v.salePrice > 0 ? v.salePrice : v.varientPrice)
-      p.displayPrice = Math.min(...prices)
-      const origPrices = p.variants.map(v => v.varientPrice)
-      p.originalPrice = Math.min(...origPrices)
-      p.displayOffer = p.offer || 0
-      p.inStock = p.variants.some(v => v.stock > 0)
+      const prices      = p.variants.map(v => v.salePrice > 0 ? v.salePrice : v.varientPrice)
+      p.displayPrice    = Math.min(...prices)
+      const origPrices  = p.variants.map(v => v.varientPrice)
+      p.originalPrice   = Math.min(...origPrices)
+      p.displayOffer    = p.offer || 0
+      p.inStock         = p.variants.some(v => v.stock > 0)
       return p
     })
 
-    res.render('user/wishlist', {
+    res.status(HttpStatus.OK).render('user/wishlist', {
       products,
       user: req.session.user || null
     })
@@ -314,25 +322,25 @@ const loadWishlist = async (req, res) => {
   }
 }
 
+
 const toggleWishlist = async (req, res) => {
   try {
     const userId = req.session.user?._id
     if (!userId) {
-      return res.status(401).json({ success: false, message: 'Please log in', redirect: '/login' })
+      return res.status(HttpStatus.UNAUTHORIZED).json({ success: false, message: 'Please log in', redirect: '/login' })
     }
 
     const { productId } = req.body
     const product = await Product.findOne({ _id: productId, isDeleted: false, isListed: true })
     if (!product) {
-      return res.status(404).json({ success: false, message: 'Product not found' })
-
+      return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Product not found' })
     }
 
     let wishlist = await Wishlist.findOne({ userId })
     if (!wishlist) wishlist = new Wishlist({ userId, products: [] })
 
-    const idx = wishlist.products.findIndex(id => String(id) === String(productId))
-    let added = false
+    const idx   = wishlist.products.findIndex(id => String(id) === String(productId))
+    let added   = false
 
     if (idx > -1) {
       wishlist.products.splice(idx, 1)
@@ -342,29 +350,31 @@ const toggleWishlist = async (req, res) => {
     }
 
     await wishlist.save()
-    res.json({ success: true, added, message: added ? 'Added to wishlist' : 'Removed From wishlist' })
+    res.status(HttpStatus.OK).json({ success: true, added, message: added ? 'Added to wishlist' : 'Removed From wishlist' })
+
   } catch (error) {
-    console.error('toggleWishlist error:', err)
-    res.status(500).json({ success: false, message: 'Could not update wishlist' })
+    console.error('toggleWishlist error:', error)
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Could not update wishlist' })
   }
 }
 
+
 const applyCoupon = async (req, res) => {
   try {
-    const { code } = req.body
-    const userId = req.session.user?._id
+    const { code }  = req.body
+    const userId    = req.session.user?._id
 
     if (!code) {
-      return res.json({ success: false, message: 'Please enter a coupon code.' })
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Please enter a coupon code.' })
     }
 
     const cart = await Cart.findOne({ userId }).populate({
-      path: 'items.productId',
+      path:   'items.productId',
       select: 'variants offer isDeleted isListed'
     }).lean()
 
     if (!cart || !cart.items.length) {
-      return res.json({ success: false, message: 'Your cart is empty.' })
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Your cart is empty.' })
     }
 
     const cartTotal = cart.items.reduce((sum, item) => {
@@ -379,52 +389,46 @@ const applyCoupon = async (req, res) => {
     }, 0)
 
     if (req.session.coupon) {
-      return res.json({ success: false, message: 'A coupon is already applied. Remove it first.' })
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'A coupon is already applied. Remove it first.' })
     }
 
     const coupon = await Coupon.findOne({ code: code.toUpperCase(), isActive: true })
     if (!coupon) {
-      return res.json({ success: false, message: 'Invalid coupon code.' })
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Invalid coupon code.' })
     }
 
     if (coupon.expiresAt && coupon.expiresAt < new Date()) {
-      return res.json({ success: false, message: 'This coupon has expired.' })
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'This coupon has expired.' })
     }
 
     if (coupon.usedBy.some(id => id.toString() === userId.toString())) {
-      return res.json({ success: false, message: 'You have already used this coupon.' })
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'You have already used this coupon.' })
     }
 
     if (coupon.maxUses && coupon.usedBy.length >= coupon.maxUses) {
-      return res.json({ success: false, message: 'Coupon usage limit reached.' })
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Coupon usage limit reached.' })
     }
 
     if (cartTotal < coupon.minOrderAmount) {
-      return res.json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         success: false,
         message: `Minimum order amount is ₹${coupon.minOrderAmount} to use this coupon.`
       })
     }
 
-    // ── Calculate discount based on type ─────────────────────────────────
     let discount = 0
-
     if (coupon.discountType === 'percentage') {
       discount = Math.round((cartTotal * coupon.discountAmount) / 100)
-      // cap at maxDiscount if set
       if (coupon.maxDiscount && discount > coupon.maxDiscount) {
         discount = coupon.maxDiscount
       }
     } else {
-      // flat
       discount = coupon.discountAmount
     }
-
-    // discount can never exceed cart total
     discount = Math.min(discount, cartTotal)
 
     req.session.coupon = {
-      code: coupon.code,
+      code:     coupon.code,
       discount: discount,
       couponId: coupon._id
     }
@@ -433,21 +437,22 @@ const applyCoupon = async (req, res) => {
       ? `${coupon.discountAmount}% off`
       : `₹${discount} off`
 
-    return res.json({
-      success: true,
+    return res.status(HttpStatus.OK).json({
+      success:  true,
       discount: discount,
-      message: `Coupon applied! ${label}`
+      message:  `Coupon applied! ${label}`
     })
 
   } catch (err) {
     console.error('applyCoupon error:', err)
-    res.status(500).json({ success: false, message: 'Server error. Please try again.' })
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Server error. Please try again.' })
   }
 }
 
+
 const removeCoupon = (req, res) => {
-  req.session.coupon = null;
-  res.json({ success: true })
+  req.session.coupon = null
+  res.status(HttpStatus.OK).json({ success: true })
 }
 
 

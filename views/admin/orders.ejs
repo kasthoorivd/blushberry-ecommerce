@@ -245,14 +245,7 @@
               
             </select>
   
-              <select class="filter-select" name="sort" onchange="document.getElementById('filterForm').submit()">
-                 <option value="" <%= !locals.sort || sort === '' ? 'selected' : '' %>>All Statuses</option>
-              <option value="Online" <%= !locals.sort || sort === 'newest' ? 'selected' : '' %>>Online</option>
-              <option value="COD" <%= locals.sort === 'oldest' ? 'selected' : '' %>>COD</option>
-              <option value="Wallet" <%= locals.sort === 'amount_high' ? 'selected' : '' %>>Wallet</option>
              
-            </select>
-
 
             <select class="filter-select" name="sort" onchange="document.getElementById('filterForm').submit()">
               <option value="newest" <%= !locals.sort || sort === 'newest' ? 'selected' : '' %>>Newest First</option>

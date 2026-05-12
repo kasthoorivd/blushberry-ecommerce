@@ -8,6 +8,7 @@ const Coupon = require('../../models/user/couponModel')
 const PDFDocument = require('pdfkit')
 const Razorpay = require('razorpay')
 const crypto = require('crypto')
+const { HttpStatus } = require('../../utils/statusCode')
 
 const { creditWallet, handleCancellationRefund } = require('./walletController')
 
@@ -163,23 +164,23 @@ const placeOrder = async (req, res) => {
     const userId = req.session.user._id
     const { addressId, paymentMethod = 'COD' } = req.body
 
-    if (!addressId) return res.status(400).json({ success: false, message: 'Please select a delivery address.' })
+    if (!addressId) return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Please select a delivery address.' })
 
     const address = await Address.findOne({ _id: addressId, user: userId }).lean()
-    if (!address) return res.status(400).json({ success: false, message: 'Invalid address selected.' })
+    if (!address) return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Invalid address selected.' })
 
     const cart = await Cart.findOne({ userId })
-    if (!cart || !cart.items.length) return res.status(400).json({ success: false, message: 'Your cart is empty.' })
+    if (!cart || !cart.items.length) return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Your cart is empty.' })
 
     const lines = await buildCartLines(cart.items)
     if (lines.length < cart.items.length) {
-      return res.status(400).json({ success: false, message: 'Some items in your cart are no longer available. Please review your cart.' })
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Some items in your cart are no longer available. Please review your cart.' })
     }
-    if (!lines.length) return res.status(400).json({ success: false, message: 'No valid items in cart.' })
+    if (!lines.length) return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'No valid items in cart.' })
 
     for (const line of lines) {
       if (line.stock < line.quantity) {
-        return res.status(400).json({ success: false, message: `"${line.productName} - ${line.shade}" only has ${line.stock} units left.` })
+        return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: `"${line.productName} - ${line.shade}" only has ${line.stock} units left.` })
       }
     }
 
@@ -188,14 +189,14 @@ const placeOrder = async (req, res) => {
     const totals = computeTotals(lines, couponDiscount)
 
     if (paymentMethod === 'COD' && totals.finalAmount > COD_LIMIT) {
-      return res.status(400).json({ success: false, message: 'Cash on Delivery is not available for orders above ₹1,500. Please choose another payment method' })
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Cash on Delivery is not available for orders above ₹1,500. Please choose another payment method' })
     }
 
     let wallet
     if (paymentMethod.toLowerCase() === 'wallet') {
       wallet = await Wallet.findOne({ userId })
       if (!wallet || wallet.balance < totals.finalAmount) {
-        return res.status(400).json({ success: false, message: 'Insufficient wallet balance' })
+        return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Insufficient wallet balance' })
       }
       wallet.balance -= totals.finalAmount
       wallet.transactions.push({ type: 'debit', amount: totals.finalAmount, description: 'Payment for order', status: 'completed' })
@@ -248,10 +249,10 @@ const placeOrder = async (req, res) => {
     await cart.save()
     delete req.session.coupon
 
-    return res.status(200).json({ success: true, message: 'Order placed successfully!', orderId: order.orderId, dbId: order._id })
+    return res.status(HttpStatus.BAD_REQUEST).json({ success: true, message: 'Order placed successfully!', orderId: order.orderId, dbId: order._id })
   } catch (err) {
     console.error('placeOrder error:', err)
-    return res.status(500).json({ success: false, message: 'Something went wrong. Please try again.' })
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Something went wrong. Please try again.' })
   }
 }
 
@@ -286,7 +287,7 @@ const cancelOrder = async (req, res) => {
     const order = await Order.findById(req.params.orderId)
 
     if (!order || order.userId.toString() !== req.session.user._id.toString()) {
-      return res.status(404).json({ success: false, message: 'Order not found.' })
+      return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Order not found.' })
     }
 
     // ── SINGLE ITEM CANCEL ──────────────────────────────────────────────────
@@ -297,18 +298,18 @@ const cancelOrder = async (req, res) => {
       const hasCoupon = !!(order.couponCode && order.couponDiscount > 0)
 
       if (isOnlinePaid && hasCoupon) {
-        return res.status(400).json({
+        return res.status(HttpStatus.BAD_REQUEST).json({
           success: false,
           message: 'Per-item cancellation is not available for online orders with a coupon applied. Please cancel the entire order instead.'
         })
       }
 
       const item = order.items.id(itemId)
-      if (!item) return res.status(404).json({ success: false, message: 'Item not found.' })
+      if (!item) return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Item not found.' })
 
       const itemStatus = order.itemStatuses.find(s => s.itemId?.toString() === itemId)
       if (itemStatus && itemStatus.status !== 'Active') {
-        return res.status(400).json({ success: false, message: 'Item already cancelled or returned.' })
+        return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Item already cancelled or returned.' })
       }
 
       // Mark item as cancelled
@@ -383,7 +384,7 @@ const cancelOrder = async (req, res) => {
 
     // ── FULL ORDER CANCEL ───────────────────────────────────────────────────
     if (!['Placed', 'Processing'].includes(order.orderStatus)) {
-      return res.status(400).json({ success: false, message: 'This order cannot be cancelled.' })
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'This order cannot be cancelled.' })
     }
 
     order.orderStatus = 'Cancelled'
@@ -413,7 +414,7 @@ const cancelOrder = async (req, res) => {
     return res.json({ success: true, message: 'Order cancelled successfully.' })
   } catch (err) {
     console.error('cancelOrder error:', err)
-    return res.status(500).json({ success: false, message: 'Something went wrong.' })
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Something went wrong.' })
   }
 }
 
@@ -421,24 +422,24 @@ const returnOrder = async (req, res) => {
   try {
     const { reason, itemId } = req.body
     if (!reason || !reason.trim()) {
-      return res.status(400).json({ success: false, message: 'Return reason is required.' })
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Return reason is required.' })
     }
 
     const order = await Order.findById(req.params.orderId)
     if (!order || order.userId.toString() !== req.session.user._id.toString()) {
-      return res.status(404).json({ success: false, message: 'Order not found.' })
+      return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Order not found.' })
     }
     if (order.orderStatus !== 'Delivered') {
-      return res.status(400).json({ success: false, message: 'Only delivered orders can be returned.' })
+      return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Only delivered orders can be returned.' })
     }
 
     if (itemId) {
       const item = order.items.id(itemId)
-      if (!item) return res.status(404).json({ success: false, message: 'Item not found.' })
+      if (!item) return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Item not found.' })
 
       const itemStatus = order.itemStatuses.find(s => s.itemId?.toString() === itemId)
       if (itemStatus && itemStatus.status !== 'Active') {
-        return res.status(400).json({ success: false, message: 'Item already cancelled or returned.' })
+        return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Item already cancelled or returned.' })
       }
       if (itemStatus) {
         itemStatus.status = 'Returned'
@@ -472,7 +473,7 @@ const returnOrder = async (req, res) => {
     return res.json({ success: true, message: 'Return request submitted successfully.' })
   } catch (err) {
     console.error('returnOrder error:', err)
-    return res.status(500).json({ success: false, message: 'Something went wrong.' })
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Something went wrong.' })
   }
 }
 
