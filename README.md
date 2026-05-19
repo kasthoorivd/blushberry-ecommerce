@@ -1,4 +1,3 @@
-﻿# blushberry-ecommerce
 # BlushBerry E-Commerce Website
 
 A full-stack e-commerce web application built using the MERN-related backend stack with **Node.js**, **Express.js**, **MongoDB**, and **EJS** templating engine.
