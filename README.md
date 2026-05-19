@@ -90,23 +90,6 @@ npm start
 └── app.js
 ```
 
-## Screenshots
-
-Add screenshots of:
-
-* Home Page
-* Product Page
-* Cart
-* Checkout
-* Admin Dashboard
-
-## Future Improvements
-
-* Product reviews and ratings
-* Real-time notifications
-* Advanced analytics
-* Multi-vendor support
-
 ## Author
 
 Kasthoori
