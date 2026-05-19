@@ -1,19 +1,19 @@
 const Product = require('../../models/user/productModel')
-const Review  = require('../../models/user/reviewModel')
-const Offer   = require('../../models/user/offerModel')  
+const Review = require('../../models/user/reviewModel')
+const Offer = require('../../models/user/offerModel')
 const Wishlist = require('../../models/user/wishlistModel')
 const Category = require('../../models/user/categoryModel')
-const {HttpStatus} = require('../../utils/statusCode')
+const { HttpStatus } = require('../../utils/statusCode')
 // ── fetch active offers and return lookup maps ────────────────────────────────
 async function getActiveOfferMaps() {
   const now = new Date()
   const activeOffers = await Offer.find({
-    isActive:  true,
+    isActive: true,
     startDate: { $lte: now },
-    endDate:   { $gte: now }
+    endDate: { $gte: now }
   }).lean()
 
-  const productOfferMap  = {}
+  const productOfferMap = {}
   const categoryOfferMap = {}
 
   for (const o of activeOffers) {
@@ -32,13 +32,13 @@ async function getActiveOfferMaps() {
 
 // ── apply best offer to a single product object ───────────────────────────────
 function applyBestOffer(p, productOfferMap, categoryOfferMap) {
-  const productOffer  = productOfferMap[String(p._id)] || 0
+  const productOffer = productOfferMap[String(p._id)] || 0
   const categoryOffer = categoryOfferMap[String(p.categoryId?._id || p.categoryId)] || 0
-  const bestOffer     = Math.max(productOffer, categoryOffer)
+  const bestOffer = Math.max(productOffer, categoryOffer)
 
   const origPrices = p.variants.map(v => v.varientPrice)
-  p.originalPrice  = Math.min(...origPrices)
-  p.displayOffer   = bestOffer
+  p.originalPrice = Math.min(...origPrices)
+  p.displayOffer = bestOffer
 
   if (bestOffer > 0) {
     p.displayPrice = parseFloat((p.originalPrice * (1 - bestOffer / 100)).toFixed(2))
@@ -59,36 +59,36 @@ function applyBestOffer(p, productOfferMap, categoryOfferMap) {
 const loadProductDetail = async (req, res) => {
   try {
     const product = await Product.findOne({
-      _id:       req.params.id,
+      _id: req.params.id,
       isDeleted: false
     })
-    .populate('categoryId', 'name isListed')
-    .lean()
+      .populate('categoryId', 'name isListed')
+      .lean()
 
-    if(!product || !product.isListed || !product.categoryId?.isListed){
-      return res.render('user/productDetail',{
+    if (!product || !product.isListed || !product.categoryId?.isListed) {
+      return res.render('user/productDetail', {
         unavailable: true,
         unavailableMsg: !product
-        ? 'This product does not exist or has been removed'
-        :!product.isListed 
-        ?'This prdouct is currently unavailable'
-        :'This product\'s category is currently unavailable',
+          ? 'This product does not exist or has been removed'
+          : !product.isListed
+            ? 'This prdouct is currently unavailable'
+            : 'This product\'s category is currently unavailable',
         product: product || null,
         reviews: [],
         avgRating: 0,
-        ratingBreakdown:{ 5:0, 4:0, 3:0, 2:0, 1:0 },
-        reviewCount:    0,
-        userReview:     null,
-        related:        [],
-        wishlistIds:    [],
-        user:           req.session.user || null
+        ratingBreakdown: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+        reviewCount: 0,
+        userReview: null,
+        related: [],
+        wishlistIds: [],
+        user: req.session.user || null
       })
     }
 
-    
+
     const { productOfferMap, categoryOfferMap } = await getActiveOfferMaps()
     applyBestOffer(product, productOfferMap, categoryOfferMap)
-   
+
 
     const reviews = await Review.find({ productId: product._id, isDeleted: false })
       .populate('userId', 'fullName profilePhoto')
@@ -104,7 +104,7 @@ const loadProductDetail = async (req, res) => {
       ratingBreakdown[r.rating] = (ratingBreakdown[r.rating] || 0) + 1
     })
 
-    const userId    = req.session.user?._id
+    const userId = req.session.user?._id
     const userReview = userId
       ? reviews.find(r => String(r.userId?._id) === String(userId))
       : null
@@ -112,25 +112,25 @@ const loadProductDetail = async (req, res) => {
     const productShades = product.variants.map(v => v.shade)
 
     const related = await Product.find({
-      _id:       { $ne: product._id },
+      _id: { $ne: product._id },
       isDeleted: false,
-      isListed:  true,
+      isListed: true,
       $or: [
         { categoryId: product.categoryId?._id },
         { 'variants.shade': { $in: productShades } }
       ]
     })
-    .populate('categoryId', 'name')
-    .limit(4)
-    .lean()
+      .populate('categoryId', 'name')
+      .limit(4)
+      .lean()
 
-    
+
     related.forEach(p => applyBestOffer(p, productOfferMap, categoryOfferMap))
-let wishlistIds = []
-if (req.session.user?._id) {
-  const wishlist = await Wishlist.findOne({ userId: req.session.user._id })
-  wishlistIds = wishlist ? wishlist.products.map(id => String(id)) : []
-}
+    let wishlistIds = []
+    if (req.session.user?._id) {
+      const wishlist = await Wishlist.findOne({ userId: req.session.user._id })
+      wishlistIds = wishlist ? wishlist.products.map(id => String(id)) : []
+    }
     res.render('user/productDetail', {
       product,
       reviews,

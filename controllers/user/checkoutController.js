@@ -425,8 +425,9 @@ const returnOrder = async (req, res) => {
       return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Return reason is required.' })
     }
 
-    const order = await Order.findById(req.params.orderId)
-    if (!order || order.userId.toString() !== req.session.user._id.toString()) {
+    const userId = req.session.user._id
+    const order = await Order.findOne({ _id: req.params.orderId, userId })
+    if (!order) {
       return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Order not found.' })
     }
     if (order.orderStatus !== 'Delivered') {

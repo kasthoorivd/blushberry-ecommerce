@@ -1,5 +1,5 @@
-const Offer    = require('../../models/user/offerModel')
-const Product  = require('../../models/user/productModel')
+const Offer = require('../../models/user/offerModel')
+const Product = require('../../models/user/productModel')
 const Category = require('../../models/user/categoryModel')
 const { HttpStatus } = require('../../utils/statusCode')
 
@@ -24,12 +24,12 @@ const loadOffers = async (req, res) => {
     }))
 
     const success = req.query.success || null
-    const error   = req.query.error   || null
+    const error = req.query.error || null
 
     res.render('admin/offers', {
-      offers:   annotated,
+      offers: annotated,
       success,
-      error:    null,
+      error: null,
       formData: {}
     })
   } catch (err) {

@@ -4,14 +4,14 @@ const { HttpStatus } = require('../../utils/statusCode')
 
 const loadAddresses = async (req, res) => {
   try {
-    const user    = req.session.user
-    const userId  = user._id
-    const page    = parseInt(req.query.page) || 1
-    const limit   = 2
-    const skip    = (page - 1) * limit
+    const user = req.session.user
+    const userId = user._id
+    const page = parseInt(req.query.page) || 1
+    const limit = 2
+    const skip = (page - 1) * limit
 
     const totalAddresses = await Address.countDocuments({ user: userId })
-    const totalPages     = Math.ceil(totalAddresses / limit)
+    const totalPages = Math.ceil(totalAddresses / limit)
 
     const addresses = await Address.find({ user: userId })
       .sort({ createdAt: -1 })
@@ -22,7 +22,7 @@ const loadAddresses = async (req, res) => {
       user,
       addresses,
       successMsg: null,
-      errorMsg:   null,
+      errorMsg: null,
       currentPage: page,
       totalAddresses,
       totalPages,
@@ -56,7 +56,7 @@ const addAddress = async (req, res) => {
       return res.status(HttpStatus.BAD_REQUEST).render('user/addresses', {
         user: req.session.user,
         addresses,
-        errorMsg:   'Please fill in all required fields',
+        errorMsg: 'Please fill in all required fields',
         successMsg: null,
       })
     }
@@ -65,7 +65,7 @@ const addAddress = async (req, res) => {
       return res.status(HttpStatus.BAD_REQUEST).render('user/addresses', {
         user: req.session.user,
         addresses,
-        errorMsg:   'Pin code must be a 6-digit number',
+        errorMsg: 'Pin code must be a 6-digit number',
         successMsg: null,
       })
     }
@@ -74,7 +74,7 @@ const addAddress = async (req, res) => {
       return res.status(HttpStatus.BAD_REQUEST).render('user/addresses', {
         user: req.session.user,
         addresses,
-        errorMsg:   'Mobile number must be 10 digits',
+        errorMsg: 'Mobile number must be 10 digits',
         successMsg: null,
       })
     }
@@ -85,10 +85,10 @@ const addAddress = async (req, res) => {
       country,
       state,
       address,
-      city:            city || null,
+      city: city || null,
       pincode,
-      addressType:     addressType || 'Home',
-      landmark:        landmark || null,
+      addressType: addressType || 'Home',
+      landmark: landmark || null,
       mobile,
       email,
       alternateNumber: alternateNumber || null,
@@ -106,14 +106,14 @@ const addAddress = async (req, res) => {
 
 const loadEditAddress = async (req, res) => {
   try {
-    const userId    = req.session.user._id
+    const userId = req.session.user._id
     const addressId = req.params.id
-    const page      = parseInt(req.query.page) || 1
-    const limit     = 2
-    const skip      = (page - 1) * limit
+    const page = parseInt(req.query.page) || 1
+    const limit = 2
+    const skip = (page - 1) * limit
 
     const totalAddresses = await Address.countDocuments({ user: userId })
-    const totalPages     = Math.ceil(totalAddresses / limit)
+    const totalPages = Math.ceil(totalAddresses / limit)
 
     const address = await Address.findOne({ _id: addressId, user: userId })
     if (!address) return res.redirect('/addresses')
@@ -134,7 +134,7 @@ const loadEditAddress = async (req, res) => {
 
 const editAddress = async (req, res) => {
   try {
-    const userId    = req.session.user._id
+    const userId = req.session.user._id
     const addressId = req.params.id
 
     const {
@@ -159,10 +159,10 @@ const editAddress = async (req, res) => {
       { _id: addressId, user: userId },
       {
         name, country, state, address,
-        city:            city || null,
+        city: city || null,
         pincode,
-        addressType:     addressType || 'Home',
-        landmark:        landmark || null,
+        addressType: addressType || 'Home',
+        landmark: landmark || null,
         mobile,
         email,
         alternateNumber: alternateNumber || null,
@@ -181,7 +181,7 @@ const editAddress = async (req, res) => {
 
 const deleteAddress = async (req, res) => {
   try {
-    const userId    = req.session.user._id
+    const userId = req.session.user._id
     const addressId = req.params.id
 
     await Address.findOneAndDelete({ _id: addressId, user: userId })
@@ -197,7 +197,7 @@ const deleteAddress = async (req, res) => {
 
 const setDefaultAddress = async (req, res) => {
   try {
-    const userId    = req.session.user._id
+    const userId = req.session.user._id
     const addressId = req.params.id
 
     await Address.updateMany({ user: userId }, { isDefault: false })

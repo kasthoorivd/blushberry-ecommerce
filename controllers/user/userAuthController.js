@@ -11,7 +11,7 @@ const passport = require('../../config/passport');
 const { isBlocked } = require('../../middleware/authMiddleware');
 const Wallet = require('../../models/user/walletModel');
 
-const {HttpStatus} = require('../../utils/statusCode')
+const { HttpStatus } = require('../../utils/statusCode')
 
 const generateReferralCode = (fullName) => {
   const prefix = fullName.substring(0, 3).toUpperCase();
@@ -76,52 +76,52 @@ const loadHomePage = async (req, res) => {
       .lean()
 
     const now = new Date()
-const activeOffers = await Offer.find({
-  isActive:  true,
-  startDate: { $lte: now },
-  endDate:   { $gte: now }
-}).lean()
+    const activeOffers = await Offer.find({
+      isActive: true,
+      startDate: { $lte: now },
+      endDate: { $gte: now }
+    }).lean()
 
-const productOfferMap  = {}
-const categoryOfferMap = {}
+    const productOfferMap = {}
+    const categoryOfferMap = {}
 
-for (const o of activeOffers) {
-  const key = String(o.targetId)
-  if (o.type === 'product') {
-    if (!productOfferMap[key] || o.discountPercent > productOfferMap[key])
-      productOfferMap[key] = o.discountPercent
-  } else if (o.type === 'category') {
-    if (!categoryOfferMap[key] || o.discountPercent > categoryOfferMap[key])
-      categoryOfferMap[key] = o.discountPercent
-  }
-}
+    for (const o of activeOffers) {
+      const key = String(o.targetId)
+      if (o.type === 'product') {
+        if (!productOfferMap[key] || o.discountPercent > productOfferMap[key])
+          productOfferMap[key] = o.discountPercent
+      } else if (o.type === 'category') {
+        if (!categoryOfferMap[key] || o.discountPercent > categoryOfferMap[key])
+          categoryOfferMap[key] = o.discountPercent
+      }
+    }
 
-products.forEach(p => {
-  const productOffer  = productOfferMap[String(p._id)] || 0
-  const categoryOffer = categoryOfferMap[String(p.categoryId?._id || p.categoryId)] || 0
-  const bestOffer     = Math.max(productOffer, categoryOffer)
+    products.forEach(p => {
+      const productOffer = productOfferMap[String(p._id)] || 0
+      const categoryOffer = categoryOfferMap[String(p.categoryId?._id || p.categoryId)] || 0
+      const bestOffer = Math.max(productOffer, categoryOffer)
 
-  const origPrices = p.variants.map(v => v.varientPrice)
-  p.originalPrice  = Math.min(...origPrices)
-  p.displayOffer   = bestOffer
+      const origPrices = p.variants.map(v => v.varientPrice)
+      p.originalPrice = Math.min(...origPrices)
+      p.displayOffer = bestOffer
 
-  if (bestOffer > 0) {
-    p.displayPrice = parseFloat((p.originalPrice * (1 - bestOffer / 100)).toFixed(2))
-  } else {
-    const effectivePrices = p.variants.map(v => v.salePrice > 0 ? v.salePrice : v.varientPrice)
-    p.displayPrice = Math.min(...effectivePrices)
-  }
+      if (bestOffer > 0) {
+        p.displayPrice = parseFloat((p.originalPrice * (1 - bestOffer / 100)).toFixed(2))
+      } else {
+        const effectivePrices = p.variants.map(v => v.salePrice > 0 ? v.salePrice : v.varientPrice)
+        p.displayPrice = Math.min(...effectivePrices)
+      }
 
-  p.inStock = p.variants.some(v => v.stock > 0)
-})
+      p.inStock = p.variants.some(v => v.stock > 0)
+    })
 
 
- let wishlistIds = []
-if (req.session.user?._id) {
-  const wishlist = await Wishlist.findOne({ userId: req.session.user._id })
-  wishlistIds = wishlist ? wishlist.products.map(id => String(id)) : []
-}
-    res.render('user/homePage', { user, products ,wishlistIds });
+    let wishlistIds = []
+    if (req.session.user?._id) {
+      const wishlist = await Wishlist.findOne({ userId: req.session.user._id })
+      wishlistIds = wishlist ? wishlist.products.map(id => String(id)) : []
+    }
+    res.render('user/homePage', { user, products, wishlistIds });
   } catch (error) {
     console.log(error.message);
     res.render('user/homePage', { user: null, products: [] });
@@ -158,7 +158,7 @@ const signup = async (req, res) => {
       return res.json({ success: false, message: 'User already exists' });
     }
 
-   
+
 
     // ── Referral: accept code from body OR session (URL param) ──
     const referralInput = inputReferralCode?.trim() || req.session.referralCode?.trim();
@@ -177,7 +177,7 @@ const signup = async (req, res) => {
     // Generate OTP
     const otp = generateOtp();
     const expiresAt = Date.now() + 5 * 60 * 1000;
- console.log(otp)
+    console.log(otp)
     await Otp.deleteMany({ email });
     await Otp.create({ email, otp, expiresAt, purpose: 'signup' });
 
@@ -207,13 +207,13 @@ const verifyOtp = async (req, res) => {
     let flow, email;
 
     if (req.session.tempUser) {
-      flow  = 'signup';
+      flow = 'signup';
       email = req.session.tempUser.email;
     } else if (req.session.pendingEmail) {
-      flow  = 'emailChange';
+      flow = 'emailChange';
       email = req.session.pendingEmail;
     } else {
-      flow  = 'forgot';
+      flow = 'forgot';
       email = req.session.forgotEmail;
     }
 
@@ -285,7 +285,7 @@ const verifyOtp = async (req, res) => {
         });
       });
 
-    // ── Email change flow ──
+      // ── Email change flow ──
     } else if (flow === 'emailChange') {
       const userId = req.session.user?._id;
 
@@ -298,7 +298,7 @@ const verifyOtp = async (req, res) => {
 
       return res.json({ success: true, redirectUrl: '/profile', message: 'Email updated successfully' });
 
-    // ── Forgot password flow ──
+      // ── Forgot password flow ──
     } else {
       req.session.canResetPassword = true;
       await Otp.deleteOne({ email, purpose: flow });
@@ -317,13 +317,13 @@ const resendOtp = async (req, res) => {
     let flow, email;
 
     if (req.session.tempUser) {
-      flow  = 'signup';
+      flow = 'signup';
       email = req.session.tempUser.email;
     } else if (req.session.pendingEmail) {
-      flow  = 'emailChange';
+      flow = 'emailChange';
       email = req.session.pendingEmail;
     } else {
-      flow  = 'forgot';
+      flow = 'forgot';
       email = req.session.forgotEmail;
     }
 
@@ -342,7 +342,7 @@ const resendOtp = async (req, res) => {
     await Otp.create({ email, otp: newOtp, expiresAt, purpose: flow });
 
     await sendEmail(email, newOtp);
-   console.log(newOtp)
+    console.log(newOtp)
     return res.json({ success: true, expiresAt });
 
   } catch (error) {
@@ -462,8 +462,8 @@ const showForgotOtpPage = async (req, res) => {
 
   const expiresAt = otpRecord
     ? (otpRecord.expiresAt instanceof Date
-        ? otpRecord.expiresAt.getTime()
-        : Number(otpRecord.expiresAt))
+      ? otpRecord.expiresAt.getTime()
+      : Number(otpRecord.expiresAt))
     : null;
 
   res.render('user/otpPage.ejs', { isForgotPassword: true, expiresAt });
@@ -509,13 +509,13 @@ const resetPassword = async (req, res) => {
 // Load OTP page
 const loadOtpPage = async (req, res) => {
   try {
-    const email   = req.session.tempUser?.email
-                  || req.session.pendingEmail
-                  || req.session.forgotEmail;
+    const email = req.session.tempUser?.email
+      || req.session.pendingEmail
+      || req.session.forgotEmail;
 
-    const purpose = req.session.tempUser     ? 'signup'
-                  : req.session.pendingEmail  ? 'emailChange'
-                  : 'forgot';
+    const purpose = req.session.tempUser ? 'signup'
+      : req.session.pendingEmail ? 'emailChange'
+        : 'forgot';
 
     if (!email) return res.redirect('/signup');
 
@@ -576,11 +576,11 @@ const requestEmailChange = async (req, res) => {
 
 const logout = (req, res) => {
   try {
-    req.logout((err) => {            
+    req.logout((err) => {
       if (err) console.error(err)
     })
-    delete req.session.user         
-    res.clearCookie('user.sid')      
+    delete req.session.user
+    res.clearCookie('user.sid')
     res.redirect('/')
   } catch (error) {
     console.error('error during logout:', error)
@@ -624,5 +624,5 @@ module.exports = {
   resetPassword,
   showForgotOtpPage,
   requestEmailChange,
-  getReferralInfo,   
+  getReferralInfo,
 };

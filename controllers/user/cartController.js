@@ -1,7 +1,7 @@
-const Cart     = require('../../models/user/cartModel')
+const Cart = require('../../models/user/cartModel')
 const Wishlist = require('../../models/user/wishlistModel')
-const Product  = require('../../models/user/productModel')
-const Coupon   = require('../../models/user/couponModel')
+const Product = require('../../models/user/productModel')
+const Coupon = require('../../models/user/couponModel')
 const { HttpStatus } = require('../../utils/statusCode')
 
 
@@ -47,8 +47,8 @@ const loadCart = async (req, res) => {
     const checkoutError = req.session.checkoutError || null
     req.session.checkoutError = null
 
-    let validItems        = []
-    let removedNames      = [...sessionRemovedNames]
+    let validItems = []
+    let removedNames = [...sessionRemovedNames]
     let invalidCartItemIds = []
 
     if (cart && cart.items.length) {
@@ -70,7 +70,7 @@ const loadCart = async (req, res) => {
         }
 
         const currentPrice = getVariantPrice(variant)
-        const inStock      = variant.stock > 0
+        const inStock = variant.stock > 0
 
         validItems.push({
           ...item,
@@ -78,10 +78,10 @@ const loadCart = async (req, res) => {
           variant,
           currentPrice,
           inStock,
-          stockAvailable:  variant.stock,
+          stockAvailable: variant.stock,
           qtyExceedsStock: item.quantity > variant.stock,
-          qtyExceedsMax:   item.quantity > MAX_QTY_PER_ITEM,
-          effectiveQty:    Math.min(item.quantity, variant.stock, MAX_QTY_PER_ITEM)
+          qtyExceedsMax: item.quantity > MAX_QTY_PER_ITEM,
+          effectiveQty: Math.min(item.quantity, variant.stock, MAX_QTY_PER_ITEM)
         })
       }
     }
@@ -98,12 +98,12 @@ const loadCart = async (req, res) => {
       .reduce((sum, i) => sum + i.currentPrice * i.effectiveQty, 0)
 
     const hasOutOfStock = validItems.some(i => !i.inStock)
-    const hasQtyIssues  = validItems.some(i => i.qtyExceedsStock || i.qtyExceedsMax)
-    const canCheckout   = validItems.length > 0 && !hasOutOfStock && !hasQtyIssues
+    const hasQtyIssues = validItems.some(i => i.qtyExceedsStock || i.qtyExceedsMax)
+    const canCheckout = validItems.length > 0 && !hasOutOfStock && !hasQtyIssues
 
     const totalItemDiscount = validItems.reduce((sum, item) => {
       const original = item.variant?.varientPrice || 0
-      const current  = item.currentPrice || 0
+      const current = item.currentPrice || 0
       return sum + ((original - current) * item.effectiveQty)
     }, 0)
 
@@ -160,7 +160,7 @@ const addToCart = async (req, res) => {
       if (newQty > variant.stock) {
         return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: `Only ${variant.stock} units available in this shade.` })
       }
-      cart.items[existingIdx].quantity   = newQty
+      cart.items[existingIdx].quantity = newQty
       cart.items[existingIdx].priceAtAdd = getVariantPrice(variant)
     } else {
       if (qty > MAX_QTY_PER_ITEM) {
@@ -170,9 +170,9 @@ const addToCart = async (req, res) => {
         return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: `Only ${variant.stock} units available in stock.` })
       }
       cart.items.push({
-        productId:  product._id,
-        shade:      shade || variant.shade,
-        quantity:   qty,
+        productId: product._id,
+        shade: shade || variant.shade,
+        quantity: qty,
         priceAtAdd: getVariantPrice(variant)
       })
     }
@@ -213,7 +213,7 @@ const updateCartItem = async (req, res) => {
       return res.status(HttpStatus.NOT_FOUND).json({ success: false, message: 'Item not found.' })
     }
 
-    const item  = cart.items[itemIdx]
+    const item = cart.items[itemIdx]
     const check = await validateProductAvailability(item.productId, item.shade)
 
     if (!check.ok) {
@@ -247,7 +247,7 @@ const updateCartItem = async (req, res) => {
       newQty = item.quantity - 1
     }
 
-    cart.items[itemIdx].quantity   = newQty
+    cart.items[itemIdx].quantity = newQty
     cart.items[itemIdx].priceAtAdd = getVariantPrice(variant)
     await cart.save()
 
@@ -294,7 +294,7 @@ const loadWishlist = async (req, res) => {
 
     const wishlist = await Wishlist.findOne({ userId })
       .populate({
-        path:  'products',
+        path: 'products',
         match: { isDeleted: false, isListed: true },
         select: 'name images variants offer createdAt',
         populate: { path: 'categoryId', select: 'name' }
@@ -302,12 +302,12 @@ const loadWishlist = async (req, res) => {
       .lean()
 
     const products = (wishlist?.products || []).map(p => {
-      const prices      = p.variants.map(v => v.salePrice > 0 ? v.salePrice : v.varientPrice)
-      p.displayPrice    = Math.min(...prices)
-      const origPrices  = p.variants.map(v => v.varientPrice)
-      p.originalPrice   = Math.min(...origPrices)
-      p.displayOffer    = p.offer || 0
-      p.inStock         = p.variants.some(v => v.stock > 0)
+      const prices = p.variants.map(v => v.salePrice > 0 ? v.salePrice : v.varientPrice)
+      p.displayPrice = Math.min(...prices)
+      const origPrices = p.variants.map(v => v.varientPrice)
+      p.originalPrice = Math.min(...origPrices)
+      p.displayOffer = p.offer || 0
+      p.inStock = p.variants.some(v => v.stock > 0)
       return p
     })
 
@@ -339,8 +339,8 @@ const toggleWishlist = async (req, res) => {
     let wishlist = await Wishlist.findOne({ userId })
     if (!wishlist) wishlist = new Wishlist({ userId, products: [] })
 
-    const idx   = wishlist.products.findIndex(id => String(id) === String(productId))
-    let added   = false
+    const idx = wishlist.products.findIndex(id => String(id) === String(productId))
+    let added = false
 
     if (idx > -1) {
       wishlist.products.splice(idx, 1)
@@ -361,15 +361,15 @@ const toggleWishlist = async (req, res) => {
 
 const applyCoupon = async (req, res) => {
   try {
-    const { code }  = req.body
-    const userId    = req.session.user?._id
+    const { code } = req.body
+    const userId = req.session.user?._id
 
     if (!code) {
       return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Please enter a coupon code.' })
     }
 
     const cart = await Cart.findOne({ userId }).populate({
-      path:   'items.productId',
+      path: 'items.productId',
       select: 'variants offer isDeleted isListed'
     }).lean()
 
@@ -428,7 +428,7 @@ const applyCoupon = async (req, res) => {
     discount = Math.min(discount, cartTotal)
 
     req.session.coupon = {
-      code:     coupon.code,
+      code: coupon.code,
       discount: discount,
       couponId: coupon._id
     }
@@ -438,9 +438,9 @@ const applyCoupon = async (req, res) => {
       : `₹${discount} off`
 
     return res.status(HttpStatus.OK).json({
-      success:  true,
+      success: true,
       discount: discount,
-      message:  `Coupon applied! ${label}`
+      message: `Coupon applied! ${label}`
     })
 
   } catch (err) {

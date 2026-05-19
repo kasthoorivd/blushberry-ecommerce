@@ -8,7 +8,7 @@ const crypto = require('crypto')
 const mongoose = require('mongoose')
 const generateOtp = require('../../utils/generateOtp')
 const sendEmail = require('../../utils/sendEmail')
-const {HttpStatus} = require('../../utils/statusCode')
+const { HttpStatus } = require('../../utils/statusCode')
 
 // ── Generate referral code for users who don't have one ──
 const generateReferralCode = (fullName) => {

@@ -1,9 +1,9 @@
-const Order   = require('../../models/user/orderModel')
+const Order = require('../../models/user/orderModel')
 const Product = require('../../models/user/productModel')
 const { HttpStatus } = require('../../utils/statusCode')
 
 function getDateRange(filter) {
-  const now   = new Date()
+  const now = new Date()
   const start = new Date()
 
   switch (filter) {
@@ -35,7 +35,7 @@ function getDateRange(filter) {
 
 const loadDashboard = async (req, res) => {
   try {
-    const filter    = req.query.filter    || 'monthly'
+    const filter = req.query.filter || 'monthly'
     const chartType = req.query.chartType || 'revenue'
 
     let dateFilter
@@ -57,9 +57,9 @@ const loadDashboard = async (req, res) => {
       { $match: matchStage },
       {
         $group: {
-          _id:           null,
-          totalRevenue:  { $sum: '$finalAmount'   },
-          totalOrders:   { $sum: 1                },
+          _id: null,
+          totalRevenue: { $sum: '$finalAmount' },
+          totalOrders: { $sum: 1 },
           totalDiscount: { $sum: '$totalDiscount' }
         }
       }
@@ -85,29 +85,29 @@ const loadDashboard = async (req, res) => {
       { $match: matchStage },
       {
         $group: {
-          _id:      groupId,
-          revenue:  { $sum: '$finalAmount'   },
-          orders:   { $sum: 1                },
+          _id: groupId,
+          revenue: { $sum: '$finalAmount' },
+          orders: { $sum: 1 },
           discount: { $sum: '$totalDiscount' }
         }
       },
       { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1, '_id.hour': 1, '_id.date': 1 } }
     ])
 
-    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-    const chartLabels   = []
-    const chartRevenue  = []
-    const chartOrders   = []
+    const chartLabels = []
+    const chartRevenue = []
+    const chartOrders = []
     const chartDiscount = []
 
     if (filter === 'today') {
       const byHour = {}
       chartRaw.forEach(r => { byHour[r._id.hour] = r })
       for (let h = 0; h < 24; h++) {
-        chartLabels.push(h === 0 ? '12am' : h < 12 ? `${h}am` : h === 12 ? '12pm' : `${h-12}pm`)
-        chartRevenue.push((byHour[h]?.revenue  || 0).toFixed(2))
-        chartOrders.push(byHour[h]?.orders     || 0)
+        chartLabels.push(h === 0 ? '12am' : h < 12 ? `${h}am` : h === 12 ? '12pm' : `${h - 12}pm`)
+        chartRevenue.push((byHour[h]?.revenue || 0).toFixed(2))
+        chartOrders.push(byHour[h]?.orders || 0)
         chartDiscount.push((byHour[h]?.discount || 0).toFixed(2))
       }
     } else if (filter === 'week') {
@@ -118,14 +118,14 @@ const loadDashboard = async (req, res) => {
         chartDiscount.push(r.discount.toFixed(2))
       })
     } else if (filter === 'month') {
-      const now         = new Date()
+      const now = new Date()
       const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
-      const byDay       = {}
+      const byDay = {}
       chartRaw.forEach(r => { byDay[r._id.day] = r })
       for (let d = 1; d <= daysInMonth; d++) {
         chartLabels.push(d)
-        chartRevenue.push((byDay[d]?.revenue  || 0).toFixed(2))
-        chartOrders.push(byDay[d]?.orders     || 0)
+        chartRevenue.push((byDay[d]?.revenue || 0).toFixed(2))
+        chartOrders.push(byDay[d]?.orders || 0)
         chartDiscount.push((byDay[d]?.discount || 0).toFixed(2))
       }
     } else {
@@ -142,10 +142,10 @@ const loadDashboard = async (req, res) => {
       { $unwind: '$items' },
       {
         $group: {
-          _id:          '$items.productId',
-          name:         { $first: '$items.productName'  },
-          image:        { $first: '$items.productImage' },
-          totalQty:     { $sum: '$items.quantity'       },
+          _id: '$items.productId',
+          name: { $first: '$items.productName' },
+          image: { $first: '$items.productImage' },
+          totalQty: { $sum: '$items.quantity' },
           totalRevenue: { $sum: { $multiply: ['$items.quantity', '$items.salePrice'] } }
         }
       },
@@ -170,9 +170,9 @@ const loadDashboard = async (req, res) => {
       { $unwind: { path: '$cat', preserveNullAndEmptyArrays: true } },
       {
         $group: {
-          _id:          '$cat._id',
-          name:         { $first: '$cat.name' },
-          totalQty:     { $sum: '$items.quantity' },
+          _id: '$cat._id',
+          name: { $first: '$cat.name' },
+          totalQty: { $sum: '$items.quantity' },
           totalRevenue: { $sum: { $multiply: ['$items.quantity', '$items.salePrice'] } }
         }
       },
@@ -186,8 +186,8 @@ const loadDashboard = async (req, res) => {
       { $unwind: '$items' },
       {
         $group: {
-          _id:          { $arrayElemAt: [{ $split: ['$items.productName', ' '] }, 0] },
-          totalQty:     { $sum: '$items.quantity' },
+          _id: { $arrayElemAt: [{ $split: ['$items.productName', ' '] }, 0] },
+          totalQty: { $sum: '$items.quantity' },
           totalRevenue: { $sum: { $multiply: ['$items.quantity', '$items.salePrice'] } }
         }
       },
@@ -203,14 +203,14 @@ const loadDashboard = async (req, res) => {
 
     res.status(HttpStatus.OK).render('admin/dashboard', {
       summary,
-      chartLabels:   JSON.stringify(chartLabels),
-      chartRevenue:  JSON.stringify(chartRevenue),
-      chartOrders:   JSON.stringify(chartOrders),
+      chartLabels: JSON.stringify(chartLabels),
+      chartRevenue: JSON.stringify(chartRevenue),
+      chartOrders: JSON.stringify(chartOrders),
       chartDiscount: JSON.stringify(chartDiscount),
       chartType,
       filter,
       fromDate: req.query.from || '',
-      toDate:   req.query.to   || '',
+      toDate: req.query.to || '',
       bestProducts,
       bestCategories,
       bestBrands,
