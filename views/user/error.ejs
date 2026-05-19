@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 – Page Not Found | Blush Berry</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Poppins:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #fff;
+            color: #cd7878;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.5;
+                transform: scale(1) translate(-50%, -50%);
+            }
+
+            50% {
+                opacity: 0.9;
+                transform: scale(1.08) translate(-46%, -46%);
+            }
+        }
+
+        .btn-primary:hover {
+            background: #a33049 !important;
+        }
+
+        .btn-outline:hover {
+            background: #c0415a !important;
+            color: #fff !important;
+        }
+
+        .hero-section {
+            flex: 1;
+            background: linear-gradient(110deg, #fff8f9 55%, #fce8ed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 72px 48px;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .orb-1 {
+            position: absolute;
+            right: -100px;
+            top: -100px;
+            width: 480px;
+            height: 480px;
+            background: radial-gradient(circle, #f9d5de 0%, transparent 65%);
+            border-radius: 50%;
+        }
+
+        .orb-2 {
+            position: absolute;
+            left: -60px;
+            bottom: -80px;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, #fce8ed 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+            max-width: 540px;
+            animation: fadeUp 0.8s ease both;
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #c0415a;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .big-number {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(100px, 18vw, 160px);
+            font-weight: 900;
+            color: #1a1a2e;
+            line-height: 1;
+            letter-spacing: -4px;
+            margin-bottom: 0;
+            animation: fadeUp 0.8s 0.1s ease both, float 4s ease-in-out infinite 1s;
+            display: inline-block;
+        }
+
+        .big-number .o-wrap {
+            position: relative;
+            display: inline-block;
+        }
+
+        .big-number .o-wrap .o-ring {
+            color: transparent;
+            -webkit-text-stroke: 4px #c0415a;
+        }
+
+        .big-number .o-wrap .lip-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 34%;
+            height: 34%;
+            background: radial-gradient(circle at 38% 35%, #e8756a, #c0415a);
+            border-radius: 50%;
+            box-shadow: 0 6px 20px rgba(192, 65, 90, 0.4);
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+
+        .headline {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 12px;
+            animation: fadeUp 0.8s 0.2s ease both;
+        }
+
+        .subtext {
+            font-size: 13px;
+            color: #aaa;
+            line-height: 1.8;
+            max-width: 360px;
+            margin: 0 auto 30px;
+            animation: fadeUp 0.8s 0.3s ease both;
+        }
+
+        .shade-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 28px;
+            animation: fadeUp 0.8s 0.35s ease both;
+        }
+
+        .shade-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid #eee;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp 0.8s 0.4s ease both;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            background: #c0415a;
+            color: #fff;
+            padding: 13px 36px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border-radius: 3px;
+            transition: background 0.25s;
+        }
+
+        .btn-outline {
+            display: inline-block;
+            background: transparent;
+            color: #c0415a;
+            border: 1.5px solid #c0415a;
+            padding: 12px 28px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border-radius: 3px;
+            transition: all 0.25s;
+        }
+
+        .features-strip {
+            background: #1a1a2e;
+            padding: 36px 48px;
+        }
+
+        .features-inner {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            color: #fff;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(192, 65, 90, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .feature-divider {
+            width: 1px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+
+<body>
+
+    <%- include('../partials/user/header') %>
+
+        <section class="hero-section">
+            <div class="orb-1"></div>
+            <div class="orb-2"></div>
+
+            <!-- decorative lipstick trio, same as hero -->
+            <div
+                style="position:absolute;right:80px;top:50%;transform:translateY(-50%);display:flex;gap:14px;align-items:flex-end;opacity:0.3;z-index:1;">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+                    <div
+                        style="width:16px;height:12px;background:#d64d6a;clip-path:polygon(20% 0%,80% 0%,100% 100%,0% 100%);border-radius:2px 2px 0 0;">
+                    </div>
+                    <div
+                        style="width:20px;height:100px;background:linear-gradient(180deg,#e06080 0%,#8b1a2f 100%);border-radius:2px 2px 0 0;">
+                    </div>
+                    <div style="width:24px;height:18px;background:#c8bfc2;border-radius:0 0 3px 3px;"></div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:0;margin-bottom:24px;">
+                    <div
+                        style="width:16px;height:12px;background:#e8756a;clip-path:polygon(20% 0%,80% 0%,100% 100%,0% 100%);border-radius:2px 2px 0 0;">
+                    </div>
+                    <div
+                        style="width:20px;height:130px;background:linear-gradient(180deg,#e8908a 0%,#a03020 100%);border-radius:2px 2px 0 0;">
+                    </div>
+                    <div style="width:24px;height:18px;background:#d4c0c0;border-radius:0 0 3px 3px;"></div>
+                </div>
+            </div>
+
+            <div class="content">
+                <p class="eyebrow">Oops — Error 404</p>
+
+                <div class="big-number">
+                    4<span class="o-wrap"><span class="o-ring">0</span>
+                        <div class="lip-dot"></div>
+                    </span>4
+                </div>
+
+                <h1 class="headline">This shade doesn't exist.</h1>
+
+                <p class="subtext">
+                    Looks like the page you're searching for has been discontinued — or maybe it never made it to our
+                    shelves. Let's get you back to something beautiful.
+                </p>
+
+                <div class="shade-row">
+                    <div class="shade-dot" style="background:#c8956c;"></div>
+                    <div class="shade-dot" style="background:#b5446e;"></div>
+                    <div class="shade-dot" style="background:#f4a0b0;"></div>
+                    <div class="shade-dot" style="background:#c0415a;"></div>
+                    <div class="shade-dot" style="background:#8b1a2f;"></div>
+                </div>
+
+                <div class="actions">
+                    <a href="/" class="btn-primary">← Back to Home</a>
+                    <a href="/products" class="btn-outline">Shop Collection</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="features-strip">
+            <div class="features-inner">
+                <div class="feature-item">
+                    <div class="feature-icon">🚀</div>
+                    <div>
+                        <p style="font-size:13px;font-weight:600;margin-bottom:3px;letter-spacing:0.3px;">Express
+                            Shipping</p>
+                        <p style="font-size:12px;color:#888;">Ships within 24 hours</p>
+                    </div>
+                </div>
+                <div class="feature-divider"></div>
+                <div class="feature-item">
+                    <div class="feature-icon">📦</div>
+                    <div>
+                        <p style="font-size:13px;font-weight:600;margin-bottom:3px;letter-spacing:0.3px;">Easy Tracking
+                        </p>
+                        <p style="font-size:12px;color:#888;">Track your order live</p>
+                    </div>
+                </div>
+                <div class="feature-divider"></div>
+                <div class="feature-item">
+                    <div class="feature-icon">↩️</div>
+                    <div>
+                        <p style="font-size:13px;font-weight:600;margin-bottom:3px;letter-spacing:0.3px;">Easy Returns
+                        </p>
+                        <p style="font-size:12px;color:#888;">30-day return policy</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <%- include('../partials/user/footer') %>
+
+</body>
+
+</html>

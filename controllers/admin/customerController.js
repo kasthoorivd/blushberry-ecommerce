@@ -12,16 +12,16 @@ const loadCustomer = async (req, res) => {
 
     const searchFilter = search
       ? {
-          $or: [
-            { fullName:    { $regex: search, $options: "i" } },
-            { email:       { $regex: search, $options: "i" } },
-            { phoneNumber: { $regex: search, $options: "i" } },
-          ],
-        }
+        $or: [
+          { fullName: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+          { phoneNumber: { $regex: search, $options: "i" } },
+        ],
+      }
       : {};
 
-    const totalUsers  = await User.countDocuments(searchFilter);
-    const totalPages  = Math.ceil(totalUsers / limit);
+    const totalUsers = await User.countDocuments(searchFilter);
+    const totalPages = Math.ceil(totalUsers / limit);
     const sortOptions = { [sortField]: sortOrder === "asc" ? 1 : -1 };
 
     const customers = await User.find(searchFilter)

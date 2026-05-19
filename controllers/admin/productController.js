@@ -1,4 +1,4 @@
-const Product  = require('../../models/user/productModel')
+const Product = require('../../models/user/productModel')
 const Category = require('../../models/user/categoryModel')
 const { cloudinary } = require('../../config/cloudinary')
 const { HttpStatus } = require('../../utils/statusCode')
@@ -26,7 +26,7 @@ const loadProducts = async (req, res) => {
     }
 
     const totalProducts = await Product.countDocuments(filter)
-    const totalPages    = Math.ceil(totalProducts / LIMIT)
+    const totalPages = Math.ceil(totalProducts / LIMIT)
 
     const products = await Product.find(filter)
       .populate('categoryId', 'name')
@@ -78,12 +78,12 @@ const addProduct = async (req, res) => {
         )
 
         return {
-          shade:        v.shade,
+          shade: v.shade,
           varientPrice: v.varientPrice,
-          salePrice:    v.salePrice || 0,
-          stock:        v.stock,
-          image:        swatchUrl,
-          images:       shadeGalleryUrls
+          salePrice: v.salePrice || 0,
+          stock: v.stock,
+          image: swatchUrl,
+          images: shadeGalleryUrls
         }
       })
     )
@@ -137,19 +137,19 @@ const editProduct = async (req, res) => {
       variants.map(async (v) => {
         const swatchUrl = await uploadIfBase64(v.image, 'blushberry/shades')
 
-        const kept     = v.keptImages || []
+        const kept = v.keptImages || []
         const uploaded = await Promise.all(
           (v.newImages || []).map(img => uploadIfBase64(img, 'blushberry/shades'))
         )
         const finalShadeGallery = [...kept, ...uploaded]
 
         return {
-          shade:        v.shade,
+          shade: v.shade,
           varientPrice: v.varientPrice,
-          salePrice:    v.salePrice || 0,
-          stock:        v.stock,
-          image:        swatchUrl,
-          images:       finalShadeGallery
+          salePrice: v.salePrice || 0,
+          stock: v.stock,
+          image: swatchUrl,
+          images: finalShadeGallery
         }
       })
     )
@@ -202,7 +202,7 @@ const deleteProduct = async (req, res) => {
     }
 
     product.isDeleted = true
-    product.isListed  = false
+    product.isListed = false
     await product.save()
 
     res.status(HttpStatus.OK).json({ success: true, message: `"${product.name}" has been deleted.` })

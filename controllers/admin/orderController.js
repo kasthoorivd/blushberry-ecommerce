@@ -1,7 +1,7 @@
-const Order   = require('../../models/user/orderModel')
-const User    = require('../../models/user/userModel')
+const Order = require('../../models/user/orderModel')
+const User = require('../../models/user/userModel')
 const Product = require('../../models/user/productModel')
-const Coupon  = require('../../models/user/couponModel')
+const Coupon = require('../../models/user/couponModel')
 const { creditWallet } = require('../user/walletController')
 const { HttpStatus } = require('../../utils/statusCode')
 
@@ -27,7 +27,7 @@ async function recalcCODAmount(order) {
   const total = activeItemsTotal(order)
 
   let couponDiscount = order.couponDiscount || 0
-  let couponVoided   = false
+  let couponVoided = false
 
   if (order.couponCode && couponDiscount > 0) {
     const coupon = await Coupon.findOne({ code: order.couponCode })
@@ -35,12 +35,12 @@ async function recalcCODAmount(order) {
 
     if (total < minVal) {
       couponDiscount = 0
-      couponVoided   = true
+      couponVoided = true
     }
   }
 
-  const taxable  = Math.max(0, total - couponDiscount)
-  const tax      = Math.round(taxable * 0.05)
+  const taxable = Math.max(0, total - couponDiscount)
+  const tax = Math.round(taxable * 0.05)
   const finalAmt = taxable + tax + (order.shippingCharge || 0)
 
   return { finalAmount: finalAmt, couponVoided, couponDiscount, tax }
@@ -52,10 +52,10 @@ async function recalcCODAmount(order) {
 // ─────────────────────────────────────────────
 const loadOrders = async (req, res) => {
   try {
-    const page   = Math.max(1, parseInt(req.query.page) || 1)
+    const page = Math.max(1, parseInt(req.query.page) || 1)
     const search = (req.query.search || '').trim().replace(/^#/, '')
     const status = req.query.status || ''
-    const sort   = req.query.sort   || 'newest'
+    const sort = req.query.sort || 'newest'
 
     const query = {}
     if (status === 'Returned') {
@@ -76,14 +76,14 @@ const loadOrders = async (req, res) => {
     }
 
     const sortMap = {
-      newest:      { createdAt: -1 },
-      oldest:      { createdAt:  1 },
+      newest: { createdAt: -1 },
+      oldest: { createdAt: 1 },
       amount_high: { finalAmount: -1 },
-      amount_low:  { finalAmount:  1 },
+      amount_low: { finalAmount: 1 },
     }
     const sortObj = sortMap[sort] || { createdAt: -1 }
 
-    const total      = await Order.countDocuments(query)
+    const total = await Order.countDocuments(query)
     const totalPages = Math.ceil(total / LIMIT)
 
     const orders = await Order.find(query)
@@ -160,11 +160,11 @@ const updateOrderStatus = async (req, res) => {
     order.orderStatus = status
 
     if (status === 'Delivered') {
-      order.deliveredAt   = new Date()
+      order.deliveredAt = new Date()
       order.paymentStatus = 'Paid'
     }
     if (status === 'Cancelled' && prev !== 'Cancelled') {
-      order.cancelledAt  = new Date()
+      order.cancelledAt = new Date()
       order.cancelReason = order.cancelReason || 'Cancelled by admin'
       for (const item of order.items) {
         await Product.updateOne(
@@ -205,9 +205,9 @@ const cancelOrder = async (req, res) => {
       })
     }
 
-    order.orderStatus  = 'Cancelled'
+    order.orderStatus = 'Cancelled'
     order.cancelReason = reason
-    order.cancelledAt  = new Date()
+    order.cancelledAt = new Date()
 
     order.itemStatuses = order.itemStatuses || []
     for (const item of order.items) {
@@ -215,15 +215,15 @@ const cancelOrder = async (req, res) => {
         s => s.itemId && s.itemId.toString() === item._id.toString()
       )
       if (existing) {
-        existing.status       = 'Cancelled'
+        existing.status = 'Cancelled'
         existing.cancelReason = reason
-        existing.cancelledAt  = new Date()
+        existing.cancelledAt = new Date()
       } else {
         order.itemStatuses.push({
-          itemId:       item._id,
-          status:       'Cancelled',
+          itemId: item._id,
+          status: 'Cancelled',
           cancelReason: reason,
-          cancelledAt:  new Date()
+          cancelledAt: new Date()
         })
       }
       await Product.updateOne(
@@ -264,7 +264,7 @@ const cancelItem = async (req, res) => {
     }
 
     const isOnlinePaid = order.paymentMethod !== 'COD'
-    const hasCoupon    = !!(order.couponCode && order.couponDiscount > 0)
+    const hasCoupon = !!(order.couponCode && order.couponDiscount > 0)
 
     if (isOnlinePaid && hasCoupon) {
       return res.status(HttpStatus.BAD_REQUEST).json({
@@ -287,15 +287,15 @@ const cancelItem = async (req, res) => {
       if (existing.status === 'Cancelled') {
         return res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: 'Item is already cancelled.' })
       }
-      existing.status       = 'Cancelled'
+      existing.status = 'Cancelled'
       existing.cancelReason = reason
-      existing.cancelledAt  = new Date()
+      existing.cancelledAt = new Date()
     } else {
       order.itemStatuses.push({
-        itemId:       item._id,
-        status:       'Cancelled',
+        itemId: item._id,
+        status: 'Cancelled',
         cancelReason: reason,
-        cancelledAt:  new Date()
+        cancelledAt: new Date()
       })
     }
 
@@ -308,11 +308,11 @@ const cancelItem = async (req, res) => {
     if (order.paymentMethod === 'COD' && hasCoupon) {
       const { finalAmount, couponVoided, couponDiscount, tax } = await recalcCODAmount(order)
       order.finalAmount = finalAmount
-      order.tax         = tax
+      order.tax = tax
 
       if (couponVoided) {
         order.couponDiscount = 0
-        order.couponVoided   = true
+        order.couponVoided = true
         couponVoidedMsg = ' Coupon was removed because remaining items no longer meet the minimum order value.'
       } else {
         order.couponDiscount = couponDiscount
@@ -325,9 +325,9 @@ const cancelItem = async (req, res) => {
       )
     )
     if (allCancelled) {
-      order.orderStatus  = 'Cancelled'
+      order.orderStatus = 'Cancelled'
       order.cancelReason = 'All items cancelled'
-      order.cancelledAt  = new Date()
+      order.cancelledAt = new Date()
     }
 
     await order.save()
@@ -401,7 +401,7 @@ const updateReturnStatus = async (req, res) => {
       }
 
       const wasAlreadyApproved = ['Approved', 'Completed'].includes(itemStatus.returnStatus)
-      itemStatus.returnStatus  = returnStatus
+      itemStatus.returnStatus = returnStatus
 
       if (['Approved', 'Completed'].includes(returnStatus) && !wasAlreadyApproved) {
         const item = order.items.find(i => i._id.toString() === itemId.toString())
@@ -426,13 +426,13 @@ const updateReturnStatus = async (req, res) => {
 
       if (allItemReturns.length > 0) {
         const allCompleted = allItemReturns.every(s => s.returnStatus === 'Completed')
-        const allRejected  = allItemReturns.every(s => s.returnStatus === 'Rejected')
-        const anyApproved  = allItemReturns.some(s => s.returnStatus === 'Approved')
+        const allRejected = allItemReturns.every(s => s.returnStatus === 'Rejected')
+        const anyApproved = allItemReturns.some(s => s.returnStatus === 'Approved')
         const anyRequested = allItemReturns.some(s => s.returnStatus === 'Requested')
 
-        if (allCompleted)      order.returnStatus = 'Completed'
-        else if (allRejected)  order.returnStatus = 'Rejected'
-        else if (anyApproved)  order.returnStatus = 'Approved'
+        if (allCompleted) order.returnStatus = 'Completed'
+        else if (allRejected) order.returnStatus = 'Rejected'
+        else if (anyApproved) order.returnStatus = 'Approved'
         else if (anyRequested) order.returnStatus = 'Requested'
       }
 
@@ -446,7 +446,7 @@ const updateReturnStatus = async (req, res) => {
     }
 
     const wasAlreadyApproved = ['Approved', 'Completed'].includes(order.returnStatus)
-    order.returnStatus       = returnStatus
+    order.returnStatus = returnStatus
 
     if (['Approved', 'Completed'].includes(returnStatus) && !wasAlreadyApproved) {
       const returnedItems = order.items.filter(item => {

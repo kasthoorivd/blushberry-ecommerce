@@ -3,7 +3,7 @@ const { HttpStatus } = require('../../utils/statusCode')
 
 const loadCoupons = async (req, res) => {
   try {
-    const page  = parseInt(req.query.page) || 1
+    const page = parseInt(req.query.page) || 1
     const LIMIT = 3
 
     const totalCoupons = await Coupon.countDocuments()
@@ -16,7 +16,7 @@ const loadCoupons = async (req, res) => {
     res.status(HttpStatus.OK).render('admin/coupons', {
       coupons,
       currentPage: page,
-      totalPages:  Math.ceil(totalCoupons / LIMIT)
+      totalPages: Math.ceil(totalCoupons / LIMIT)
     })
   } catch (error) {
     console.error(error)
@@ -36,8 +36,8 @@ const createCoupon = async (req, res) => {
       return res.status(HttpStatus.CONFLICT).json({ success: false, message: 'Coupon code already exists.' })
     }
 
-    const type     = discountType === 'percentage' ? 'percentage' : 'flat'
-    const amount   = parseFloat(discountAmount)
+    const type = discountType === 'percentage' ? 'percentage' : 'flat'
+    const amount = parseFloat(discountAmount)
     const minOrder = parseFloat(minOrderAmount) || 0
 
     if (!amount || amount <= 0) {
@@ -58,13 +58,13 @@ const createCoupon = async (req, res) => {
     }
 
     await Coupon.create({
-      code:           code.toUpperCase(),
-      discountType:   type,
+      code: code.toUpperCase(),
+      discountType: type,
       discountAmount: amount,
-      maxDiscount:    type === 'percentage' ? (parseFloat(maxDiscount) || null) : null,
+      maxDiscount: type === 'percentage' ? (parseFloat(maxDiscount) || null) : null,
       minOrderAmount: minOrder,
-      maxUses:        maxUses   || null,
-      expiresAt:      expiresAt || null
+      maxUses: maxUses || null,
+      expiresAt: expiresAt || null
     })
 
     return res.status(HttpStatus.CREATED).json({ success: true, message: 'Coupon created successfully.' })

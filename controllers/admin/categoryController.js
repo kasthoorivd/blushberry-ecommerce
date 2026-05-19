@@ -1,13 +1,13 @@
-const User     = require('../../models/user/userModel')
+const User = require('../../models/user/userModel')
 const Category = require('../../models/user/categoryModel')
-const Product  = require('../../models/user/productModel')
+const Product = require('../../models/user/productModel')
 const { HttpStatus } = require('../../utils/statusCode')
 
 const loadCategory = async (req, res) => {
     try {
-        const page        = parseInt(req.query.page)  || 1
-        const limit       = parseInt(req.query.limit) || 2
-        const searchQuery = req.query.search          || ''
+        const page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 2
+        const searchQuery = req.query.search || ''
 
         const filter = { isDeleted: false }
         if (searchQuery) {
@@ -15,7 +15,7 @@ const loadCategory = async (req, res) => {
         }
 
         const totalCategories = await Category.countDocuments(filter)
-        const totalPages      = Math.ceil(totalCategories / limit)
+        const totalPages = Math.ceil(totalCategories / limit)
 
         const categories = await Category.find(filter)
             .sort({ createdAt: -1 })
@@ -102,11 +102,11 @@ const addCategory = async (req, res) => {
         }
 
         const newCategory = new Category({
-            name:        name.trim(),
+            name: name.trim(),
             description: description.trim(),
-            offer:       offer ? Number(offer) : 0,
-            isListed:    true,
-            isDeleted:   false
+            offer: offer ? Number(offer) : 0,
+            isListed: true,
+            isDeleted: false
         })
         await newCategory.save()
 
@@ -131,7 +131,7 @@ const editCategory = async (req, res) => {
 
         const existingCategory = await Category.findOne({
             name: { $regex: new RegExp(`^${name.trim()}$`, 'i') },
-            _id:  { $ne: categoryId }
+            _id: { $ne: categoryId }
         })
         if (existingCategory) {
             return res.status(HttpStatus.CONFLICT).json({ success: false, message: 'Category already exists' })
@@ -140,9 +140,9 @@ const editCategory = async (req, res) => {
         await Category.findByIdAndUpdate(
             categoryId,
             {
-                name:        name.trim(),
+                name: name.trim(),
                 description: description.trim(),
-                offer:       Number(offer) || 0
+                offer: Number(offer) || 0
             },
             { new: true }
         )
